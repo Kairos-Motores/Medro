@@ -1,0 +1,25 @@
+{
+  "name": "medro",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Medro — migração PowerApps → React/Node (Kairós Motores)",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "codegen": "tsx tooling/codegen/generate.ts",
+    "dev": "pnpm --filter @medro/shared build && pnpm -r --parallel dev",
+    "dev:web": "pnpm --filter @medro/web dev",
+    "dev:api": "pnpm --filter @medro/shared build && pnpm --filter @medro/api dev",
+    "build": "pnpm --filter @medro/shared build && pnpm --filter @medro/api build && pnpm --filter @medro/web build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,css}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

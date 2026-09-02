@@ -1,0 +1,7 @@
+# Normaliza para LF (deploy roda em Linux: Vercel / Render)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary
+pnpm-lock.yaml -diff

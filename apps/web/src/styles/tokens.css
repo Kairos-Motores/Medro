@@ -1,0 +1,77 @@
+/* Design tokens Medro — paleta fornecida + estética iOS 15 (refinada).
+   Cores em canais RGB (sem vírgula) para `rgb(var(--x) / <alpha>)` do Tailwind. */
+
+:root {
+  /* paleta base */
+  --surface: 255 255 255; /* #FFFFFF */
+  --bg: 236 240 244; /* levemente mais claro que #E9EEF3 */
+  --surface-muted: 240 243 246;
+  --border: 205 214 224; /* #CDD6E0 — hairline mais suave */
+  --border-strong: 183 198 214; /* #B7C6D6 */
+  --muted: 183 198 214;
+  --muted-foreground: 96 112 128; /* #607080 */
+  --primary: 74 127 176; /* #4A7FB0 */
+  --primary-hover: 63 111 156;
+  --primary-press: 52 93 133;
+  --primary-foreground: 255 255 255;
+  --foreground: 39 50 62; /* #27323E — um pouco mais escuro/neutro */
+  --elevated-dark: 39 50 62;
+
+  /* semânticos (dessaturados, profissionais) */
+  --danger: 176 74 68; /* #B04A44 */
+  --success: 66 146 100; /* #429264 */
+  --warning: 191 140 66; /* #BF8C42 */
+  --info: 74 127 176;
+
+  /* acentos por módulo — esquema coeso (azuis/teal/slate + 2 quentes reservados) */
+  --accent-blue: 74 127 176; /* #4A7FB0 */
+  --accent-indigo: 94 108 153; /* #5E6C99 */
+  --accent-teal: 62 139 132; /* #3E8B84 */
+  --accent-cyan: 69 137 168; /* #4589A8 */
+  --accent-slate: 100 118 138; /* #64768A */
+  --accent-green: 78 154 110; /* #4E9A6E */
+  --accent-amber: 185 139 62; /* #B98B3E */
+  --accent-violet: 119 107 156; /* #776B9C */
+  --accent-rose: 168 107 99; /* #A86B63 */
+
+  /* raio — enxuto, iOS 15 discreto */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* elevação — mais sutil */
+  --shadow-1: 0 1px 2px rgba(39, 50, 62, 0.05), 0 1px 1px rgba(39, 50, 62, 0.04);
+  --shadow-2: 0 6px 20px rgba(39, 50, 62, 0.09);
+  --sheet-shadow: 0 -8px 30px rgba(39, 50, 62, 0.16);
+
+  --hairline: 1px;
+  --tap-target: 44px;
+  --blur: saturate(180%) blur(20px);
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --surface: 36 47 60;
+  --bg: 26 34 44;
+  --surface-muted: 31 41 52;
+  --border: 55 70 87;
+  --border-strong: 70 88 108;
+  --muted: 60 76 94;
+  --muted-foreground: 150 166 182;
+  --primary: 111 160 203;
+  --primary-hover: 128 173 213;
+  --primary-press: 96 145 188;
+  --primary-foreground: 18 26 35;
+  --foreground: 233 238 243;
+  --elevated-dark: 18 26 35;
+
+  --danger: 210 105 99;
+  --success: 96 186 135;
+  --warning: 219 176 100;
+
+  color-scheme: dark;
+}

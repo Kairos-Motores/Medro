@@ -1,0 +1,108 @@
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-bg text-foreground font-sans antialiased;
+    margin: 0;
+  }
+  /* remove realce azul de toque no mobile */
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--primary));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* lista agrupada estilo iOS ("inset grouped table view") */
+  .ios-list {
+    @apply overflow-hidden rounded-lg bg-surface shadow-ios-1;
+  }
+  .ios-list > * + * {
+    border-top: var(--hairline) solid rgb(var(--border) / 0.7);
+  }
+  .ios-row {
+    @apply flex min-h-tap items-center gap-3 px-4 py-3 text-[15px] transition-colors;
+  }
+  .ios-row:active {
+    @apply bg-surface-muted;
+  }
+
+  /* barra de navegação / tab bar com blur */
+  .ios-bar {
+    background: rgb(var(--elevated-dark) / 0.92);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    color: rgb(var(--primary-foreground));
+  }
+}
+
+@layer utilities {
+  /* transição de página estilo iOS (push) */
+  .page-enter {
+    animation: page-enter 320ms var(--ease-ios) both;
+  }
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(16px, 0, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  /* entrada escalonada de itens (hub, listas) */
+  .stagger-item {
+    animation: stagger-in 420ms var(--ease-ios) both;
+  }
+  @keyframes stagger-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-enter,
+    .stagger-item {
+      animation: none;
+    }
+  }
+}
+
+@media print {
+  .ios-bar,
+  header,
+  .page-enter > * > .print\:hidden {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .page-enter {
+    animation: none !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  @page {
+    margin: 12mm;
+  }
+}

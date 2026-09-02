@@ -1,0 +1,41 @@
+# Render — API Medro (Node/Fastify). Web vai no Vercel (apps/web/vercel.json).
+services:
+  - type: web
+    name: medro-api
+    runtime: node
+    plan: starter
+    region: oregon
+    rootDir: .
+    buildCommand: >-
+      corepack enable &&
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @medro/shared build &&
+      pnpm --filter @medro/api build
+    startCommand: node apps/api/dist/server.js
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: WEB_ORIGIN
+        sync: false # URL do front no Vercel
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATAVERSE_TENANT_ID
+        sync: false
+      - key: DATAVERSE_CLIENT_ID
+        sync: false
+      - key: DATAVERSE_CLIENT_SECRET
+        sync: false
+      - key: DATAVERSE_ENV_URL
+        value: https://org3c66e333.api.crm2.dynamics.com
+      - key: DATAVERSE_RESOURCE
+        value: https://org3c66e333.crm2.dynamics.com
+      - key: DATAVERSE_API_VERSION
+        value: "9.2"
+      - key: GRAPH_ENABLED
+        value: "false"
+      - key: PROTHEUS_ENABLED
+        value: "false"

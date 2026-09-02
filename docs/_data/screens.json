@@ -1,0 +1,5904 @@
+[
+ {
+  "screen": "1_Menu",
+  "file": "1_Menu.pa.yaml",
+  "lines": 581,
+  "background": "Fundo",
+  "onVisible": "Refresh(CIPA_2026)",
+  "onHidden": "UpdateContext({rdsmot:false,rdsaux:false})",
+  "controls": {
+   "Label": 16,
+   "Classic": 6,
+   "Rectangle": 4,
+   "Gallery": 2,
+   "Image": 2,
+   "Button": 1
+  },
+  "controlTotal": 31,
+  "dataSources": [
+   "CIPA_2026",
+   "Credenciaiss",
+   "RDS",
+   "RDS-Managements",
+   "Relatório"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Login",
+   "Login_1",
+   "Menu_RDS",
+   "Relatorio",
+   "SELEC_COD",
+   "Seleção_trajeto_SSMA",
+   "VotaçãoCIPA"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "rdsmot"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gallery4",
+    "items": "Filter('RDS-Managements', Motorista = LookUp(Credenciaiss,varlogin = Usuário,Título),Atendimento <> \"Concluído\",Atendimento <> \"Cancelado\")"
+   },
+   {
+    "name": "Gallery4_1",
+    "items": "Filter('RDS-Managements', Auxiliar = LookUp(Credenciaiss,varlogin = Usuário,Título),Atendimento <> \"Concluído\",Atendimento <> \"Cancelado\")"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Button1_72",
+    "type": "Classic",
+    "label": "\"Medro\"",
+    "prop": "OnSelect",
+    "code": "If( \"SELEC_COD\" in LookUp( Credenciaiss, Usuário = caixausuario1.Text And Matrícula = caixasenha1.Text, acesso_mod ), Navigate( SELEC_COD, ScreenTransition.CoverRight ), !IsBlank( LookUp( Credenciaiss, Usuário = caixausuario1.Text And Matrícula = caixasenha1.Text And '1_Nivel' = \"PRODUÇÃO PADRÃO\" And '2_Nivel' = \"TESTE\" ) ), Navigate( SELEC_COD, ScreenTransition.CoverRight ), //___________________"
+   },
+   {
+    "control": "Button1_73",
+    "type": "Classic",
+    "label": "\"RDS\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Menu_RDS);Refresh(RDS)"
+   },
+   {
+    "control": "Image1_8",
+    "type": "Image",
+    "label": "Image1_8",
+    "prop": "OnSelect",
+    "code": "Navigate(Login) //Navigate(Login_1)"
+   },
+   {
+    "control": "Button1_80",
+    "type": "Classic",
+    "label": "\"Relatório\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Relatorio);NewForm(Form_Relatorio)"
+   },
+   {
+    "control": "ButtonCanvas23",
+    "type": "Button",
+    "label": "\"Votar agora!!\"",
+    "prop": "OnSelect",
+    "code": "Navigate(VotaçãoCIPA)"
+   }
+  ]
+ },
+ {
+  "screen": "Atendimento",
+  "file": "Atendimento.pa.yaml",
+  "lines": 40,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 1,
+   "Image": 1
+  },
+  "controlTotal": 2,
+  "dataSources": [],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": []
+ },
+ {
+  "screen": "AtualizacaoPendentes",
+  "file": "AtualizacaoPendentes.pa.yaml",
+  "lines": 2392,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 78,
+   "Classic": 33,
+   "TypedDataCard": 25,
+   "Form": 1,
+   "Image": 1
+  },
+  "controlTotal": 138,
+  "dataSources": [
+   "Serviços Terceirizados",
+   "servicosterceirizados"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormAtualizacaoPendet",
+    "dataSource": "servicosterceirizados",
+    "item": "gal_pendentes.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button7_1",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormAtualizacaoPendet)"
+   },
+   {
+    "control": "Button7_2",
+    "type": "Classic",
+    "label": "\"Excluir\"",
+    "prop": "OnSelect",
+    "code": "Remove(servicosterceirizados,gal_pendentes.Selected);Back()"
+   }
+  ]
+ },
+ {
+  "screen": "AvaliacaoFinal",
+  "file": "AvaliacaoFinal.pa.yaml",
+  "lines": 138,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Classic": 4,
+   "Label": 1,
+   "GroupContainer": 1,
+   "Image": 1
+  },
+  "controlTotal": 7,
+  "dataSources": [
+   "Credenciaiss"
+  ],
+  "flows": [],
+  "navTargets": [
+   "GaleriaPeritagem",
+   "HistoricoAvalFinais",
+   "InspecQuali",
+   "LiberarEnsaio",
+   "SELEC_COD"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button23_2",
+    "type": "Classic",
+    "label": "\"Nova Avaliação\"",
+    "prop": "OnSelect",
+    "code": "Navigate(GaleriaPeritagem)"
+   },
+   {
+    "control": "Button23_3",
+    "type": "Classic",
+    "label": "\"Nova Inspeção\"",
+    "prop": "OnSelect",
+    "code": "Navigate(InspecQuali)"
+   },
+   {
+    "control": "Button23_4",
+    "type": "Classic",
+    "label": "\"Buscar Avaliações\"",
+    "prop": "OnSelect",
+    "code": "Navigate(HistoricoAvalFinais)"
+   },
+   {
+    "control": "Button23_5",
+    "type": "Classic",
+    "label": "\"Liberar ensaio\"",
+    "prop": "OnSelect",
+    "code": "Navigate(LiberarEnsaio,ScreenTransition.CoverRight);NewForm(FormLiberarEnsaio)"
+   },
+   {
+    "control": "Image74_1",
+    "type": "Image",
+    "label": "Image74_1",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   }
+  ]
+ },
+ {
+  "screen": "Balanceamento_Pendentes",
+  "file": "Balanceamento_Pendentes.pa.yaml",
+  "lines": 146,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "UpdateContext({normal:true,prior:true,susp:false})",
+  "controls": {
+   "Label": 4,
+   "Rectangle": 2,
+   "Classic": 1,
+   "Gallery": 1,
+   "Image": 1
+  },
+  "controlTotal": 9,
+  "dataSources": [
+   "Balanceamento",
+   "Caldeiraria_Controle"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Caldeiraria_Pendentes_Servicos"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "normal"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gal_Balanc_OS",
+    "items": "Sort(Search( Filter(Caldeiraria_Controle,xStatus <> \"Concluído\",Unidade = varfilial,Pecas = \"Balanceamento\"),PesquisaHistCalde_3.Text,OS),DataPrazo,SortOrder.Ascending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Gal_Balanc_OS",
+    "type": "Gallery",
+    "label": "Gal_Balanc_OS",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Pendentes_Servicos,ScreenTransition.Cover,{tipo:3})"
+   }
+  ]
+ },
+ {
+  "screen": "COD_GERENCIAMENTO",
+  "file": "COD_GERENCIAMENTO.pa.yaml",
+  "lines": 12947,
+  "background": "'Firefly Universo escuro, sem estrelas e algumas nebulosas 27848 (1)'",
+  "onVisible": "",
+  "onHidden": "UpdateContext({log:false,pcp:false,cad:false,resetdaterds:false})",
+  "controls": {
+   "Label": 393,
+   "Classic": 144,
+   "TypedDataCard": 95,
+   "Button": 36,
+   "Rectangle": 34,
+   "Image": 19,
+   "Form": 10,
+   "GroupContainer": 9,
+   "Gallery": 9,
+   "TextInput": 7,
+   "Attachments": 4,
+   "Radio": 2,
+   "CheckBox": 1,
+   "Text": 1
+  },
+  "controlTotal": 764,
+  "dataSources": [
+   "Balanceamento",
+   "Credenciaiss",
+   "Lista Auxiliar - Clientes Medro",
+   "Lista Auxiliar - Setores Medro",
+   "RDS",
+   "RDS-Managements",
+   "Serviços Terceirizados",
+   "Usuários",
+   "controle_man_veicul",
+   "controle_veiculo"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Exportar_CheckList",
+   "Seleção_trajeto_SSMA",
+   "TelaPCP_SLZ"
+  ],
+  "globalVars": [
+   "varfilial"
+  ],
+  "contextVars": [
+   "RDS1",
+   "cad_cliente",
+   "cad_fun",
+   "con_vel",
+   "conf_alterarsetor",
+   "cont_log",
+   "contagemrds",
+   "create_control_vel",
+   "editman",
+   "edituser",
+   "editvei",
+   "esc_aux",
+   "esc_mot",
+   "filtrords",
+   "gestao_userlog",
+   "inclu_cliente",
+   "incluc_colab",
+   "lista_control_vel",
+   "log",
+   "manurds",
+   "newuser",
+   "novoman",
+   "progrds",
+   "rds",
+   "resetdaterds",
+   "resumords"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form_inclusaocliente_6",
+    "dataSource": "'Lista Auxiliar - Clientes Medro'",
+    "item": "galeriaclientesmedro_6.Selected",
+    "default": ""
+   },
+   {
+    "name": "Form_edit_alterarsetor",
+    "dataSource": "Credenciaiss",
+    "item": "galeriagestaousesetor.Selected",
+    "default": ""
+   },
+   {
+    "name": "Form_novocolab_8",
+    "dataSource": "Credenciaiss",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "FormRDS_2",
+    "dataSource": "'RDS-Managements'",
+    "item": "galeriaRDS_2.Selected",
+    "default": ""
+   },
+   {
+    "name": "Form_nova_manu_1",
+    "dataSource": "controle_man_veicul",
+    "item": "galeriamanutencao.Selected",
+    "default": ""
+   },
+   {
+    "name": "Form_manuRDS_1",
+    "dataSource": "'RDS-Managements'",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "Form_edicao_veic",
+    "dataSource": "controle_veiculo",
+    "item": "Gallery6.Selected",
+    "default": ""
+   },
+   {
+    "name": "Form3",
+    "dataSource": "controle_veiculo",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "Form_edit_gestaouser",
+    "dataSource": "Credenciaiss",
+    "item": "galeriagestaouserlog.Selected",
+    "default": ""
+   },
+   {
+    "name": "Form_edit_gestaouser_1",
+    "dataSource": "Credenciaiss",
+    "item": "galeriagestaouserlog_1.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "galeriaclientesmedro_6",
+    "items": "Sort(Filter('Lista Auxiliar - Clientes Medro', Unidade.Value = varfilial,Title <> \" -\", xStatus <> \"Inativo\"),Nome_completo,SortOrder.Ascending)"
+   },
+   {
+    "name": "galeriagestaousesetor",
+    "items": "Search(Sort(Filter(Credenciaiss, Filial = varfilial, '1_Nivel' = \"PRODUÇÃO PADRÃO\" ),Título, SortOrder.Ascending),pesquisaloggestaouser_2.Value,Título,Filial)"
+   },
+   {
+    "name": "galeriaRDS_2",
+    "items": "If(\n    RDS_radio_2.Selected.Value = \"Em andamento\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                (Atendimento = \"Pendente\" Or Atendimento = \"Programado\" Or Atendimento = \"Atendido\" Or Atendimento = \"Em atendimento\") &&\n                (IsBlank(DataInicio.SelectedDate) || cr4a1_xdatareq >= DataInicio.SelectedDate) &&\n                (IsBlank(DataFim.SelectedDate) || cr4a1_xdatareq <= DataFim.SelectedDate)\n            ),\n            pesquisaRDS_P_2.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio_2.Selected.Value = \"Pendentes\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                (Atendimento = \"Pendente\") &&\n                (IsBlank(DataInicio.SelectedDate) || cr4a1_xdatareq >= DataInicio.SelectedDate) &&\n                (IsBlank(DataFim.SelectedDate) || cr4a1_xdatareq <= DataFim.SelectedDate)\n            ),\n            pesquisaRDS_P_2.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio_2.Selected.Value = \"Concluídos\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                Atendimento = \"Concluído\" &&\n                (IsBlank(DataInicio.SelectedDate) || cr4a1_xdatareq >= DataInicio.SelectedDate) &&\n                (IsBlank(DataFim.SelectedDate) || cr4a1_xdatareq <= DataFim.SelectedDate)\n            ),\n            pesquisaRDS_P_2.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio_2.Selected.Value = \"Cancelados\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                Atendimento = \"Cancelado\" &&\n                (IsBlank(DataInicio.SelectedDate) || cr4a1_xdatareq >= DataInicio.SelectedDate) &&\n                (IsBlank(DataFim.SelectedDate) || cr4a1_xdatareq <= DataFim.SelectedDate)\n            ),\n            pesquisaRDS_P_2.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio_2.Selected.Value = \"Atendidos\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                Atendimento = \"Atendido\" &&\n                (IsBlank(DataInicio.SelectedDate) || cr4a1_xdatareq >= DataInicio.SelectedDate) &&\n                (IsBlank(DataFim.SelectedDate) || cr4a1_xdatareq <= DataFim.SelectedDate)\n            ),\n            pesquisaRDS_P_2.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio_2.Selected.Value = \"Todos\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                (IsBlank(DataInicio.SelectedDate) || cr4a1_xdatareq >= DataInicio.SelectedDate) &&\n                (IsBlank(DataFim.SelectedDate) || cr4a1_xdatareq <= DataFim.SelectedDate)\n            ),\n            pesquisaRDS_P_2.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    )\n)\n"
+   },
+   {
+    "name": "Gallery3_2",
+    "items": "Sort(Filter('RDS-Managements', Atendimento = \"Programado\"),DataNecess,SortOrder.Ascending)"
+   },
+   {
+    "name": "Gallery6",
+    "items": "Sort( Filter( controle_veiculo,xstatus <> \"Branco\" ),filial,SortOrder.Ascending)"
+   },
+   {
+    "name": "galeriaveiculosativosman",
+    "items": "Sort(Search(Filter(controle_veiculo,xstatus = \"Ativo\"),textcontrolveiculo.Value,veiculo,filial,tipoveicul),filial,SortOrder.Ascending)"
+   },
+   {
+    "name": "galeriamanutencao",
+    "items": "Sort( Search(controle_man_veicul,pesquisamanutencao.Value,IDman,ID_veiculo,veiculo,filial,tipodemanutencao,responsavel,statusman,local,descricao) ,'Data de Criação',SortOrder.Descending)"
+   },
+   {
+    "name": "galeriagestaouserlog",
+    "items": "Search(Sort(Filter(Credenciaiss, \"_ROTA_MOT\" in acesso_mod Or \"_ROTA_AUX\" in acesso_mod),Título, SortOrder.Ascending),pesquisaloggestaouser.Value,Título,Filial)"
+   },
+   {
+    "name": "galeriagestaouserlog_1",
+    "items": "Search(Sort(Filter(Credenciaiss,Not(\"_ROTA_MOT\" in acesso_mod) And Not(\"_ROTA_AUX\" in acesso_mod)),Título,SortOrder.Ascending),pesquisaloggestaouser_1.Value,Título,Filial)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "logokairos",
+    "type": "Image",
+    "label": "logokairos",
+    "prop": "OnSelect",
+    "code": "Refresh('RDS-Managements');Refresh(controle_veiculo);Refresh(controle_man_veicul);Refresh(Credenciaiss);Refresh('Lista Auxiliar - Setores Medro'); Set( varfilial, LookUp( Credenciaiss, varnome = Título , Filial ) )"
+   },
+   {
+    "control": "BT_CAD_3",
+    "type": "Button",
+    "label": "\"Serviços Terceirizados\"",
+    "prop": "OnSelect",
+    "code": "Navigate(TelaPCP_SLZ)"
+   },
+   {
+    "control": "BT_CAD_27",
+    "type": "Button",
+    "label": "\"Tela PCP\"",
+    "prop": "OnSelect",
+    "code": "Navigate(TelaPCP_SLZ)"
+   },
+   {
+    "control": "Button5_26",
+    "type": "Classic",
+    "label": "\"Novo Cliente\"",
+    "prop": "OnSelect",
+    "code": "NewForm(Form_inclusaocliente_6);UpdateContext({inclu_cliente:true})"
+   },
+   {
+    "control": "Button5_24",
+    "type": "Classic",
+    "label": "\"Editar Cliente\"",
+    "prop": "OnSelect",
+    "code": "EditForm(Form_inclusaocliente_6);UpdateContext({inclu_cliente:true})"
+   },
+   {
+    "control": "Button3",
+    "type": "Classic",
+    "label": "\"Excluir Cliente\"",
+    "prop": "OnSelect",
+    "code": "UpdateIf( 'Lista Auxiliar - Clientes Medro', ID = galeriaclientesmedro_6.Selected.ID, { xStatus: \"Inativo\" } )"
+   },
+   {
+    "control": "Button5_25",
+    "type": "Classic",
+    "label": "\"Submeter\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_inclusaocliente_6)"
+   },
+   {
+    "control": "ButtonCanvas6",
+    "type": "Button",
+    "label": "\"Incluir Colaborador\"",
+    "prop": "OnSelect",
+    "code": "NewForm(Form_novocolab_8);UpdateContext({incluc_colab:true,alterarsetor:false})"
+   },
+   {
+    "control": "Form_edit_alterarsetor",
+    "type": "Form",
+    "label": "Form_edit_alterarsetor",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({conf_alterarsetor:false});Notify(\"Setor do usuário alterado com sucesso!\",NotificationType.Success,2000)"
+   },
+   {
+    "control": "BT_CAD_29",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_edit_alterarsetor)"
+   },
+   {
+    "control": "Form_novocolab_8",
+    "type": "Form",
+    "label": "Form_novocolab_8",
+    "prop": "OnSuccess",
+    "code": "NewForm(Form_novocolab_8);Notify(\"Colaborador cadastrado com sucesso\",NotificationType.Success)"
+   },
+   {
+    "control": "Button5_31",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_novocolab_8);UpdateContext({inclu_cliente:true})"
+   },
+   {
+    "control": "BT_CAD_7",
+    "type": "Button",
+    "label": "\"Check List\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Seleção_trajeto_SSMA)"
+   },
+   {
+    "control": "BT_CAD_17",
+    "type": "Button",
+    "label": "\"Tela PCP\"",
+    "prop": "OnSelect",
+    "code": "Navigate(TelaPCP_SLZ)"
+   },
+   {
+    "control": "ButtonCanvas44_1",
+    "type": "Button",
+    "label": "\"Exportar Check List\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Exportar_CheckList)"
+   },
+   {
+    "control": "FormRDS_2",
+    "type": "Form",
+    "label": "FormRDS_2",
+    "prop": "OnSuccess",
+    "code": "Notify(\"RDS Atualizado!\",NotificationType.Success,1500);UpdateContext({RDS1:false})"
+   },
+   {
+    "control": "Button13_2",
+    "type": "Classic",
+    "label": "\"Atualizar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormRDS_2)"
+   },
+   {
+    "control": "BT_CAD_14",
+    "type": "Button",
+    "label": "\"Novo Registro\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({novoman:true,titmanuten:\"Novo Registro\"});NewForm(Form_nova_manu_1)"
+   },
+   {
+    "control": "BT_CAD_15",
+    "type": "Button",
+    "label": "\"Editar Registro\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({novoman:true,editman:true,titmanuten:\"Edição de Registro\"});EditForm(Form_nova_manu_1) //UpdateContext({novoman:true;editman:true;listaman_veicul:true;titmanuten:\"Edição de Registro\"});;EditForm(Form_nova_manu_1)"
+   },
+   {
+    "control": "BT_CAD_18",
+    "type": "Button",
+    "label": "\"Agendar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_manuRDS_1)"
+   },
+   {
+    "control": "ButtonCanvas5_2",
+    "type": "Button",
+    "label": "\"Agendar RDS\"",
+    "prop": "OnSelect",
+    "code": "NewForm(Form_manuRDS_1);UpdateContext({manurds:true})"
+   },
+   {
+    "control": "ButtonCanvas5_3",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_nova_manu_1)"
+   },
+   {
+    "control": "Form_manuRDS_1",
+    "type": "Form",
+    "label": "Form_manuRDS_1",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({editman:false,manurds:false});Notify(\"Agendamento RDS realizado!\",NotificationType.Success,2000)"
+   },
+   {
+    "control": "BT_CAD_19",
+    "type": "Button",
+    "label": "\"Novo Veículo\"",
+    "prop": "OnSelect",
+    "code": "NewForm(Form3);UpdateContext({create_control_vel:true,listaman_veicul:false,abasteciment:false})"
+   },
+   {
+    "control": "BT_CAD_20",
+    "type": "Button",
+    "label": "\"Editar Veículo\"",
+    "prop": "OnSelect",
+    "code": "//UpdateContext({novoman:true;editman:true;listaman_veicul:true;titmanuten:\"Edição de Registro\"});;EditForm(Form_nova_manu_1) UpdateContext({novoman:true,editvei:true,listaman_veicul:false,titmanuten:\"Edição de Veículo\"});EditForm(Form_edicao_veic)"
+   },
+   {
+    "control": "Form_edicao_veic",
+    "type": "Form",
+    "label": "Form_edicao_veic",
+    "prop": "OnSuccess",
+    "code": "Notify(\"Veículo Registrado!\",NotificationType.Success,2000);UpdateContext({create_control_vel:false})"
+   },
+   {
+    "control": "BT_CAD_28",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_edicao_veic)"
+   },
+   {
+    "control": "Form3",
+    "type": "Form",
+    "label": "Form3",
+    "prop": "OnSuccess",
+    "code": "Notify(\"Veículo Registrado!\",NotificationType.Success,2000);UpdateContext({create_control_vel:false})"
+   },
+   {
+    "control": "BT_CAD_12",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form3)"
+   },
+   {
+    "control": "BT_CAD_23",
+    "type": "Button",
+    "label": "\"Editar Usuário\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({edituser:true,newuser:false,cont_log:false});EditForm(Form_edit_gestaouser)"
+   },
+   {
+    "control": "BT_CAD_24",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_edit_gestaouser)"
+   },
+   {
+    "control": "Form_edit_gestaouser_1",
+    "type": "Form",
+    "label": "Form_edit_gestaouser_1",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({newuser:false});Notify(\"Novo usuário adicionado\",NotificationType.Success,2000)"
+   },
+   {
+    "control": "BT_CAD_25",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_edit_gestaouser_1)"
+   },
+   {
+    "control": "BT_CAD_26",
+    "type": "Button",
+    "label": "\"Contagem\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({cont_log:true,edituser:false,newuser:false});EditForm(Form_edit_gestaouser)"
+   },
+   {
+    "control": "BT_CAD_30",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_edicao_veic) ; UpdateContext({editvei:false})"
+   }
+  ]
+ },
+ {
+  "screen": "Caldeiraria_Botao_Pendente",
+  "file": "Caldeiraria_Botao_Pendente.pa.yaml",
+  "lines": 143,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "UpdateContext({normal:true,prior:true,susp:false})",
+  "controls": {
+   "Classic": 4,
+   "Label": 1,
+   "Image": 1
+  },
+  "controlTotal": 6,
+  "dataSources": [
+   "Balanceamento",
+   "Caldeiraria_Controle",
+   "Credenciaiss"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Balanceamento_Pendentes",
+   "Caldeiraria_Pendentes_OS",
+   "Caldeiraria_Pendentes_Peças",
+   "Controle_Caldeiraria"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "normal"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Image1_90",
+    "type": "Image",
+    "label": "Image1_90",
+    "prop": "OnSelect",
+    "code": "Navigate(Controle_Caldeiraria);Refresh(Caldeiraria_Controle)"
+   },
+   {
+    "control": "Button1_104",
+    "type": "Classic",
+    "label": "\"Por OS\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Pendentes_OS,ScreenTransition.Cover,{perg:true,normal:true,prior:true,susp:false});NewForm(FormCaldeiraria)"
+   },
+   {
+    "control": "Button1_105",
+    "type": "Classic",
+    "label": "\"Por Prazo e Peças\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Pendentes_Peças,ScreenTransition.Cover,{perg:true});NewForm(FormCaldeiraria)"
+   },
+   {
+    "control": "Button1_106",
+    "type": "Classic",
+    "label": "\"Balanceamento\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Balanceamento_Pendentes,ScreenTransition.Cover)"
+   },
+   {
+    "control": "Button1_113",
+    "type": "Classic",
+    "label": "\"Gestão\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Pendentes_Peças,ScreenTransition.Cover,{perg:true});NewForm(FormCaldeiraria)"
+   }
+  ]
+ },
+ {
+  "screen": "Caldeiraria_Histórico",
+  "file": "Caldeiraria_Hist+¦rico.pa.yaml",
+  "lines": 1495,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 47,
+   "Classic": 17,
+   "TypedDataCard": 12,
+   "Rectangle": 8,
+   "Image": 5,
+   "Gallery": 1,
+   "Form": 1
+  },
+  "controlTotal": 91,
+  "dataSources": [
+   "Caldeiraria_Controle"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Caldeiraria_Pendentes_Servicos"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "form",
+   "foto"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormCaldeirHist",
+    "dataSource": "Caldeiraria_Controle",
+    "item": "Gal_Caldeiraria_Histor.Selected",
+    "default": "FormMode.View"
+   }
+  ],
+  "galleries": [
+   {
+    "name": "Gal_Caldeiraria_Histor",
+    "items": "Sort(Search(Filter(Caldeiraria_Controle,Unidade = varfilial, xxStatus <> \"Inativo\"),PesquisaHistCalde.Text,OS,Pecas),'Data de Criação',SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Gal_Caldeiraria_Histor",
+    "type": "Gallery",
+    "label": "Gal_Caldeiraria_Histor",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Pendentes_Servicos,ScreenTransition.Cover)"
+   },
+   {
+    "control": "Image66_1",
+    "type": "Image",
+    "label": "Image66_1",
+    "prop": "OnSelect",
+    "code": "UpdateContext({form:false});ResetForm(FormCaldeirHist)"
+   },
+   {
+    "control": "FormCaldeirHist",
+    "type": "Form",
+    "label": "FormCaldeirHist",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({form:false});Notify(\"Salvo!\",NotificationType.Success)"
+   }
+  ]
+ },
+ {
+  "screen": "Caldeiraria_ListadePecas",
+  "file": "Caldeiraria_ListadePecas.pa.yaml",
+  "lines": 200,
+  "background": "t",
+  "onVisible": "NewForm(Form_Lista_Calde)",
+  "onHidden": "",
+  "controls": {
+   "Label": 5,
+   "Classic": 2,
+   "Gallery": 1,
+   "Rectangle": 1,
+   "Image": 1,
+   "Form": 1,
+   "TypedDataCard": 1
+  },
+  "controlTotal": 12,
+  "dataSources": [
+   "Caldeiraria_Controle",
+   "Caldeiraria_Lista"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Caldeiraria_Pendentes_Servicos"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form_Lista_Calde",
+    "dataSource": "Caldeiraria_Lista",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "Gal_Caldeiraria_OS_1",
+    "items": "Caldeiraria_Lista"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Gal_Caldeiraria_OS_1",
+    "type": "Gallery",
+    "label": "Gal_Caldeiraria_OS_1",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Pendentes_Servicos,ScreenTransition.Cover)"
+   },
+   {
+    "control": "Form_Lista_Calde",
+    "type": "Form",
+    "label": "Form_Lista_Calde",
+    "prop": "OnSuccess",
+    "code": "NewForm(Form_Lista_Calde)"
+   },
+   {
+    "control": "Button22",
+    "type": "Classic",
+    "label": "\"Adicionar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_Lista_Calde)"
+   }
+  ]
+ },
+ {
+  "screen": "Caldeiraria_Novo",
+  "file": "Caldeiraria_Novo.pa.yaml",
+  "lines": 3006,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "UpdateContext({perg:true,tab0:false,tabmais:false,bal:false})",
+  "controls": {
+   "Label": 93,
+   "Classic": 38,
+   "TypedDataCard": 28,
+   "Button": 3,
+   "Form": 3,
+   "TextInput": 3,
+   "Image": 2,
+   "DropDown": 1,
+   "AddMedia": 1
+  },
+  "controlTotal": 172,
+  "dataSources": [
+   "Balanceamento",
+   "Base_Medro",
+   "Caldeiraria_Controle",
+   "Caldeiraria_Lista",
+   "Credenciaiss"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "bal",
+   "perg"
+  ],
+  "patchTargets": [
+   "Caldeiraria_Controle"
+  ],
+  "collections": [
+   "colServico"
+  ],
+  "forms": [
+   {
+    "name": "FormCaldeiraria",
+    "dataSource": "Caldeiraria_Controle",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "FormCaldeiraria_1",
+    "dataSource": "Caldeiraria_Controle",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "FormCaldeiraria_2",
+    "dataSource": "Caldeiraria_Controle",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "ButtonCanvas7",
+    "type": "Button",
+    "label": "\"Avançar\"",
+    "prop": "OnSelect",
+    "code": "If( DropdownCanvas5.Selected.Value = 1, UpdateContext( { perg: false, tab0: true } ), DropdownCanvas5.Selected.Value <> 1 , UpdateContext( { perg: false, //tabmais: true tab0: true } )/*;; NewForm(FormCaldeiraria_1)*/ //NewForm(FormCaldeiraria) )"
+   },
+   {
+    "control": "Button18",
+    "type": "Classic",
+    "label": "\"Enviar\"",
+    "prop": "OnSelect",
+    "code": "If( DropdownCanvas5.Selected.Value > 1, ForAll( colServico, Patch( Caldeiraria_Controle, Defaults(Caldeiraria_Controle), { Pecas: colServico[@cr4a1_pecas], Serviços: colServico[@cr4a1_servicos], OS: colServico[@cr4a1_os], Unidade: colServico[@cr4a1_unidade], Prazo: colServico[@cr4a1_prazo], InseridoPor: colServico[@cr4a1_inseridopor], Regime: colServico[@cr4a1_regime], ImagemReferencia: colServico"
+   },
+   {
+    "control": "Counter_BTN",
+    "type": "Button",
+    "label": "\"Guardar: \" & CountRows(colServico)",
+    "prop": "OnSelect",
+    "code": "Collect( colServico, { cr4a1_pecas: If(bal = true, \"Balanceamento\", ComboBox1.Selected.Peças), cr4a1_servicos: DataCardValue220.Text, cr4a1_os: DataCardValue219.Text, cr4a1_unidade: LookUp(Credenciaiss, Usuário = varlogin, Filial), cr4a1_prazo: Value(DataCardValue216.Text), cr4a1_inseridopor: LookUp(Credenciaiss, Usuário = varlogin, Título), cr4a1_regime: DataCardValue221.Selected.Value, cr4a1_ima"
+   }
+  ]
+ },
+ {
+  "screen": "Caldeiraria_Pendentes_OS",
+  "file": "Caldeiraria_Pendentes_OS.pa.yaml",
+  "lines": 310,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "UpdateContext({normal:true,prior:true,susp:false})",
+  "controls": {
+   "Rectangle": 7,
+   "Label": 6,
+   "CheckBox": 3,
+   "Gallery": 1,
+   "GroupContainer": 1,
+   "Image": 1,
+   "Classic": 1
+  },
+  "controlTotal": 20,
+  "dataSources": [
+   "Balanceamento",
+   "Caldeiraria_Controle"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Caldeiraria_Pendentes_Servicos"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "normal",
+   "prior",
+   "susp"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gal_Caldeiraria_OS",
+    "items": "If( normal = true And prior = true And susp = true,\n\n\nDistinct(Sort(Search( Filter(Caldeiraria_Controle,xStatus <> \"Concluído\",Unidade = varfilial,Pecas <> \"Balanceamento\"),PesquisaHistCalde_1.Text,OS),Regime,SortOrder.Descending),OS),\n\nnormal = true And prior = true And susp = false,\n\n\nDistinct(Sort(Search( Filter(Caldeiraria_Controle,xStatus <> \"Concluído\" And xStatus <> \"Suspenso\",Unidade = varfilial,Pecas <> \"Balanceamento\"),PesquisaHistCalde_1.Text,OS),Regime,SortOrder.Descending),OS),\nnormal = true And prior = false And susp = false,\n\n\nDistinct(Sort(Search(Filter(Caldeiraria_Controle,xStatus = \"Pendente\" And Regime = \"Normal\",Unidade = varfilial,Pecas <> \"Balanceamento\"),PesquisaHistCalde_1.Text,OS),Regime,SortOrder.Descending),OS),\nnormal = false And prior = true And susp = false,\n\n\nDistinct(Sort(Search(Filter(Caldeiraria_Controle,xStatus = \"Pendente\" And Regime = \"Prioridade\",Unidade = varfilial,Pecas <> \"Balanceamento\"),PesquisaHistCalde_1.Text,OS),Regime,SortOrder.Descending),OS))"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Gal_Caldeiraria_OS",
+    "type": "Gallery",
+    "label": "Gal_Caldeiraria_OS",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Pendentes_Servicos,ScreenTransition.Cover,{tipo:1})"
+   }
+  ]
+ },
+ {
+  "screen": "Caldeiraria_Pendentes_Peças",
+  "file": "Caldeiraria_Pendentes_Pe+ºas.pa.yaml",
+  "lines": 165,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "UpdateContext({normal:true,prior:true,susp:false})",
+  "controls": {
+   "Label": 5,
+   "Rectangle": 2,
+   "Classic": 1,
+   "Gallery": 1,
+   "Image": 1
+  },
+  "controlTotal": 10,
+  "dataSources": [
+   "Balanceamento",
+   "Caldeiraria_Controle"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Caldeiraria_Pendentes_Servicos"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "normal"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gal_Caldeiraria_OS_2",
+    "items": "Sort(Search( Filter(Caldeiraria_Controle,xStatus <> \"Concluído\",Unidade = varfilial,Pecas <> \"Balanceamento\"),PesquisaHistCalde_2.Text,OS,Pecas),DataPrazo,SortOrder.Ascending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Gal_Caldeiraria_OS_2",
+    "type": "Gallery",
+    "label": "Gal_Caldeiraria_OS_2",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Pendentes_Servicos,ScreenTransition.Cover,{tipo:2})"
+   }
+  ]
+ },
+ {
+  "screen": "Caldeiraria_Pendentes_Servicos",
+  "file": "Caldeiraria_Pendentes_Servicos.pa.yaml",
+  "lines": 1615,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "UpdateContext({alterar:false})",
+  "controls": {
+   "Label": 48,
+   "Classic": 18,
+   "TypedDataCard": 13,
+   "Image": 8,
+   "Rectangle": 4,
+   "Gallery": 1,
+   "GroupContainer": 1,
+   "Form": 1,
+   "Button": 1,
+   "AddMedia": 1
+  },
+  "controlTotal": 96,
+  "dataSources": [
+   "Balanceamento",
+   "Caldeiraria_Controle",
+   "Credenciaiss"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "alterar",
+   "form",
+   "foto"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormCaldeirResp",
+    "dataSource": "Caldeiraria_Controle",
+    "item": "Gal_Caldeiraria_Serviço.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "Gal_Caldeiraria_Serviço",
+    "items": "If( tipo = 1,\n\nSort(Filter(Caldeiraria_Controle,OS = Gal_Caldeiraria_OS.Selected.Value,xStatus <> \"Concluído\",Pecas <> \"Balanceamento\"),Regime,SortOrder.Descending),\n\ntipo = 2,\n\nSort(Filter(Caldeiraria_Controle,Caldeiraria_Controle = Gal_Caldeiraria_OS_2.Selected.Caldeiraria_Controle,xStatus <> \"Concluído\",Pecas <> \"Balanceamento\"),Regime,SortOrder.Descending),\n\ntipo = 3,\n\nSort(Filter(Caldeiraria_Controle,Caldeiraria_Controle = Gal_Balanc_OS.Selected.Caldeiraria_Controle,xStatus <> \"Concluído\"),Regime,SortOrder.Descending))"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Image66",
+    "type": "Image",
+    "label": "Image66",
+    "prop": "OnSelect",
+    "code": "UpdateContext({form:false});ResetForm(FormCaldeirResp)"
+   },
+   {
+    "control": "FormCaldeirResp",
+    "type": "Form",
+    "label": "FormCaldeirResp",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({form:false});Notify(\"Salvo!\",NotificationType.Success)"
+   },
+   {
+    "control": "Button21",
+    "type": "Classic",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormCaldeirResp)"
+   }
+  ]
+ },
+ {
+  "screen": "Checklist_veicular_slz",
+  "file": "Checklist_veicular_slz.pa.yaml",
+  "lines": 6273,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 207,
+   "TypedDataCard": 69,
+   "Classic": 69,
+   "Image": 1,
+   "Form": 1,
+   "ComboBox": 1,
+   "Attachments": 1
+  },
+  "controlTotal": 349,
+  "dataSources": [
+   "CheckList_Veicular",
+   "controle_veiculo"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormChecklist_1",
+    "dataSource": "CheckList_Veicular",
+    "item": "'gal.historicocheck_slz'.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "FormChecklist_1",
+    "type": "Form",
+    "label": "FormChecklist_1",
+    "prop": "OnSuccess",
+    "code": "Back();Notify(\"Check-List submetido com sucesso\")"
+   },
+   {
+    "control": "Button15",
+    "type": "Classic",
+    "label": "\"Enviar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm([@FormChecklist_1])"
+   }
+  ]
+ },
+ {
+  "screen": "Checklist_veicular_slz_View",
+  "file": "Checklist_veicular_slz_View.pa.yaml",
+  "lines": 6131,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 202,
+   "Classic": 67,
+   "TypedDataCard": 67,
+   "Image": 2,
+   "Form": 1,
+   "Attachments": 1,
+   "Gallery": 1
+  },
+  "controlTotal": 341,
+  "dataSources": [
+   "CheckList_Veicular",
+   "Credenciaiss"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormChecklist_View",
+    "dataSource": "CheckList_Veicular",
+    "item": "Galeriachecklist.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "Gallery1",
+    "items": "Galeriachecklist.Selected.Anexos"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Botaocadastro_26",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormChecklist_View)"
+   },
+   {
+    "control": "FormChecklist_View",
+    "type": "Form",
+    "label": "FormChecklist_View",
+    "prop": "OnSuccess",
+    "code": "Back();Notify(\"Check-List submetido com sucesso\")"
+   }
+  ]
+ },
+ {
+  "screen": "ControleTerceirizado",
+  "file": "ControleTerceirizado.pa.yaml",
+  "lines": 106,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Classic": 3,
+   "Label": 1,
+   "Image": 1
+  },
+  "controlTotal": 5,
+  "dataSources": [
+   "Serviços Terceirizados"
+  ],
+  "flows": [],
+  "navTargets": [
+   "HistoricoTerceir",
+   "NovoRegistroTerceir",
+   "PendentesdeRetorno",
+   "SELEC_COD"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button1_26",
+    "type": "Classic",
+    "label": "\"Novo Registro\"",
+    "prop": "OnSelect",
+    "code": "Navigate(NovoRegistroTerceir);NewForm(FormNovoTercei)"
+   },
+   {
+    "control": "Button1_27",
+    "type": "Classic",
+    "label": "\"Pendentes de Retorno\"",
+    "prop": "OnSelect",
+    "code": "Navigate(PendentesdeRetorno);Refresh('Serviços Terceirizados')"
+   },
+   {
+    "control": "Button1_69",
+    "type": "Classic",
+    "label": "\"Histórico\"",
+    "prop": "OnSelect",
+    "code": "Navigate(HistoricoTerceir)"
+   },
+   {
+    "control": "Image1_48",
+    "type": "Image",
+    "label": "Image1_48",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   }
+  ]
+ },
+ {
+  "screen": "Controle_Caldeiraria",
+  "file": "Controle_Caldeiraria.pa.yaml",
+  "lines": 326,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Image": 4,
+   "Label": 4,
+   "Classic": 4,
+   "Rectangle": 3,
+   "GroupContainer": 2,
+   "Gallery": 1,
+   "Circle": 1
+  },
+  "controlTotal": 19,
+  "dataSources": [
+   "Balanceamento",
+   "Caldeiraria_Controle",
+   "Caldeiraria_Lista",
+   "Credenciaiss"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Caldeiraria_Botao_Pendente",
+   "Caldeiraria_Histórico",
+   "Caldeiraria_ListadePecas",
+   "Caldeiraria_Novo",
+   "SELEC_COD"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "foto"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "GaleriaMenuCaldeiraria",
+    "items": "Sort(Filter(Caldeiraria_Controle,xStatus = \"Concluído\",Unidade = varfilial,Pecas <> \"Balanceamento\", xxStatus <> \"Inativo\"),DataConclusao,SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Image1_84",
+    "type": "Image",
+    "label": "Image1_84",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   },
+   {
+    "control": "Button1_96",
+    "type": "Classic",
+    "label": "\"Novo Serviço\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Novo,ScreenTransition.Cover,{perg:true});NewForm(FormCaldeiraria)"
+   },
+   {
+    "control": "Button1_97",
+    "type": "Classic",
+    "label": "\"Serviços Pendentes - \" & CountIf(Caldeiraria_Controle,xStat",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Botao_Pendente,ScreenTransition.Cover,{normal:true,prior:true,susp:false})"
+   },
+   {
+    "control": "Button1_98",
+    "type": "Classic",
+    "label": "\"Histórico\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_Histórico)"
+   },
+   {
+    "control": "Button1_99",
+    "type": "Classic",
+    "label": "\"Controle de Lista\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Caldeiraria_ListadePecas)"
+   }
+  ]
+ },
+ {
+  "screen": "DepTecnico",
+  "file": "DepTecnico.pa.yaml",
+  "lines": 4636,
+  "background": "Fundo",
+  "onVisible": "UpdateContext({img: false})",
+  "onHidden": "",
+  "controls": {
+   "Text": 98,
+   "Label": 88,
+   "TextInput": 29,
+   "TypedDataCard": 28,
+   "Button": 19,
+   "Rectangle": 14,
+   "Image": 8,
+   "Classic": 6,
+   "Gallery": 4,
+   "GroupContainer": 4,
+   "DropDown": 4,
+   "Radio": 3,
+   "Form": 2,
+   "DatePicker": 2,
+   "TabList": 1,
+   "Timer": 1,
+   "Attachments": 1,
+   "HtmlViewer": 1,
+   "PDFViewer": 1
+  },
+  "controlTotal": 314,
+  "dataSources": [
+   "Base_Medro",
+   "Credenciaiss",
+   "Laudos",
+   "Prod_Avaliacao_Final",
+   "Prod_Avaliacao_Final_Opc",
+   "Prod_Inspecao"
+  ],
+  "flows": [
+   "gerarlinkLaudo",
+   "obterLaudo"
+  ],
+  "navTargets": [
+   "QRCodeLaudos",
+   "SELEC_COD"
+  ],
+  "globalVars": [
+   "LaudoFinalPDF",
+   "linkFinal",
+   "pdfFile"
+  ],
+  "contextVars": [
+   "carrlaudo",
+   "cleanlaudo",
+   "editlaudo",
+   "exclus",
+   "img",
+   "inspec",
+   "novolaudo",
+   "verlaudo",
+   "verqrcode"
+  ],
+  "patchTargets": [
+   "Laudos"
+  ],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormLaudo",
+    "dataSource": "Laudos",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "FormLaudo_1",
+    "dataSource": "Laudos",
+    "item": "galeriahistoricolaudo.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "galeriahistoricolaudo",
+    "items": "If( ListaDPTTEC.Selected.Value = \"Todos\",\n\n\nSort(Search(Filter(Laudos,TipoPatch<>\"PCP\" && xStatus <> \"Inativo\"),PesquisaLaudo.Value,OS,Emissor,'Tipo Laudo','Classe Laudo','Parecer Tecnico','Falha Principal',Observacao),'Data Laudo',SortOrder.Descending),\n\nSort(Search(Filter(Laudos,TipoPatch<>\"PCP\" && Filial = ListaDPTTEC.Selected.Value && xStatus <> \"Inativo\"),PesquisaLaudo.Value,OS,Emissor,'Tipo Laudo','Classe Laudo','Parecer Tecnico','Falha Principal',Observacao),'Data Laudo',SortOrder.Descending))"
+   },
+   {
+    "name": "Gallery8_12",
+    "items": "//Gallery8_9.Selected\n\nFilter(Prod_Avaliacao_Final,'Ordem de Serviço' = DataCardValue100.Value)"
+   },
+   {
+    "name": "Gallery9_2",
+    "items": "Sort( Search( Filter(Base_Medro,Setor = \"Aguardando processo\"), TextInputCanvas5_1.Value , OS, Unidade ),'Data de Criação',SortOrder.Descending)"
+   },
+   {
+    "name": "Gallery9_3",
+    "items": "Sort( Search(  Filter(Base_Medro,Setor = \"Motor pronto\"),TextInputCanvas5.Value,OS_Comp,Unidade),'Data de Criação',SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Title18_23",
+    "type": "Label",
+    "label": "If(IsBlank(ThisItem.xValidLaudoQRCcode),\"\",\"Laudo Arquivado\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({cleanlaudo:true,carrlaudo:false}) //Patch( // Laudos; // galeriahistoricolaudo.Selected; // {xArquiv: \"\"} //)"
+   },
+   {
+    "control": "ButtonCanvas13",
+    "type": "Button",
+    "label": "\"Novo Laudo\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({novolaudo:true,histo:false,at:false,verlaudo:false});NewForm(FormLaudo)"
+   },
+   {
+    "control": "FormLaudo",
+    "type": "Form",
+    "label": "FormLaudo",
+    "prop": "OnSuccess",
+    "code": "Notify(\"Laudo registrado\",NotificationType.Success,3000); NewForm(FormLaudo)"
+   },
+   {
+    "control": "ButtonCanvas13_3",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormLaudo)"
+   },
+   {
+    "control": "ButtonCanvas16_1",
+    "type": "Button",
+    "label": "\"Carregar Laudo\"",
+    "prop": "OnSelect",
+    "code": "If( galeriahistoricolaudo.Selected.Filial = \"Barcarena\" Or galeriahistoricolaudo.Selected.Filial = \"São José dos Campos\" Or galeriahistoricolaudo.Selected.Filial = \"Aveiro\", ForAll( cardlaudoatt.Attachments, GruposdoOffice365.HttpRequest( \"https://graph.microsoft.com/v1.0/sites/471ed516-b1af-4b60-adb1-e33530b40fd2/drives/b!FtUeR6-xYEutseM1MLQP0luN9WQa7dVAm7IrWRchyFnVHstz2SkdR6IH4JOZ3kJr/root:\" & E"
+   },
+   {
+    "control": "Icon1_1",
+    "type": "Classic",
+    "label": "Icon1_1",
+    "prop": "OnSelect",
+    "code": "Set( pdfFile, PDF( Container13, { DPI: 200, Size: PaperSize.A5, Orientation: \"Portrait\" } ) ); Download(pdfFile)"
+   },
+   {
+    "control": "ButtonCanvas2_3",
+    "type": "Button",
+    "label": "\"Inspeção\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({inspec:true});EditForm(Form_View_Quali)"
+   },
+   {
+    "control": "ButtonCanvas13_4",
+    "type": "Button",
+    "label": "\"Voltar\"",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   },
+   {
+    "control": "FormLaudo_1",
+    "type": "Form",
+    "label": "FormLaudo_1",
+    "prop": "OnSuccess",
+    "code": "Notify(\"Laudo registrado\",NotificationType.Success,3000); NewForm(FormLaudo_1)"
+   },
+   {
+    "control": "ButtonCanvas14",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormLaudo_1)"
+   },
+   {
+    "control": "ButtonCanvas13_9",
+    "type": "Button",
+    "label": "\"Imprimir QR Codes\"",
+    "prop": "OnSelect",
+    "code": "Navigate(QRCodeLaudos)"
+   },
+   {
+    "control": "ButtonCanvas13_14",
+    "type": "Button",
+    "label": "\"Ver Laudo\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext( { verqrcode: false, verlaudo: true } ); If( galeriahistoricolaudo.Selected.Filial = \"Barcarena\" Or galeriahistoricolaudo.Selected.Filial = \"São José dos Campos\" Or galeriahistoricolaudo.Selected.Filial = \"Aveiro\", Set( LaudoFinalPDF, obterLaudo.Run( \"Laudo \" & galeriahistoricolaudo.Selected.'Classe Laudo' & \" \" & If( IsBlank(galeriahistoricolaudo.Selected.OS_semSigla), First( Split("
+   },
+   {
+    "control": "ButtonCanvas21",
+    "type": "Button",
+    "label": "\"Excluir\"",
+    "prop": "OnSelect",
+    "code": "//Remove(Laudos; Filter(Laudos; xID = Title18_25.Text)) ;; UpdateContext({exclusão: false}) Patch( Laudos, First( Filter(Laudos, xID = Title18_25.Text And (xStatus = \"Ativo\" Or IsBlank(xStatus))) ), { xStatus: \"Inativo\" } ) ; UpdateContext({exclusão: false})"
+   }
+  ]
+ },
+ {
+  "screen": "Documentos_trajeto SLZ",
+  "file": "Documentos_trajeto SLZ.pa.yaml",
+  "lines": 101,
+  "background": "RGBA(8, 5, 31, 1)",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 2,
+   "Rectangle": 2,
+   "Gallery": 1,
+   "PDFViewer": 1,
+   "Image": 1
+  },
+  "controlTotal": 7,
+  "dataSources": [
+   "Doc.Medro.SLZ"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "galeriadocumentoslz",
+    "items": "'Doc.Medro.SLZ'"
+   }
+  ],
+  "actions": []
+ },
+ {
+  "screen": "EdicaoOS_Medro",
+  "file": "EdicaoOS_Medro.pa.yaml",
+  "lines": 1139,
+  "background": "Fundo_Input_Medro_2",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Text": 33,
+   "ComboBoxDataField": 14,
+   "TypedDataCard": 10,
+   "TextInput": 8,
+   "DropDown": 4,
+   "Image": 4,
+   "Classic": 3,
+   "ComboBox": 3,
+   "DatePicker": 2,
+   "Label": 2,
+   "Form": 1,
+   "GroupContainer": 1,
+   "Rectangle": 1
+  },
+  "controlTotal": 86,
+  "dataSources": [
+   "Balanceamento",
+   "Base_Medro",
+   "Caldeiraria_Controle",
+   "Lista Auxiliar - Clientes Medro",
+   "Lista Auxiliar - Setores Medro"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "confirmar"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormEntradaMedro_2",
+    "dataSource": "Base_Medro",
+    "item": "EmAberto_Medro_Novo_3.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "FormEntradaMedro_2",
+    "type": "Form",
+    "label": "FormEntradaMedro_2",
+    "prop": "OnSuccess",
+    "code": "Back();Notify(\"✅ Entrada\",NotificationType.Success,2000);UpdateContext({confirmar:false})"
+   },
+   {
+    "control": "Image39_7",
+    "type": "Image",
+    "label": "Image39_7",
+    "prop": "OnSelect",
+    "code": "Back();ResetForm(FormEntradaMedro_2)"
+   },
+   {
+    "control": "Image82_3",
+    "type": "Image",
+    "label": "Image82_3",
+    "prop": "OnSelect",
+    "code": "//SubmitForm(FormEntradaMedro) UpdateContext({confirmar:true})"
+   },
+   {
+    "control": "Button1_1",
+    "type": "Classic",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormEntradaMedro_2)"
+   }
+  ]
+ },
+ {
+  "screen": "EnsaioTemporizado",
+  "file": "EnsaioTemporizado.pa.yaml",
+  "lines": 1803,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Text": 47,
+   "TypedDataCard": 13,
+   "Label": 12,
+   "Image": 12,
+   "TextInput": 12,
+   "Classic": 8,
+   "Rectangle": 3,
+   "Button": 2,
+   "DropDown": 2,
+   "Gallery": 1,
+   "GroupContainer": 1,
+   "Form": 1,
+   "DatePicker": 1
+  },
+  "controlTotal": 115,
+  "dataSources": [
+   "ensaio_temporizado"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "novo"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormEnsaioTemporizado",
+    "dataSource": "ensaio_temporizado",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "galeriaensaiotemporizado",
+    "items": "Filter( ensaio_temporizado, xFilial = varfilial,OS = os_aval)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "ButtonCanvas17",
+    "type": "Button",
+    "label": "\"Novo Registro\"",
+    "prop": "OnSelect",
+    "code": "NewForm(FormEnsaioTemporizado);UpdateContext({novo:true})"
+   },
+   {
+    "control": "Image29",
+    "type": "Image",
+    "label": "Image29",
+    "prop": "OnSelect",
+    "code": "UpdateContext({novo:false});ResetForm(FormEnsaioTemporizado)"
+   },
+   {
+    "control": "ButtonCanvas18",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormEnsaioTemporizado)"
+   }
+  ]
+ },
+ {
+  "screen": "EntradaTarefa",
+  "file": "EntradaTarefa.pa.yaml",
+  "lines": 790,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 26,
+   "Classic": 9,
+   "TypedDataCard": 8,
+   "Image": 1,
+   "Form": 1,
+   "Attachments": 1
+  },
+  "controlTotal": 46,
+  "dataSources": [
+   "Credenciaiss",
+   "Lista QR Code",
+   "Tarefas Operacionais"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "TarefaBRC",
+    "dataSource": "'Tarefas Operacionais'",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button1_30",
+    "type": "Classic",
+    "label": "\"Enviar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(TarefaBRC)"
+   }
+  ]
+ },
+ {
+  "screen": "Entrada_Medro_Nova",
+  "file": "Entrada_Medro_Nova.pa.yaml",
+  "lines": 1643,
+  "background": "Fundo_Input_Medro_2",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Text": 44,
+   "TypedDataCard": 14,
+   "ComboBoxDataField": 14,
+   "TextInput": 11,
+   "Label": 6,
+   "Image": 6,
+   "ComboBox": 4,
+   "DropDown": 4,
+   "Classic": 3,
+   "Rectangle": 3,
+   "DatePicker": 2,
+   "Form": 1,
+   "Button": 1,
+   "CheckBox": 1,
+   "GroupContainer": 1,
+   "Gallery": 1
+  },
+  "controlTotal": 116,
+  "dataSources": [
+   "Balanceamento",
+   "Base_Medro",
+   "Caldeiraria_Controle",
+   "Credenciaiss",
+   "Laudos",
+   "Lista Auxiliar - Clientes Medro",
+   "Lista Auxiliar - Setores Medro"
+  ],
+  "flows": [
+   "CopiarLaudo",
+   "gerarlinkLaudo"
+  ],
+  "navTargets": [],
+  "globalVars": [
+   "ValPCP",
+   "linkFinalPCP",
+   "linkInicialPCP"
+  ],
+  "contextVars": [
+   "confirmar",
+   "serv"
+  ],
+  "patchTargets": [
+   "Laudos"
+  ],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormEntradaMedro",
+    "dataSource": "Base_Medro",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "Gallery5",
+    "items": "Filter(Caldeiraria_Controle, OS = DataCardValue58_2.Value,xStatus = \"Pendente\")"
+   }
+  ],
+  "actions": [
+   {
+    "control": "FormEntradaMedro",
+    "type": "Form",
+    "label": "FormEntradaMedro",
+    "prop": "OnSuccess",
+    "code": "Back(); Notify(\"✅ Entrada\",NotificationType.Success,2000); UpdateContext({confirmar:false})"
+   },
+   {
+    "control": "Image39_5",
+    "type": "Image",
+    "label": "Image39_5",
+    "prop": "OnSelect",
+    "code": "Back();ResetForm(FormEntradaMedro)"
+   },
+   {
+    "control": "Image82_1",
+    "type": "Image",
+    "label": "Image82_1",
+    "prop": "OnSelect",
+    "code": "//SubmitForm(FormEntradaMedro) UpdateContext({confirmar:true})"
+   },
+   {
+    "control": "Button1",
+    "type": "Classic",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "If( DataCardValue62_3.Selected.Nome = \"PCP\" And (DataCardValue62_2.Selected.Unidade.Value = \"Barcarena\" Or DataCardValue62_2.Selected.Unidade.Value = \"São José dos Campos\" Or DataCardValue62_2.Selected.Unidade.Value = \"Aveiro\") And IsBlank(LookUp(Base_Medro,OS_Comp = DataCardValue31.Value && Unidade = varfilial && Setor = \"PCP\")), //Sucesso //1- CopiarLaudo.Run( \"Doc Tcnicos/Laudos/\" & DataCardVal"
+   }
+  ]
+ },
+ {
+  "screen": "EscopoDeManuten",
+  "file": "EscopoDeManuten.pa.yaml",
+  "lines": 303,
+  "background": "Fundo",
+  "onVisible": "UpdateContext({img: false})",
+  "onHidden": "",
+  "controls": {
+   "Label": 6,
+   "Text": 5,
+   "Rectangle": 4,
+   "Button": 2,
+   "Gallery": 2,
+   "Classic": 2,
+   "TextInput": 2
+  },
+  "controlTotal": 23,
+  "dataSources": [
+   "ABF010",
+   "Laudos",
+   "SCP010"
+  ],
+  "flows": [],
+  "navTargets": [
+   "SELEC_COD"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "img"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gallery11",
+    "items": "Sort( Search(SCP010,TextInputCanvas7.Value,CP_NUMOS) ,CP_DATPRF,SortOrder.Descending)"
+   },
+   {
+    "name": "Gallery11_1",
+    "items": "Sort( Search(ABF010,TextInputCanvas7_1.Value,ABF_NUMOS) ,ABF_EMISSA,SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "ButtonCanvas13_19",
+    "type": "Button",
+    "label": "\"Voltar\"",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   }
+  ]
+ },
+ {
+  "screen": "Exportar_CheckList",
+  "file": "Exportar_CheckList.pa.yaml",
+  "lines": 312,
+  "background": "RGBA(234, 234, 234, 1)",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "ModernText": 4,
+   "Button": 3,
+   "GroupContainer": 2,
+   "Label": 2,
+   "ModernDatePicker": 2,
+   "CheckBox": 2,
+   "Gallery": 1,
+   "Image": 1
+  },
+  "controlTotal": 17,
+  "dataSources": [
+   "CheckList_Veicular"
+  ],
+  "flows": [
+   "gerar_planilha_checkList_veicular"
+  ],
+  "navTargets": [
+   "COD_GERENCIAMENTO"
+  ],
+  "globalVars": [
+   "checkListJSON",
+   "executarFluxo"
+  ],
+  "contextVars": [
+   "atehoje",
+   "hoje"
+  ],
+  "patchTargets": [],
+  "collections": [
+   "colList"
+  ],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gallery19",
+    "items": "Sort(\n    Filter(\n        CheckList_Veicular,\n        Unidade = \"São Luís\",\n        (IsBlank(De.SelectedDate) And IsBlank(Ate.SelectedDate) Or DateValue(data_check) >= De.SelectedDate And DateValue(data_check) <= Ate.SelectedDate)\n    ),\n    ID,\n    SortOrder.Descending\n)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "ButtonCanvas45",
+    "type": "Button",
+    "label": "\"Gerar planilha 📄\"",
+    "prop": "OnSelect",
+    "code": "ClearCollect( colList, ShowColumns( Gallery19.AllItems, Title, autorizado, Observation, data_check, nome_check, matricula, quilometragem, Unidade, '1.Documento Do Veículo (IPVA/RT''S/TACÓGRAFO)', '2.Alarme', '3.Bateria (Luzes no painel)', '4.Buzina (Sonoridade)', '5.Chave De Roda (Condição das bocas da chave e presença)', '6.Macaco (lubrificação, mecanismos de bombeamento, preservação das roscas e"
+   },
+   {
+    "control": "ButtonCanvas47",
+    "type": "Button",
+    "label": "=",
+    "prop": "OnSelect",
+    "code": "Navigate(COD_GERENCIAMENTO)"
+   }
+  ]
+ },
+ {
+  "screen": "Finalizar_Medro_Nova",
+  "file": "Finalizar_Medro_Nova.pa.yaml",
+  "lines": 2099,
+  "background": "Fundo_Input_Medro_2",
+  "onVisible": "UpdateContext({avisofechar:false,dest:false})",
+  "onHidden": "",
+  "controls": {
+   "Text": 79,
+   "TypedDataCard": 25,
+   "TextInput": 19,
+   "DropDown": 8,
+   "ComboBoxDataField": 7,
+   "ComboBox": 5,
+   "DatePicker": 4,
+   "Image": 3,
+   "Form": 2,
+   "Label": 2,
+   "Classic": 2,
+   "GroupContainer": 1,
+   "Rectangle": 1,
+   "Button": 1
+  },
+  "controlTotal": 159,
+  "dataSources": [
+   "Balanceamento",
+   "Base_Medro",
+   "CK_Farol",
+   "Credenciaiss",
+   "Lista Auxiliar - Setores Medro"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "avisofechar",
+   "dest"
+  ],
+  "patchTargets": [
+   "Base_Medro",
+   "CK_Farol"
+  ],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormDestinacao",
+    "dataSource": "Base_Medro",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "FormSaidaMedro",
+    "dataSource": "Base_Medro",
+    "item": "EmAberto_Medro_Novo.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Image39_3",
+    "type": "Image",
+    "label": "Image39_3",
+    "prop": "OnSelect",
+    "code": "Back();ResetForm(FormSaidaMedro);"
+   },
+   {
+    "control": "Image82",
+    "type": "Image",
+    "label": "Image82",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormSaidaMedro); If( Caixadestinacao.Selected.Nome = \"Aguardando Processo\", Patch( CK_Farol, LookUp( CK_Farol, OS = Trim(DataCardValue58.Value) ), {StatusComercial: \"AGUARDANDO COTACAO\"} ), false )"
+   },
+   {
+    "control": "FormSaidaMedro",
+    "type": "Form",
+    "label": "FormSaidaMedro",
+    "prop": "OnFailure",
+    "code": "Notify(\"Erro\",NotificationType.Error,2000)"
+   },
+   {
+    "control": "FormSaidaMedro",
+    "type": "Form",
+    "label": "FormSaidaMedro",
+    "prop": "OnSuccess",
+    "code": "Notify(\"✅\",NotificationType.Success,2000);If(dest = true,UpdateContext({avisofechar:true,dest:false}),Back()) ; Patch( Base_Medro, LookUp( Base_Medro, OS = DataCardValue58.Value And Setor = \"Pintura\" And Responsavel = \"Destinado\" ), {'Tipo de Pintura': DataCardValue21.Selected.Value} )"
+   },
+   {
+    "control": "button_OS__2",
+    "type": "Classic",
+    "label": "\"Destinação\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({dest:true});NewForm(FormDestinacao)"
+   },
+   {
+    "control": "ButtonCanvas8",
+    "type": "Button",
+    "label": "\"Confirmar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormDestinacao) ; Patch( Base_Medro, LookUp( Base_Medro, OS = DataCardValue58.Value And Setor = \"Pintura\" And Responsavel = \"Destinado\" ), {'Tipo de Pintura': DataCardValue21.Selected.Value} )"
+   }
+  ]
+ },
+ {
+  "screen": "FormInspec",
+  "file": "FormInspec.pa.yaml",
+  "lines": 3801,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 126,
+   "Classic": 42,
+   "TypedDataCard": 41,
+   "Image": 4,
+   "Form": 2,
+   "AddMedia": 2,
+   "InfoButton": 1,
+   "Rectangle": 1
+  },
+  "controlTotal": 219,
+  "dataSources": [
+   "Credenciaiss",
+   "Lista Auxiliar - Inspeção de Qualidade",
+   "Prod_Avaliacao_Final",
+   "Prod_Inspecao"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "fundo",
+   "rep1",
+   "rep10",
+   "rep11",
+   "rep12",
+   "rep13",
+   "rep14",
+   "rep15",
+   "rep16",
+   "rep17",
+   "rep18",
+   "rep19",
+   "rep2",
+   "rep20",
+   "rep21",
+   "rep22",
+   "rep23",
+   "rep24",
+   "rep25",
+   "rep26",
+   "rep27",
+   "rep28",
+   "rep3",
+   "rep4",
+   "rep5",
+   "rep6",
+   "rep7",
+   "rep8",
+   "rep9"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormAtualizarInspec",
+    "dataSource": "Prod_Avaliacao_Final",
+    "item": "GaleriaEscolhaInspec.Selected",
+    "default": ""
+   },
+   {
+    "name": "FormNewInspec",
+    "dataSource": "Prod_Inspecao",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button23",
+    "type": "Classic",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormAtualizarInspec);SubmitForm(FormNewInspec)"
+   }
+  ]
+ },
+ {
+  "screen": "GaleriaPeritagem",
+  "file": "GaleriaPeritagem.pa.yaml",
+  "lines": 6089,
+  "background": "t",
+  "onVisible": "UpdateContext({botoes:true});NewForm(F_AF)",
+  "onHidden": "",
+  "controls": {
+   "Label": 176,
+   "Classic": 81,
+   "TypedDataCard": 55,
+   "Image": 17,
+   "GroupContainer": 3,
+   "Button": 2,
+   "Rectangle": 1,
+   "Form": 1,
+   "AddMedia": 1,
+   "TextInput": 1
+  },
+  "controlTotal": 338,
+  "dataSources": [
+   "Credenciaiss",
+   "Lista Auxiliar - Clientes Medro",
+   "Prod_Avaliacao_Final",
+   "Prod_LiberarEnsaio"
+  ],
+  "flows": [],
+  "navTargets": [
+   "AvaliacaoFinal",
+   "EnsaioTemporizado",
+   "PeritagemFin_opicional"
+  ],
+  "globalVars": [
+   "os_aval"
+  ],
+  "contextVars": [
+   "botoes",
+   "num_cabos",
+   "os",
+   "rb_isol",
+   "rb_res",
+   "resis",
+   "rpm",
+   "sir_corrente",
+   "sir_vib"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "F_AF",
+    "dataSource": "Prod_Avaliacao_Final",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Image74",
+    "type": "Image",
+    "label": "Image74",
+    "prop": "OnSelect",
+    "code": "Navigate(AvaliacaoFinal);Set(os_aval, \"\")"
+   },
+   {
+    "control": "Button23_22",
+    "type": "Classic",
+    "label": "\"Sensores\"",
+    "prop": "OnSelect",
+    "code": "Navigate(PeritagemFin_opicional)"
+   },
+   {
+    "control": "Button23_23",
+    "type": "Classic",
+    "label": "\"Ensaio Temporizado\"",
+    "prop": "OnSelect",
+    "code": "Navigate(EnsaioTemporizado,ScreenTransition.CoverRight); Set(os_aval, DataCardValue237.Text)"
+   },
+   {
+    "control": "F_AF",
+    "type": "Form",
+    "label": "F_AF",
+    "prop": "OnSuccess",
+    "code": "Navigate(AvaliacaoFinal); Notify( \"Avaliação salva com sucesso!!!\", NotificationType.Success, 3000 ); ResetForm(F_AF); ResetForm(FormSensorOpc); UpdateContext( { rb_isol: false, rb_res: false, sir_vib: false, sir_corrente: false, rpm: false, vib: false, temp: false, corrent: false, isol: false, botoes: true, form: false, fundo: false, Ant_resis: false, resis: false, final:false } ); Reset(Dropdown"
+   },
+   {
+    "control": "ButtonCanvas1_1",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(F_AF);If(IsBlank(TextCanvas2.Text),false,SubmitForm(FormSensorOpc))"
+   }
+  ]
+ },
+ {
+  "screen": "GerarLink_DPT",
+  "file": "GerarLink_DPT.pa.yaml",
+  "lines": 458,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 7,
+   "ComboBoxDataField": 7,
+   "Rectangle": 2,
+   "ComboBox": 2,
+   "Button": 2,
+   "GroupContainer": 1,
+   "Gallery": 1,
+   "Image": 1,
+   "TextInput": 1
+  },
+  "controlTotal": 24,
+  "dataSources": [
+   "Laudos",
+   "Lista Auxiliar - Clientes Medro",
+   "Requisicao"
+  ],
+  "flows": [
+   "CopiarLaudo",
+   "gerarlinkLaudo"
+  ],
+  "navTargets": [
+   "SELEC_COD"
+  ],
+  "globalVars": [
+   "ValPCP",
+   "linkFinalPCP",
+   "linkInicialPCP"
+  ],
+  "contextVars": [],
+  "patchTargets": [
+   "Laudos"
+  ],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "GaleriaRequisição_1",
+    "items": "Filter(Laudos, OS = DataCardValue79_5.Value & \"-\" & DataCardValue62_7.Selected.Sigla)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Image1_94",
+    "type": "Image",
+    "label": "Image1_94",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   },
+   {
+    "control": "ButtonCanvas24",
+    "type": "Button",
+    "label": "\"Gerar Inicial\"",
+    "prop": "OnSelect",
+    "code": "If( DataCardValue62_8.Selected.Value = \"Barcarena\" Or DataCardValue62_8.Selected.Value = \"São José dos Campos\" Or DataCardValue62_8.Selected.Value = \"Aveiro\", //Sucesso //1- CopiarLaudo.Run( \"Doc Tcnicos/Laudos/\" & DataCardValue62_8.Selected.Value, \"Laudo Inicial \" & DataCardValue79_5.Value & \".pdf\" ); //2- Set( linkInicialPCP, gerarlinkLaudo.Run(\"Doc Tcnicos/Laudos/\" & DataCardValue62_8.Selected."
+   },
+   {
+    "control": "ButtonCanvas24_1",
+    "type": "Button",
+    "label": "\"Gerar Final\"",
+    "prop": "OnSelect",
+    "code": "If( DataCardValue62_8.Selected.Value = \"Barcarena\" Or DataCardValue62_8.Selected.Value = \"São José dos Campos\" Or DataCardValue62_8.Selected.Value = \"Aveiro\", //Sucesso //1- CopiarLaudo.Run( \"Doc Tcnicos/Laudos/\" & DataCardValue62_8.Selected.Value, \"Laudo Final \" & DataCardValue79_5.Value & \".pdf\" ); //2- Set( linkFinalPCP, gerarlinkLaudo.Run(\"Doc Tcnicos/Laudos/\" & DataCardValue62_8.Selected.Valu"
+   }
+  ]
+ },
+ {
+  "screen": "Gestao_Pendencias_Medro",
+  "file": "Gestao_Pendencias_Medro.pa.yaml",
+  "lines": 945,
+  "background": "Fundo_Input_Medro_2",
+  "onVisible": "",
+  "onHidden": "UpdateContext({statuspendencia:\"\"})",
+  "controls": {
+   "Text": 37,
+   "TypedDataCard": 12,
+   "TextInput": 10,
+   "Classic": 3,
+   "Image": 3,
+   "DropDown": 2,
+   "Label": 1,
+   "Form": 1,
+   "DatePicker": 1,
+   "ComboBox": 1,
+   "GroupContainer": 1
+  },
+  "controlTotal": 72,
+  "dataSources": [
+   "Base_Medro",
+   "Credenciaiss"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "statuspendencia"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormEntradaMedro_1",
+    "dataSource": "Base_Medro",
+    "item": "Pendencias_Medro.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "FormEntradaMedro_1",
+    "type": "Form",
+    "label": "FormEntradaMedro_1",
+    "prop": "OnSuccess",
+    "code": "Back();Notify(\"✅ Entrada\",NotificationType.Success,2000)"
+   },
+   {
+    "control": "Image82_2",
+    "type": "Image",
+    "label": "Image82_2",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormEntradaMedro_1)"
+   }
+  ]
+ },
+ {
+  "screen": "HIstóricoServAVR",
+  "file": "HIst+¦ricoServAVR.pa.yaml",
+  "lines": 332,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 10,
+   "Classic": 5,
+   "Gallery": 1,
+   "Rectangle": 1,
+   "Image": 1
+  },
+  "controlTotal": 18,
+  "dataSources": [
+   "ServiExternosAveiro",
+   "ServiçosExternosPortugal"
+  ],
+  "flows": [],
+  "navTargets": [
+   "ServiçosExternos"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "check1",
+   "check2"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "historicoavr",
+    "items": "Sort(\n    Search(\n        If(\n            checkfinalizado.Value = true,\n            Filter(\n                ServiçosExternosPortugal,\n                status.Value = checkfinalizado.Text\n            ),\n            checkpendente.Value = true,\n            Filter(\n                ServiçosExternosPortugal,\n                status.Value = checkpendente.Text\n            ),\n            ServiçosExternosPortugal\n        ),\n        pesquisaservptg.Text,\n        Título,\n        cliente,\n        morada,\n        equipamentosintervencionados,\n        'material usado',\n        Notaencomenda,\n        'tipo serviço',\n        Norçamento\n    ),\n    ID,\n    SortOrder.Descending\n)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "historicoavr",
+    "type": "Gallery",
+    "label": "historicoavr",
+    "prop": "OnSelect",
+    "code": "Navigate(ServiçosExternos);EditForm(ServExternosform)"
+   }
+  ]
+ },
+ {
+  "screen": "HistóricoTrajeto",
+  "file": "Hist+¦ricoTrajeto.pa.yaml",
+  "lines": 204,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 8,
+   "Rectangle": 2,
+   "Gallery": 1,
+   "Image": 1
+  },
+  "controlTotal": 12,
+  "dataSources": [
+   "Trajetos"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Galeriatrajetoslz_3",
+    "items": "Sort(Filter(Trajetos,Unidade = varfilial),Criado,SortOrder.Descending)"
+   }
+  ],
+  "actions": []
+ },
+ {
+  "screen": "Histórico_check_SLZ",
+  "file": "Hist+¦rico_check_SLZ.pa.yaml",
+  "lines": 182,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 5,
+   "Rectangle": 3,
+   "Gallery": 1,
+   "Classic": 1,
+   "Image": 1,
+   "Button": 1
+  },
+  "controlTotal": 12,
+  "dataSources": [
+   "CheckList_Veicular",
+   "Credenciaiss",
+   "Trajetos"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Checklist_veicular_slz_View",
+   "Exportar_CheckList",
+   "SelecaoTrajeto"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "gal.historicocheck_slz",
+    "items": "Sort(Filter(CheckList_Veicular,Unidade = \"São Luís\"),Criado,SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "gal.historicocheck_slz",
+    "type": "Gallery",
+    "label": "gal.historicocheck_slz",
+    "prop": "OnSelect",
+    "code": "Navigate(Checklist_veicular_slz_View,ScreenTransition.Cover);Refresh(Trajetos)"
+   },
+   {
+    "control": "Image1_43",
+    "type": "Image",
+    "label": "Image1_43",
+    "prop": "OnSelect",
+    "code": "Navigate(SelecaoTrajeto,ScreenTransition.Cover);ResetForm(Trajetoform)"
+   },
+   {
+    "control": "ButtonCanvas44",
+    "type": "Button",
+    "label": "\"Exportar\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Exportar_CheckList)"
+   }
+  ]
+ },
+ {
+  "screen": "HistoricoAvalFinais",
+  "file": "HistoricoAvalFinais.pa.yaml",
+  "lines": 3786,
+  "background": "Fundo",
+  "onVisible": "UpdateContext({img: false,ensaiotemp:false})",
+  "onHidden": "",
+  "controls": {
+   "Text": 104,
+   "Label": 72,
+   "TextInput": 36,
+   "TypedDataCard": 35,
+   "Rectangle": 11,
+   "Image": 6,
+   "Gallery": 4,
+   "Button": 4,
+   "GroupContainer": 3,
+   "Classic": 1,
+   "Form": 1
+  },
+  "controlTotal": 277,
+  "dataSources": [
+   "Lista Auxiliar - Inspeção de Qualidade",
+   "Prod_Avaliacao_Final",
+   "Prod_Avaliacao_Final_Opc",
+   "Prod_Inspecao",
+   "ensaio_temporizado"
+  ],
+  "flows": [],
+  "navTargets": [
+   "PCP_ANTIGO"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "ensaiotemp",
+   "img",
+   "inspec"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form_View_Quali",
+    "dataSource": "Prod_Inspecao",
+    "item": "Gallery8_11.Selected",
+    "default": "FormMode.View"
+   }
+  ],
+  "galleries": [
+   {
+    "name": "Gallery8_11",
+    "items": "Filter(Prod_Inspecao, Gallery8_9.Selected.'Ordem de Serviço' = Ordem_Servico)"
+   },
+   {
+    "name": "Gallery8_9",
+    "items": "Sort(Search(Prod_Avaliacao_Final,TextInputCanvas1.Value,'Ordem de Serviço',Data_Ref,TipoMotor),'Data de Criação',SortOrder.Descending)"
+   },
+   {
+    "name": "Gallery8_10",
+    "items": "Gallery8_9.Selected"
+   },
+   {
+    "name": "galeriaensaiotemporizado_1",
+    "items": "Filter( ensaio_temporizado, xFilial =  Gallery8_9.Selected.Filial,OS = Gallery8_9.Selected.'Ordem de Serviço')"
+   }
+  ],
+  "actions": [
+   {
+    "control": "ButtonCanvas2_1",
+    "type": "Button",
+    "label": "\"Inspeção\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({inspec:true});EditForm(Form_View_Quali)"
+   },
+   {
+    "control": "ButtonCanvas3",
+    "type": "Button",
+    "label": "\"Versão Antiga\"",
+    "prop": "OnSelect",
+    "code": "Navigate(PCP_ANTIGO)"
+   }
+  ]
+ },
+ {
+  "screen": "HistoricoPendentes",
+  "file": "HistoricoPendentes.pa.yaml",
+  "lines": 1778,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 61,
+   "Classic": 23,
+   "TypedDataCard": 20,
+   "Form": 1,
+   "Image": 1
+  },
+  "controlTotal": 106,
+  "dataSources": [
+   "Serviços Terceirizados",
+   "servicosterceirizados"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormAtualizacaoPendet_1",
+    "dataSource": "servicosterceirizados",
+    "item": "gal_historico.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button7_4",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormAtualizacaoPendet_1)"
+   },
+   {
+    "control": "Button7_3",
+    "type": "Classic",
+    "label": "\"Excluir\"",
+    "prop": "OnSelect",
+    "code": "Remove(servicosterceirizados,gal_historico.Selected);Back()"
+   }
+  ]
+ },
+ {
+  "screen": "HistoricoTarefa_PRP",
+  "file": "HistoricoTarefa_PRP.pa.yaml",
+  "lines": 142,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 5,
+   "Image": 2,
+   "Gallery": 1,
+   "Rectangle": 1
+  },
+  "controlTotal": 9,
+  "dataSources": [
+   "Lista QR Code",
+   "Tarefas Operacionais"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "historicodetarefaPRP",
+    "items": "SortByColumns(Filter('Tarefas Operacionais',Unidade =\"Parauapebas\"),\"Data\",SortOrder.Descending)"
+   }
+  ],
+  "actions": []
+ },
+ {
+  "screen": "HistoricoTerceir",
+  "file": "HistoricoTerceir.pa.yaml",
+  "lines": 280,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 7,
+   "Image": 4,
+   "Rectangle": 2,
+   "Classic": 2,
+   "Gallery": 1
+  },
+  "controlTotal": 16,
+  "dataSources": [
+   "Serviços Terceirizados",
+   "servicosterceirizados"
+  ],
+  "flows": [],
+  "navTargets": [
+   "ControleTerceirizado",
+   "HistoricoPendentes"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "class"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "gal_historico",
+    "items": "If(\n    class = true,\n    Sort(\n        Search(\n            Filter(\n                servicosterceirizados,\n                ID <> \"\",Unidade = varfilial\n            ),\n            pesquisahistorico.Text,\n            N_OR,\n            Título,ID\n        ),\n        'Data de Criação',\n        SortOrder.Ascending\n    ),\n    Sort(\n        Search(\n            Filter(\n                servicosterceirizados,\n                ID <> \"\",Unidade = varfilial\n            ),\n            pesquisahistorico.Text,\n            N_OR,\n            Título,ID\n        ),\n        'Data de Criação',\n        SortOrder.Descending\n    )\n)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "gal_historico",
+    "type": "Gallery",
+    "label": "gal_historico",
+    "prop": "OnSelect",
+    "code": "Navigate(HistoricoPendentes);EditForm(FormAtualizacaoPendet_1)"
+   },
+   {
+    "control": "Image1_51",
+    "type": "Image",
+    "label": "Image1_51",
+    "prop": "OnSelect",
+    "code": "Navigate(ControleTerceirizado);Refresh('Serviços Terceirizados')"
+   }
+  ]
+ },
+ {
+  "screen": "Historico_RDS",
+  "file": "Historico_RDS.pa.yaml",
+  "lines": 182,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 5,
+   "Rectangle": 3,
+   "Gallery": 1,
+   "Image": 1,
+   "Classic": 1
+  },
+  "controlTotal": 11,
+  "dataSources": [
+   "Credenciaiss",
+   "RDS",
+   "RDS-Managements"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gallery4_2",
+    "items": "Sort( Filter('RDS-Managements', LookUp(Credenciaiss,TextInput2.Text = Matrícula,Título) = NomeReq),'Data de Criação',SortOrder.Descending)"
+   }
+  ],
+  "actions": []
+ },
+ {
+  "screen": "ImprimirSSMA",
+  "file": "ImprimirSSMA.pa.yaml",
+  "lines": 6175,
+  "background": "RGBA(255, 255, 255, 1)",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 194,
+   "TypedDataCard": 67,
+   "Classic": 58,
+   "Rectangle": 23,
+   "FormViewer": 1,
+   "Gallery": 1,
+   "Image": 1,
+   "Arrow": 1
+  },
+  "controlTotal": 346,
+  "dataSources": [
+   "CheckList_Veicular"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gallery2",
+    "items": "Galeriachecklist.Selected.Anexos"
+   }
+  ],
+  "actions": []
+ },
+ {
+  "screen": "InspecQuali",
+  "file": "InspecQuali.pa.yaml",
+  "lines": 168,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 5,
+   "Image": 2,
+   "Rectangle": 2,
+   "GroupContainer": 1,
+   "Gallery": 1
+  },
+  "controlTotal": 11,
+  "dataSources": [
+   "Prod_Avaliacao_Final",
+   "Prod_Inspecao"
+  ],
+  "flows": [],
+  "navTargets": [
+   "FormInspec"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "GaleriaEscolhaInspec",
+    "items": "Filter(Prod_Avaliacao_Final,InspecQuali = \"Pendente\",Filial = varfilial)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "GaleriaEscolhaInspec",
+    "type": "Gallery",
+    "label": "GaleriaEscolhaInspec",
+    "prop": "OnSelect",
+    "code": "NewForm(FormNewInspec);Navigate(FormInspec)"
+   }
+  ]
+ },
+ {
+  "screen": "LiberarEnsaio",
+  "file": "LiberarEnsaio.pa.yaml",
+  "lines": 296,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Text": 9,
+   "TypedDataCard": 3,
+   "TextInput": 3,
+   "Label": 2,
+   "Rectangle": 2,
+   "Gallery": 1,
+   "Image": 1,
+   "Form": 1,
+   "Button": 1
+  },
+  "controlTotal": 23,
+  "dataSources": [
+   "Prod_LiberarEnsaio"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormLiberarEnsaio",
+    "dataSource": "Prod_LiberarEnsaio",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "Gallery9",
+    "items": "Sort( Filter( Prod_LiberarEnsaio, Filial = varfilial),'Data de Criação', SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "FormLiberarEnsaio",
+    "type": "Form",
+    "label": "FormLiberarEnsaio",
+    "prop": "OnSuccess",
+    "code": "Notify(\"OS liberada dos ensaios de vibração!\",NotificationType.Success,3000);NewForm(FormLiberarEnsaio)"
+   },
+   {
+    "control": "ButtonCanvas4",
+    "type": "Button",
+    "label": "\"Liberar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormLiberarEnsaio)"
+   }
+  ]
+ },
+ {
+  "screen": "Login",
+  "file": "Login.pa.yaml",
+  "lines": 196,
+  "background": "LoginMedro",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Classic": 4,
+   "Label": 2,
+   "Image": 1,
+   "Timer": 1
+  },
+  "controlTotal": 8,
+  "dataSources": [
+   "Credenciaiss"
+  ],
+  "flows": [],
+  "navTargets": [
+   "AvaliacaoFinal"
+  ],
+  "globalVars": [
+   "varfilial",
+   "varlogin",
+   "varnome",
+   "varsenha"
+  ],
+  "contextVars": [
+   "show"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Label9",
+    "type": "Label",
+    "label": "\"Update 106\"",
+    "prop": "OnSelect",
+    "code": "Navigate(AvaliacaoFinal)"
+   },
+   {
+    "control": "Botão_de_login_2",
+    "type": "Classic",
+    "label": "\"\"",
+    "prop": "OnSelect",
+    "code": "If(\"AVA\" in LookUp(Credenciaiss,varlogin=Usuário,acesso_mod),Navigate(AvaliacaoFinal), false )"
+   },
+   {
+    "control": "Botão_de_login_1",
+    "type": "Classic",
+    "label": "\"Login\"",
+    "prop": "OnSelect",
+    "code": "If( !IsBlank( LookUp( Credenciaiss, Usuário = caixausuario1.Text And Matrícula = caixasenha1.Text And xstatus = \"Ativo\" ) ), Navigate( '1_Menu', ScreenTransition.CoverRight ); Set( varlogin, caixausuario1.Text ); Set( varsenha, caixasenha1.Text ); Set( varnome, LookUp( Credenciaiss, Usuário = caixausuario1.Text And Matrícula = caixasenha1.Text, Título ) ) ; Set( varfilial, LookUp( Credenciaiss, Us"
+   }
+  ]
+ },
+ {
+  "screen": "Login_1",
+  "file": "Login_1.pa.yaml",
+  "lines": 196,
+  "background": "'LoginMedro-2'",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Classic": 4,
+   "Label": 2,
+   "Image": 1,
+   "Timer": 1
+  },
+  "controlTotal": 8,
+  "dataSources": [
+   "Credenciaiss"
+  ],
+  "flows": [],
+  "navTargets": [
+   "AvaliacaoFinal"
+  ],
+  "globalVars": [
+   "varfilial",
+   "varlogin",
+   "varnome",
+   "varsenha"
+  ],
+  "contextVars": [
+   "show"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Label9_1",
+    "type": "Label",
+    "label": "\"Update 84\"",
+    "prop": "OnSelect",
+    "code": "Navigate(AvaliacaoFinal)"
+   },
+   {
+    "control": "Botão_de_login_3",
+    "type": "Classic",
+    "label": "\"\"",
+    "prop": "OnSelect",
+    "code": "If(\"AVA\" in LookUp(Credenciaiss,varlogin=Usuário,acesso_mod),Navigate(AvaliacaoFinal), false )"
+   },
+   {
+    "control": "Botão_de_login_4",
+    "type": "Classic",
+    "label": "\"Login\"",
+    "prop": "OnSelect",
+    "code": "If( !IsBlank( LookUp( Credenciaiss, Usuário = caixausuario.Text And Matrícula = caixasenha.Text And xstatus = \"Ativo\" ) ), Navigate( '1_Menu', ScreenTransition.CoverRight ); Set( varlogin, caixausuario.Text ); Set( varsenha, caixasenha.Text ); Set( varnome, LookUp( Credenciaiss, Usuário = caixausuario.Text And Matrícula = caixasenha.Text, Título ) ) ; Set( varfilial, LookUp( Credenciaiss, Usuário "
+   }
+  ]
+ },
+ {
+  "screen": "Menu_RDS",
+  "file": "Menu_RDS.pa.yaml",
+  "lines": 75,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Classic": 2,
+   "Image": 1
+  },
+  "controlTotal": 3,
+  "dataSources": [
+   "RDS"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Historico_RDS",
+   "Req_RDS"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button1_77",
+    "type": "Classic",
+    "label": "\"Requisição RDS\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Req_RDS);NewForm(formRDS)"
+   },
+   {
+    "control": "Button1_78",
+    "type": "Classic",
+    "label": "\"Histórico RDS\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Historico_RDS)"
+   }
+  ]
+ },
+ {
+  "screen": "NovoRegistroTerceir",
+  "file": "NovoRegistroTerceir.pa.yaml",
+  "lines": 1582,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 51,
+   "Classic": 20,
+   "TypedDataCard": 16,
+   "Image": 2,
+   "Form": 1,
+   "AddMedia": 1
+  },
+  "controlTotal": 91,
+  "dataSources": [
+   "servicosterceirizados",
+   "servicosterceirizados_for"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormNovoTercei",
+    "dataSource": "servicosterceirizados",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "FormNovoTercei",
+    "type": "Form",
+    "label": "FormNovoTercei",
+    "prop": "OnSuccess",
+    "code": "Back();Notify(\"Registro inserido com sucesso\",NotificationType.Success)"
+   },
+   {
+    "control": "Button7",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormNovoTercei)"
+   }
+  ]
+ },
+ {
+  "screen": "Novo_CheckList_Veicular",
+  "file": "Novo_CheckList_Veicular.pa.yaml",
+  "lines": 1523,
+  "background": "RGBA(234, 234, 234, 1)",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Text": 52,
+   "TypedDataCard": 16,
+   "TextInput": 12,
+   "Button": 10,
+   "Label": 9,
+   "GroupContainer": 7,
+   "Rectangle": 4,
+   "Form": 2,
+   "Gallery": 2,
+   "DropDown": 2,
+   "Radio": 1,
+   "ComboBox": 1,
+   "DatePicker": 1,
+   "Attachments": 1
+  },
+  "controlTotal": 120,
+  "dataSources": [
+   "CheckList_Veicular",
+   "controle_veiculo"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "openAddCar",
+   "openCheckList",
+   "openHistorico",
+   "openVehicles"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form4",
+    "dataSource": "CheckList_Veicular",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "Form5",
+    "dataSource": "controle_veiculo",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "Gallery13",
+    "items": "Sort(Filter(controle_veiculo, xstatus <> \"Inativo\", filial = varfilial), 'Data de Criação', SortOrder.Descending)"
+   },
+   {
+    "name": "Gallery14",
+    "items": "Sort(Filter(CheckList_Veicular, nome_check = varnome), data_check, SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "ButtonCanvas26_2",
+    "type": "Button",
+    "label": "\"Checklist\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({openCheckList: true}) ; NewForm(Form4)"
+   },
+   {
+    "control": "ButtonCanvas26_3",
+    "type": "Button",
+    "label": "\"Cadastro de Veículos\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({openAddCar: true}) ; NewForm(Form5)"
+   },
+   {
+    "control": "ButtonCanvas31",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form5) ; UpdateContext({openAddCar:false})"
+   }
+  ]
+ },
+ {
+  "screen": "PCP_ANTIGO",
+  "file": "PCP_ANTIGO.pa.yaml",
+  "lines": 7206,
+  "background": "telaSSMA",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 241,
+   "Classic": 76,
+   "TypedDataCard": 70,
+   "Image": 18,
+   "Gallery": 4,
+   "Rectangle": 4,
+   "Form": 2,
+   "Attachments": 2
+  },
+  "controlTotal": 417,
+  "dataSources": [
+   "PF e IQ",
+   "PF e IQ - 2024",
+   "Prod_Avaliacao_Final"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "a2023",
+   "a2024"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form_ComercialSLZ_1",
+    "dataSource": "'PF e IQ'",
+    "item": "GaleriaComercialSLZ_1.Selected",
+    "default": "FormMode.View"
+   },
+   {
+    "name": "Form_ComercialSLZ_14",
+    "dataSource": "'PF e IQ - 2024'",
+    "item": "GaleriaComercialSLZ_15.Selected",
+    "default": "FormMode.View"
+   }
+  ],
+  "galleries": [
+   {
+    "name": "GaleriaComercialSLZ_1",
+    "items": "If(\n    checkpcp_1.Value = false,\n    Sort(\n        Search(\n            'PF e IQ',\n            pesquisaos_1.Text,\n            Title,\n            Filial,\n            Data,\n            DataInspeção\n        ),\n        Criado,\n        SortOrder.Descending\n    ),\n    Sort(\n        Search(\n            Filter(\n                'PF e IQ',\n                \n                DataInspeção = Blank()\n            ),\n            pesquisaos_1.Text,\n            Title,\n            Filial,\n            Data,\n            DataInspeção\n        ),\n        Criado,\n        SortOrder.Descending\n    )\n)"
+   },
+   {
+    "name": "Gallery6_1",
+    "items": "GaleriaComercialSLZ_1.Selected.Anexos"
+   },
+   {
+    "name": "GaleriaComercialSLZ_15",
+    "items": "If(\n    checkpcp_15.Value = false,\n    Sort(\n        Search(\n            Filter(\n                'PF e IQ - 2024',Filial = varfilial\n            ),\n            pesquisaos_15.Text,\n            Title,\n            Filial,\n            Data,\n            DataInspeção\n        ),\n        Criado,\n        SortOrder.Descending\n    ),\n    Sort(\n        Search(\n            Filter(\n                'PF e IQ - 2024',\n                DataInspeção = Blank(),Filial = varfilial\n            ),\n            pesquisaos_15.Text,\n            Title,\n            Filial,\n            Data,\n            DataInspeção\n        ),\n        Criado,\n        SortOrder.Descending\n    )\n)"
+   },
+   {
+    "name": "Gallery6_15",
+    "items": "GaleriaComercialSLZ_15.Selected.Anexos"
+   }
+  ],
+  "actions": [
+   {
+    "control": "GaleriaComercialSLZ_1",
+    "type": "Gallery",
+    "label": "GaleriaComercialSLZ_1",
+    "prop": "OnSelect",
+    "code": "EditForm(Form_ComercialSLZ_1)"
+   },
+   {
+    "control": "GaleriaComercialSLZ_15",
+    "type": "Gallery",
+    "label": "GaleriaComercialSLZ_15",
+    "prop": "OnSelect",
+    "code": "EditForm(Form_ComercialSLZ_14)"
+   }
+  ]
+ },
+ {
+  "screen": "PendentesdeRetorno",
+  "file": "PendentesdeRetorno.pa.yaml",
+  "lines": 282,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 7,
+   "Image": 4,
+   "Rectangle": 2,
+   "Classic": 2,
+   "Gallery": 1
+  },
+  "controlTotal": 16,
+  "dataSources": [
+   "servicosterceirizados"
+  ],
+  "flows": [],
+  "navTargets": [
+   "AtualizacaoPendentes",
+   "ControleTerceirizado"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "class"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "gal_pendentes",
+    "items": "If(\n    class = true,\n    Sort(\n        Search(\n            Filter(\n                servicosterceirizados,\n                IsBlank(Data_retorno) And IsBlank(xdataretorno),Unidade = varfilial\n            ),\n            pesquisapendentes.Text,\n            N_OR,\n            Título\n        ),\n        'Data de Criação',\n        SortOrder.Descending\n    ),\n    Sort(\n        Search(\n            Filter(\n                servicosterceirizados,\n                IsBlank(Data_retorno) And IsBlank(xdataretorno),Unidade = varfilial\n            ),\n            pesquisapendentes.Text,\n            N_OR,\n            Título\n        ),\n        'Data de Criação',\n        SortOrder.Ascending\n    )\n)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "gal_pendentes",
+    "type": "Gallery",
+    "label": "gal_pendentes",
+    "prop": "OnSelect",
+    "code": "Navigate(AtualizacaoPendentes);EditForm(FormAtualizacaoPendet)"
+   },
+   {
+    "control": "Image1_49",
+    "type": "Image",
+    "label": "Image1_49",
+    "prop": "OnSelect",
+    "code": "Navigate(ControleTerceirizado)"
+   }
+  ]
+ },
+ {
+  "screen": "PeritagemFin_Temporizado",
+  "file": "PeritagemFin_Temporizado.pa.yaml",
+  "lines": 41,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Image": 1,
+   "Label": 1
+  },
+  "controlTotal": 2,
+  "dataSources": [],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": []
+ },
+ {
+  "screen": "PeritagemFin_opicional",
+  "file": "PeritagemFin_opicional.pa.yaml",
+  "lines": 3540,
+  "background": "t",
+  "onVisible": "NewForm(FormSensorOpc)",
+  "onHidden": "",
+  "controls": {
+   "Label": 111,
+   "TypedDataCard": 37,
+   "Classic": 37,
+   "Button": 6,
+   "DropDown": 5,
+   "Text": 5,
+   "Image": 2,
+   "Form": 1
+  },
+  "controlTotal": 204,
+  "dataSources": [
+   "Prod_Avaliacao_Final_Opc"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "form",
+   "pt100e",
+   "pt100t"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormSensorOpc",
+    "dataSource": "Prod_Avaliacao_Final_Opc",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": []
+ },
+ {
+  "screen": "QRCodeLaudos",
+  "file": "QRCodeLaudos.pa.yaml",
+  "lines": 660,
+  "background": "Fundo",
+  "onVisible": "UpdateContext({img: false})",
+  "onHidden": "",
+  "controls": {
+   "Button": 13,
+   "Text": 7,
+   "Rectangle": 2,
+   "GroupContainer": 2,
+   "TextInput": 2,
+   "NumberInput": 2,
+   "Gallery": 1,
+   "Image": 1,
+   "Label": 1,
+   "HtmlViewer": 1,
+   "Classic": 1,
+   "PDFViewer": 1,
+   "Progress": 1
+  },
+  "controlTotal": 35,
+  "dataSources": [
+   "Credenciaiss",
+   "Laudos",
+   "Lista Auxiliar - Clientes Medro",
+   "Relatório"
+  ],
+  "flows": [
+   "gerarlinkLaudo"
+  ],
+  "navTargets": [
+   "SELEC_COD"
+  ],
+  "globalVars": [
+   "linkFinalQR",
+   "varPDF"
+  ],
+  "contextVars": [
+   "acess_pdf",
+   "carr_pdf",
+   "gerar",
+   "img",
+   "reset",
+   "visu",
+   "xfilial"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gallery12",
+    "items": "If(\n    //São Luís ---------------------------------------------------------------\n    IsBlank(Dropdown6.Selected) And xfilial = \"slz\",\n    If(\n    // Se ambos nmrinicial e nmrfinal estiverem preenchidos, filtra por intervalo\n        !IsBlank(nmrinicial.Value) && !IsBlank(nmrfinal.Value),\n    // → Filtro com intervalo\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    Filial = \"São Luís\",\n                    'Classe Laudo' = \"Final\",\n                    OS_semSigla_numero >= Value(nmrinicial.Value) && OS_semSigla_numero <= Value(nmrfinal.Value)\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        ),\n    // → Caso contrário, sem filtro de intervalo\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    'Classe Laudo' = \"Final\",\n                    Filial = \"São Luís\"\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        )\n    ),\n// Caso haja um cliente selecionado\n    !IsBlank(Dropdown6.Selected) And xfilial = \"slz\",\n    If(\n    // Se ambos nmrinicial e nmrfinal estiverem preenchidos, filtra por intervalo\n        !IsBlank(nmrinicial.Value) && !IsBlank(nmrfinal.Value),\n    // → Filtro com intervalo + cliente\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    Filial = \"São Luís\",\n                    'Classe Laudo' = \"Final\",\n                    Cliente = Dropdown6.Selected.Nome,\n                    OS_semSigla_numero >= Value(nmrinicial.Value) && OS_semSigla_numero <= Value(nmrfinal.Value)\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        ),\n    // → Caso contrário, sem filtro de intervalo, mas com cliente\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    Filial = \"São Luís\",\n                    'Classe Laudo' = \"Final\",\n                    Cliente = Dropdown6.Selected.Nome\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        )\n    ),\n    //Parauapebas ---------------------------------------------------------------\n    IsBlank(Dropdown6.Selected) And xfilial = \"prp\",\n    If(\n    // Se ambos nmrinicial e nmrfinal estiverem preenchidos, filtra por intervalo\n        !IsBlank(nmrinicial.Value) && !IsBlank(nmrfinal.Value),\n    // → Filtro com intervalo\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    Filial = \"Parauapebas\",\n                    'Classe Laudo' = \"Final\",\n                    OS_semSigla_numero >= Value(nmrinicial.Value) && OS_semSigla_numero <= Value(nmrfinal.Value)\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        ),\n    // → Caso contrário, sem filtro de intervalo\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    'Classe Laudo' = \"Final\",\n                    Filial = \"Parauapebas\"\n                    \n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        )\n    ),\n// Caso haja um cliente selecionado\n    !IsBlank(Dropdown6.Selected) And xfilial = \"prp\",\n    If(\n    // Se ambos nmrinicial e nmrfinal estiverem preenchidos, filtra por intervalo\n        !IsBlank(nmrinicial.Value) && !IsBlank(nmrfinal.Value),\n    // → Filtro com intervalo + cliente\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    Filial = \"Parauapebas\",\n                    'Classe Laudo' = \"Final\",\n                    Cliente = Dropdown6.Selected.Nome,\n                    OS_semSigla_numero >= Value(nmrinicial.Value) && OS_semSigla_numero <= Value(nmrfinal.Value)\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        ),\n    // → Caso contrário, sem filtro de intervalo, mas com cliente\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    'Classe Laudo' = \"Final\",\n                    Filial = \"Parauapebas\",\n                    Cliente = Dropdown6.Selected.Nome\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        )\n    ),\n    //Sâo José dos Campos ---------------------------------------------------------------\n    IsBlank(Dropdown6.Selected) And xfilial = \"sjc\",\n    If(\n        !IsBlank(nmrinicial.Value) && !IsBlank(nmrfinal.Value),\n    /* Ambos preenchidos → filtra por intervalo */\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    'Classe Laudo' = \"Final\",\n                    Filial = \"São José dos Campos\",\n                    OS_semSigla_numero >= Value(nmrinicial.Value) && OS_semSigla_numero <= Value(nmrfinal.Value)\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        ),\n    /* Caso contrário → comportamento padrão sem filtro de intervalo */\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    'Classe Laudo' = \"Final\",\n                    Filial = \"São José dos Campos\"\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        )\n    ),\n    //Aveiro ---------------------------------------------------------------\n    IsBlank(Dropdown6.Selected) And xfilial = \"avr\",\n    If(\n        !IsBlank(nmrinicial.Value) && !IsBlank(nmrfinal.Value),\n    /* Ambos preenchidos → filtra por intervalo */\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    'Classe Laudo' = \"Final\",\n                    Filial = \"Aveiro\",\n                    OS_semSigla_numero >= Value(nmrinicial.Value) && OS_semSigla_numero <= Value(nmrfinal.Value)\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        ),\n    /* Caso contrário → comportamento padrão sem filtro de intervalo */\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    'Classe Laudo' = \"Final\",\n                    Filial = \"Aveiro\"\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        )\n    ),\n    //Barcarena ---------------------------------------------------------------\n    IsBlank(Dropdown6.Selected) And xfilial = \"brc\",\n    If(\n        !IsBlank(nmrinicial.Value) && !IsBlank(nmrfinal.Value),\n    /* Ambos preenchidos → filtra por intervalo */\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    'Classe Laudo' = \"Final\",\n                    Filial = \"Barcarena\",\n                    OS_semSigla_numero >= Value(nmrinicial.Value) && OS_semSigla_numero <= Value(nmrfinal.Value)\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        ),\n    /* Caso contrário → comportamento padrão sem filtro de intervalo */\n        Sort(\n            Search(\n                Filter(\n                    Laudos,\n                    !IsBlank(xArquiv),\n                    TipoPatch = \"PCP\",\n                    'Classe Laudo' = \"Final\",\n                    Filial = \"Barcarena\"\n                ),\n                TextInputCanvas6.Value,\n                OS\n            ),\n            OS_semSigla_numero,\n            SortOrder.Ascending\n        )\n    ),\n    Sort(\n        Search(\n            Filter(\n                Laudos,\n                !IsBlank(xArquiv),\n                'Classe Laudo' = \"Final\",\n                TipoPatch = \"PCP\"\n            ),\n            TextInputCanvas6.Value,\n            OS\n        ),\n        OS_semSigla_numero,\n        SortOrder.Ascending\n    )\n)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "ButtonCanvas13_11",
+    "type": "Button",
+    "label": "\"Voltar\"",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   },
+   {
+    "control": "ButtonCanvas13_15",
+    "type": "Button",
+    "label": "\"Gerar PDF\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({carr_pdf:true}); Set( varPDF, PDF( Gallery12, { Orientation: PaperOrientation.Portrait, Size: PaperSize.A4, DPI: 150, Margin: \"10pt 10pt 10pt 10pt\", ExpandContainers: true } ) ) ; Notify(\"PDF Gerado com sucesso!\",NotificationType.Success,2000) ; UpdateContext({carr_pdf:false})"
+   },
+   {
+    "control": "ButtonCanvas13_16",
+    "type": "Button",
+    "label": "\"Gerar PDF Cloud\"",
+    "prop": "OnSelect",
+    "code": "GruposdoOffice365.HttpRequest( \"https://graph.microsoft.com/v1.0/sites/471ed516-b1af-4b60-adb1-e33530b40fd2/drives/b!FtUeR6-xYEutseM1MLQP0luN9WQa7dVAm7IrWRchyFnVHstz2SkdR6IH4JOZ3kJr/root:\" & EncodeUrl( \"/QRCODE/QRCODE_\" & xfilial & \"_\" & Substitute(varnome & \"_\" & TextInputCanvas6_1.Value,\" \",\"\") & \".pdf\" ) & \":/content\", \"PUT\", varPDF ) ; Set( linkFinalQR, gerarlinkLaudo.Run( \"/Doc Tcnicos/QRCODE"
+   }
+  ]
+ },
+ {
+  "screen": "Rel_Balanceamento",
+  "file": "Rel_Balanceamento.pa.yaml",
+  "lines": 280,
+  "background": "RGBA(234, 234, 234, 1)",
+  "onVisible": "NewForm(Form_Balanc)",
+  "onHidden": "",
+  "controls": {
+   "Text": 8,
+   "GroupContainer": 3,
+   "TypedDataCard": 3,
+   "Button": 2,
+   "Form": 1,
+   "TextInput": 1,
+   "Image": 1,
+   "AddMedia": 1,
+   "Attachments": 1
+  },
+  "controlTotal": 21,
+  "dataSources": [
+   "Balanceamento",
+   "Relatório"
+  ],
+  "flows": [],
+  "navTargets": [
+   "SELEC_COD"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form_Balanc",
+    "dataSource": "Balanceamento",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Form_Balanc",
+    "type": "Form",
+    "label": "Form_Balanc",
+    "prop": "OnSuccess",
+    "code": "Notify(\"Dados enviados com sucesso!\", NotificationType.Success) ; ResetForm(Form_Balanc)"
+   },
+   {
+    "control": "ButtonCanvas35",
+    "type": "Button",
+    "label": "\"Enviar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_Balanc)"
+   },
+   {
+    "control": "ButtonCanvas37",
+    "type": "Button",
+    "label": "\"Voltar\"",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   }
+  ]
+ },
+ {
+  "screen": "Rel_Foto_Escolha",
+  "file": "Rel_Foto_Escolha.pa.yaml",
+  "lines": 65,
+  "background": "Fundo",
+  "onVisible": "Refresh(CIPA_2026)",
+  "onHidden": "UpdateContext({rdsmot:false,rdsaux:false})",
+  "controls": {
+   "Button": 2,
+   "Image": 1,
+   "Text": 1
+  },
+  "controlTotal": 4,
+  "dataSources": [
+   "CIPA_2026",
+   "Relatório"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Rel_Foto_Lista",
+   "Rel_Foto_Lista_PC",
+   "Rel_Foto_parametro",
+   "SELEC_COD"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "rdsmot"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Image1_11",
+    "type": "Image",
+    "label": "Image1_11",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   },
+   {
+    "control": "ButtonCanvas36",
+    "type": "Button",
+    "label": "\"Galeria de Fotos\"",
+    "prop": "OnSelect",
+    "code": "If(Host.OSType = \"Android\" Or \"IOS\", Navigate(Rel_Foto_Lista,ScreenTransition.Cover), Navigate(Rel_Foto_Lista_PC,ScreenTransition.Cover))"
+   },
+   {
+    "control": "ButtonCanvas36_1",
+    "type": "Button",
+    "label": "\"Novo Relatório\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Rel_Foto_parametro,ScreenTransition.Cover)"
+   }
+  ]
+ },
+ {
+  "screen": "Rel_Foto_Lista",
+  "file": "Rel_Foto_Lista.pa.yaml",
+  "lines": 447,
+  "background": "//Fundo",
+  "onVisible": "exibir_imagens_sharepoint.Run(varfilial, \"\", \"\", \"\") ; ClearCollect( ColFotosPeritagemClientes, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, \"\",\"\", \"\").fotosjson)) )",
+  "onHidden": "UpdateContext({rdsmot:false,rdsaux:false})",
+  "controls": {
+   "Image": 6,
+   "Gallery": 4,
+   "Rectangle": 4,
+   "GroupContainer": 3,
+   "Label": 3,
+   "Button": 3,
+   "Text": 2,
+   "TextInput": 2
+  },
+  "controlTotal": 27,
+  "dataSources": [],
+  "flows": [
+   "Exibir_Imagem",
+   "exibir_imagens_sharepoint"
+  ],
+  "navTargets": [
+   "Rel_Foto_Escolha"
+  ],
+  "globalVars": [
+   "varcliente3",
+   "varos3",
+   "vartipo2",
+   "vartipo3"
+  ],
+  "contextVars": [
+   "rdsmot",
+   "showImage",
+   "showImages",
+   "varFotoBase64",
+   "viewImage",
+   "viewImages"
+  ],
+  "patchTargets": [],
+  "collections": [
+   "ColArquivos",
+   "ColFotos2",
+   "ColFotosPeritagem",
+   "ColFotosPeritagemClientes"
+  ],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "GalleryClientes",
+    "items": "//ColFotosPeritagemClientes\nSort(Filter(ColFotosPeritagemClientes, TextInputCanvas9.Value in Value.Nome), SortOrder.Ascending)"
+   },
+   {
+    "name": "GalleryPeritagem",
+    "items": "Sort(Filter(ColFotosPeritagem, TextInputCanvas10.Value in Value.Nome), SortOrder.Ascending)"
+   },
+   {
+    "name": "GalleryOSFiles",
+    "items": "ColArquivos"
+   },
+   {
+    "name": "Gallery16",
+    "items": "ColFotos2"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Image1_12",
+    "type": "Image",
+    "label": "Image1_12",
+    "prop": "OnSelect",
+    "code": "Navigate(Rel_Foto_Escolha,ScreenTransition.Cover)"
+   },
+   {
+    "control": "GalleryClientes",
+    "type": "Gallery",
+    "label": "GalleryClientes",
+    "prop": "OnSelect",
+    "code": "Set(varcliente3, ThisItem.Value.Nome) ; exibir_imagens_sharepoint.Run(varfilial, varcliente3, \"\", \"\") ; ClearCollect( ColFotosPeritagem, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente3,\"\", \"\").fotosjson)) )"
+   },
+   {
+    "control": "GalleryPeritagem",
+    "type": "Gallery",
+    "label": "GalleryPeritagem",
+    "prop": "OnSelect",
+    "code": "UpdateContext({showImage: true}) ; Set(varos3, ThisItem.Value.Nome) ; Set(vartipo2, \"\") ; exibir_imagens_sharepoint.Run(varfilial, varcliente3, varos3, vartipo2) ; ClearCollect( ColArquivos, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente3,varos3, vartipo2).fotosjson)) ) ; UpdateContext({viewImages:false})"
+   },
+   {
+    "control": "ButtonCanvas39",
+    "type": "Button",
+    "label": "\"Fechar\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({showImage: false}) ; UpdateContext({showImages: true}) ; UpdateContext({viewImage:false}) ; ClearCollect(ColFotos2, [])"
+   },
+   {
+    "control": "GalleryOSFiles",
+    "type": "Gallery",
+    "label": "GalleryOSFiles",
+    "prop": "OnSelect",
+    "code": "Set(vartipo3, ThisItem.Value.Nome) ; exibir_imagens_sharepoint.Run(varfilial, varcliente3, varos3, vartipo3) ; ClearCollect( ColFotos2, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente3,varos3, vartipo3).fotosjson)) ) ; UpdateContext({viewImages: true}) ; Clear(colImagens) ; ForAll( ColFotos2, Collect( colImagens, { ID: Value.Id, Imagem: \"data:image/jpeg;base64,\" & Exibir_Imag"
+   },
+   {
+    "control": "Gallery16",
+    "type": "Gallery",
+    "label": "Gallery16",
+    "prop": "OnSelect",
+    "code": "UpdateContext({viewImage:true}) ; UpdateContext({varFotoBase64: Exibir_Imagem.Run(ThisItem.Value.Id).imgbase64})"
+   }
+  ]
+ },
+ {
+  "screen": "Rel_Foto_Lista_PC",
+  "file": "Rel_Foto_Lista_PC.pa.yaml",
+  "lines": 417,
+  "background": "'Logo Kairós azul em '",
+  "onVisible": "exibir_imagens_sharepoint.Run(varfilial, \"\", \"\", \"\") ; ClearCollect( ColFotosPeritagemClientesPC, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, \"\",\"\", \"\").fotosjson)) )",
+  "onHidden": "",
+  "controls": {
+   "GroupContainer": 7,
+   "ModernText": 5,
+   "Image": 5,
+   "Gallery": 3,
+   "Label": 2,
+   "ModernTextInput": 2,
+   "Button": 1,
+   "ModernRadio": 1
+  },
+  "controlTotal": 26,
+  "dataSources": [],
+  "flows": [
+   "Exibir_Imagem",
+   "Imagens_JSON",
+   "exibir_imagens_sharepoint"
+  ],
+  "navTargets": [
+   "Rel_Foto_Escolha"
+  ],
+  "globalVars": [
+   "varcliente3",
+   "varos3",
+   "vartipo2",
+   "vartipo3"
+  ],
+  "contextVars": [
+   "getFile",
+   "showImagePC",
+   "viewImagePC",
+   "viewImages",
+   "viewImagesPC"
+  ],
+  "patchTargets": [],
+  "collections": [
+   "ColArquivosPC",
+   "ColFotosPC",
+   "ColFotosPeritagemClientesPC",
+   "ColFotosPeritagemPC"
+  ],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gallery15",
+    "items": "Sort(Filter(ColFotosPeritagemClientesPC, TextInput7.Text in Value.Nome), SortOrder.Ascending)"
+   },
+   {
+    "name": "Gallery17",
+    "items": "Sort(Filter(ColFotosPeritagemPC, TextInput7_1.Text in Value.Nome), SortOrder.Ascending)"
+   },
+   {
+    "name": "Gallery18",
+    "items": "ColFotosPC"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Gallery15",
+    "type": "Gallery",
+    "label": "Gallery15",
+    "prop": "OnSelect",
+    "code": "Set(varcliente3, ThisItem.Value.Nome) ; exibir_imagens_sharepoint.Run(varfilial, varcliente3, \"\", \"\") ; ClearCollect( ColFotosPeritagemPC, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente3,\"\", \"\").fotosjson)) )"
+   },
+   {
+    "control": "ButtonCanvas38",
+    "type": "Button",
+    "label": "\"Voltar\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Rel_Foto_Escolha,ScreenTransition.Cover)"
+   },
+   {
+    "control": "Gallery17",
+    "type": "Gallery",
+    "label": "Gallery17",
+    "prop": "OnSelect",
+    "code": "UpdateContext({showImagePC: true}) ; Set(varos3, ThisItem.Value.Nome) ; Set(vartipo2, \"\") ; exibir_imagens_sharepoint.Run(varfilial, varcliente3, varos3, vartipo2) ; ClearCollect( ColArquivosPC, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente3,varos3, vartipo2).fotosjson)) ) ; UpdateContext({viewImagesPC:false})"
+   },
+   {
+    "control": "Radio1",
+    "type": "ModernRadio",
+    "label": "Radio1",
+    "prop": "OnChange",
+    "code": "Set(vartipo3, Radio1.Selected.Value.Nome) ; exibir_imagens_sharepoint.Run(varfilial, varcliente3, varos3, vartipo3) ; //UpdateContext({getFile: Imagens_JSON.Run(varfilial; varcliente3; varos3; vartipo3).foto_json}) //;; ClearCollect( ColFotosPC, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente3,varos3, vartipo3).fotosjson)) ) ; Clear(colImagens) ; ForAll( ColFotosPC, Collect( "
+   }
+  ]
+ },
+ {
+  "screen": "Rel_Foto_Per",
+  "file": "Rel_Foto_Per.pa.yaml",
+  "lines": 344,
+  "background": "Fundo",
+  "onVisible": "Refresh(CIPA_2026)",
+  "onHidden": "UpdateContext({rdsmot:false,rdsaux:false})",
+  "controls": {
+   "Image": 5,
+   "Text": 2,
+   "Label": 2,
+   "AddMedia": 1,
+   "GroupContainer": 1,
+   "Gallery": 1,
+   "Button": 1
+  },
+  "controlTotal": 13,
+  "dataSources": [
+   "CIPA_2026",
+   "Credenciaiss",
+   "Relatorio_Fotografico",
+   "Relatório"
+  ],
+  "flows": [
+   "Imagens_JSON",
+   "salvarfotosperitagem"
+  ],
+  "navTargets": [
+   "Login_1",
+   "Rel_Foto_parametro"
+  ],
+  "globalVars": [
+   "varFluxo"
+  ],
+  "contextVars": [
+   "rdsmot"
+  ],
+  "patchTargets": [
+   "Relatorio_Fotografico"
+  ],
+  "collections": [
+   "colAllFotos",
+   "colLote",
+   "colRelatorioLinha"
+  ],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gallery16_1",
+    "items": "Sort(colFilaFotos,Data,SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Image1_10",
+    "type": "Image",
+    "label": "Image1_10",
+    "prop": "OnSelect",
+    "code": "Clear(colFilaFotos) ; Clear(colFilaFotosFlow) ; Set(varFluxo, false) ; Navigate(Rel_Foto_parametro) //Navigate(Login_1)"
+   },
+   {
+    "control": "AddMediaButton1",
+    "type": "AddMedia",
+    "label": "AddMediaButton1",
+    "prop": "OnChange",
+    "code": "With( { j: JSON(UploadedImage1.Image, JSONFormat.IncludeBinaryData) }, Collect( colFilaFotos, { Id: GUID(), Cliente: varCliente, OS: varOS, Progresso: 0, Data: Now(), Filial: varfilial, Tipo: DropdownCanvas3.Selected.Value, DataUri: Mid(j, 2, Len(j) - 2), // remove as aspas do JSON \"...\" Status: \"Pendente\", MsgErro: \"\" } ) ); Notify(\"Foto adicionada na fila.\", NotificationType.Success)"
+   },
+   {
+    "control": "Image97_1",
+    "type": "Image",
+    "label": "Image97_1",
+    "prop": "OnSelect",
+    "code": "Remove(colFilaFotos, ThisItem)"
+   },
+   {
+    "control": "ButtonCanvas35_1",
+    "type": "Button",
+    "label": "\"Subir Imagens\"",
+    "prop": "OnSelect",
+    "code": "// 1) Pega até 10 fotos pendentes ClearCollect( colLote, FirstN( Filter(colFilaFotos, Status = \"Pendente\"), 10 ) ); If( CountRows(colLote) = 0, Notify(\"Não há fotos pendentes.\", NotificationType.Information), false ); // 2) Marca como Enviando ForAll( colLote, UpdateIf( colFilaFotos, Id = ThisRecord.Id, { Status: \"Enviando\", MsgErro: \"\" } ) ); // 3) Envia 1 por 1 chamando o Flow (DATA URI) /* ForA"
+   }
+  ]
+ },
+ {
+  "screen": "Rel_Foto_parametro",
+  "file": "Rel_Foto_parametro.pa.yaml",
+  "lines": 736,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "UpdateContext({rdsmot:false,rdsaux:false})",
+  "controls": {
+   "Text": 24,
+   "ComboBoxDataField": 7,
+   "Button": 5,
+   "GroupContainer": 5,
+   "TextInput": 3,
+   "ComboBox": 1,
+   "Image": 1,
+   "Classic": 1,
+   "DropDown": 1,
+   "Label": 1
+  },
+  "controlTotal": 49,
+  "dataSources": [
+   "Credenciaiss",
+   "Lista Auxiliar - Clientes Medro",
+   "Relatorio_Fotografico",
+   "Relatório"
+  ],
+  "flows": [
+   "exibir_imagens_sharepoint"
+  ],
+  "navTargets": [
+   "Login",
+   "Login_1",
+   "Rel_Foto_Escolha",
+   "Rel_Foto_Per"
+  ],
+  "globalVars": [
+   "NomeCliente",
+   "NomeTipo",
+   "NumeroOS",
+   "varCliente",
+   "varClienteRaw",
+   "varFluxo",
+   "varOS",
+   "varOSRaw",
+   "varSessaoId",
+   "varcliente2",
+   "varos2",
+   "vartipo"
+  ],
+  "contextVars": [
+   "rdsmot",
+   "varFluxo"
+  ],
+  "patchTargets": [
+   "Relatorio_Fotografico"
+  ],
+  "collections": [
+   "colFilaFotosFlow",
+   "colRelatorioLinha"
+  ],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "DataCardValue62_10",
+    "type": "ComboBox",
+    "label": "DataCardValue62_10",
+    "prop": "OnChange",
+    "code": "Set(NomeCliente, DataCardValue62_10.Selected.Title)"
+   },
+   {
+    "control": "ButtonCanvas34",
+    "type": "Button",
+    "label": "\"Iniciar\"",
+    "prop": "OnSelect",
+    "code": "Set(varClienteRaw, Trim(DataCardValue62_10.Selected.Nome)); Set(varOSRaw, Trim(TextCanvas18.Text)); Set( varCliente, Substitute( Substitute( Substitute( Substitute( Substitute( Substitute(varClienteRaw, \"/\", \"-\"), \"\\\", \"-\" ), \":\", \"-\" ), \"*\", \"\" ), \"?\", \"\" ), \"|\", \"\" ) ); // Sanitiza nome da OS Set( varOS, Substitute( Substitute( Substitute( Substitute( Substitute( Substitute(varOSRaw, \"/\", \"-\"), "
+   },
+   {
+    "control": "Image1_9",
+    "type": "Image",
+    "label": "Image1_9",
+    "prop": "OnSelect",
+    "code": "//Navigate(Login) //Navigate(Login_1) Navigate(Rel_Foto_Escolha)"
+   },
+   {
+    "control": "DropdownCanvas3",
+    "type": "DropDown",
+    "label": "DropdownCanvas3",
+    "prop": "OnChange",
+    "code": "Set(NomeTipo, DropdownCanvas3.Selected.Value)"
+   },
+   {
+    "control": "ButtonCanvas42",
+    "type": "Button",
+    "label": "\"Adicionar\"",
+    "prop": "OnSelect",
+    "code": "Set(varcliente2, DataCardValue62_10.Selected.Title) ; Set(varos2, TextCanvas18.Text) ; Set(vartipo, DropdownCanvas3.Selected.Value) ; exibir_imagens_sharepoint.Run(varfilial, varcliente2, varos2, vartipo) ; UpdateContext({varFluxo:true}) ; ClearCollect( colFilaFotosFlow, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente2,varos2, vartipo).fotosjson)) ) ; ClearCollect( colRelator"
+   },
+   {
+    "control": "ButtonCanvas42_1",
+    "type": "Button",
+    "label": "\"Adicionar\"",
+    "prop": "OnSelect",
+    "code": "Set(varcliente2, DataCardValue62_10.Selected.Title) ; Set(varos2, TextCanvas18.Text) ; Set(vartipo, DropdownCanvas3.Selected.Value) ; exibir_imagens_sharepoint.Run(varfilial, varcliente2, varos2, vartipo) ; Set(varFluxo, true) ; ClearCollect( colFilaFotosFlow, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente2,varos2, vartipo).fotosjson)) ) ; ClearCollect( colRelatorioLinha, Pa"
+   },
+   {
+    "control": "ButtonCanvas42_2",
+    "type": "Button",
+    "label": "\"Adicionar\"",
+    "prop": "OnSelect",
+    "code": "Set(varcliente2, DataCardValue62_10.Selected.Title) ; Set(varos2, TextCanvas18.Text) ; Set(vartipo, DropdownCanvas3.Selected.Value) ; exibir_imagens_sharepoint.Run(varfilial, varcliente2, varos2, vartipo) ; Set(varFluxo, true) ; ClearCollect( colFilaFotosFlow, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente2,varos2, vartipo).fotosjson)) ) ; ClearCollect( colRelatorioLinha, Pa"
+   },
+   {
+    "control": "ButtonCanvas42_3",
+    "type": "Button",
+    "label": "\"Adicionar\"",
+    "prop": "OnSelect",
+    "code": "Set(varcliente2, DataCardValue62_10.Selected.Title) ; Set(varos2, TextCanvas18.Text) ; Set(vartipo, DropdownCanvas3.Selected.Value) ; exibir_imagens_sharepoint.Run(varfilial, varcliente2, varos2, vartipo) ; Set(varFluxo, true) ; ClearCollect( colFilaFotosFlow, Table(ParseJSON('exibir_imagens_sharepoint'.Run(varfilial, varcliente2,varos2, vartipo).fotosjson)) ) ; ClearCollect( colRelatorioLinha, Pa"
+   },
+   {
+    "control": "TextInputCanvas11",
+    "type": "TextInput",
+    "label": "TextInputCanvas11",
+    "prop": "OnChange",
+    "code": "Set(NumeroOS, TextInputCanvas11.Value)"
+   }
+  ]
+ },
+ {
+  "screen": "Relatorio",
+  "file": "Relatorio.pa.yaml",
+  "lines": 1039,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 32,
+   "Classic": 17,
+   "TypedDataCard": 7,
+   "Image": 1,
+   "Form": 1,
+   "Attachments": 1
+  },
+  "controlTotal": 59,
+  "dataSources": [
+   "Credenciaiss",
+   "Relatório"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form_Relatorio",
+    "dataSource": "Relatório",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Image1_63",
+    "type": "Image",
+    "label": "Image1_63",
+    "prop": "OnSelect",
+    "code": "Back();ResetForm(Form_Relatorio)"
+   },
+   {
+    "control": "Form_Relatorio",
+    "type": "Form",
+    "label": "Form_Relatorio",
+    "prop": "OnSuccess",
+    "code": "Back();Notify(\"Relatório enviado com sucesso!\",NotificationType.Success,2000)"
+   },
+   {
+    "control": "Button14",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_Relatorio)"
+   }
+  ]
+ },
+ {
+  "screen": "Req_RDS",
+  "file": "Req_RDS.pa.yaml",
+  "lines": 1437,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 45,
+   "Classic": 18,
+   "TypedDataCard": 14,
+   "Image": 1,
+   "Form": 1,
+   "Attachments": 1
+  },
+  "controlTotal": 80,
+  "dataSources": [
+   "Credenciaiss",
+   "Lista Auxiliar - Clientes Medro",
+   "RDS",
+   "RDS-Managements",
+   "controle_veiculo"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "formRDS",
+    "dataSource": "'RDS-Managements'",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Image1_55",
+    "type": "Image",
+    "label": "Image1_55",
+    "prop": "OnSelect",
+    "code": "Back();ResetForm(formRDS)"
+   },
+   {
+    "control": "formRDS",
+    "type": "Form",
+    "label": "formRDS",
+    "prop": "OnSuccess",
+    "code": "Notify(\"RDS enviada com sucesso\",NotificationType.Success,2000);Back()"
+   },
+   {
+    "control": "Button12",
+    "type": "Classic",
+    "label": "\"Enviar RDS\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(formRDS)"
+   }
+  ]
+ },
+ {
+  "screen": "Requisição RDS",
+  "file": "Requisi+º+úo RDS.pa.yaml",
+  "lines": 87,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Classic": 2,
+   "Label": 1,
+   "Image": 1
+  },
+  "controlTotal": 4,
+  "dataSources": [
+   "RDS"
+  ],
+  "flows": [],
+  "navTargets": [
+   "T_Ferramentaria"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button1_74",
+    "type": "Classic",
+    "label": "\"Ordens de Serviços\"",
+    "prop": "OnSelect",
+    "code": "Navigate(T_Ferramentaria)"
+   },
+   {
+    "control": "Button1_75",
+    "type": "Classic",
+    "label": "\"Requisição RDS\"",
+    "prop": "OnSelect",
+    "code": "Navigate(T_Ferramentaria)"
+   }
+  ]
+ },
+ {
+  "screen": "Requisição_PCP",
+  "file": "Requisi+º+úo_PCP.pa.yaml",
+  "lines": 416,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "NewForm(FormRequisicao)",
+  "controls": {
+   "Text": 12,
+   "TextInput": 5,
+   "TypedDataCard": 4,
+   "Label": 2,
+   "Rectangle": 2,
+   "Button": 2,
+   "GroupContainer": 1,
+   "Gallery": 1,
+   "Image": 1,
+   "Form": 1,
+   "Toggle": 1
+  },
+  "controlTotal": 32,
+  "dataSources": [
+   "Base_Medro",
+   "Requisicao"
+  ],
+  "flows": [],
+  "navTargets": [
+   "SELEC_COD"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormRequisicao",
+    "dataSource": "Requisicao",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "GaleriaRequisição",
+    "items": "Sort(Search(Filter(Requisicao,xStatus = \"Sim\",xFilial = varfilial),DataCardValue79_2.Value,OS),'Data de Criação',SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Image1_93",
+    "type": "Image",
+    "label": "Image1_93",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   },
+   {
+    "control": "FormRequisicao",
+    "type": "Form",
+    "label": "FormRequisicao",
+    "prop": "OnSuccess",
+    "code": "NewForm(FormRequisicao)"
+   },
+   {
+    "control": "ButtonCanvas12",
+    "type": "Button",
+    "label": "\"Confirmar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormRequisicao)"
+   },
+   {
+    "control": "ButtonCanvas15",
+    "type": "Button",
+    "label": "\"Excluir\"",
+    "prop": "OnSelect",
+    "code": "Remove(Requisicao,GaleriaRequisição.Selected)"
+   }
+  ]
+ },
+ {
+  "screen": "SELEC_COD",
+  "file": "SELEC_COD.pa.yaml",
+  "lines": 468,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Classic": 15,
+   "Label": 1,
+   "Image": 1,
+   "GroupContainer": 1
+  },
+  "controlTotal": 18,
+  "dataSources": [
+   "Balanceamento",
+   "Credenciaiss",
+   "Relatório"
+  ],
+  "flows": [],
+  "navTargets": [
+   "AvaliacaoFinal",
+   "COD_GERENCIAMENTO",
+   "ControleTerceirizado",
+   "Controle_Caldeiraria",
+   "DepTecnico",
+   "EntradaTarefa",
+   "EscopoDeManuten",
+   "GerarLink_DPT",
+   "QRCodeLaudos",
+   "Rel_Balanceamento",
+   "Rel_Foto_Escolha",
+   "Requisição_PCP",
+   "SelecaoTrajeto",
+   "T_Ferramentaria",
+   "TelaInicial_Medro_Nova"
+  ],
+  "globalVars": [
+   "Log"
+  ],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Image1_21",
+    "type": "Image",
+    "label": "Image1_21",
+    "prop": "OnSelect",
+    "code": "Navigate('1_Menu')"
+   },
+   {
+    "control": "button_OS__1",
+    "type": "Classic",
+    "label": "\"Ordem de Serviço\"",
+    "prop": "OnSelect",
+    "code": "Navigate(TelaInicial_Medro_Nova,ScreenTransition.Cover,{os:true});Set(Log,\"OS\");"
+   },
+   {
+    "control": "button_avaliacao",
+    "type": "Classic",
+    "label": "\"Avaliação de Equipamentos\"",
+    "prop": "OnSelect",
+    "code": "Navigate(AvaliacaoFinal,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_tarefas",
+    "type": "Classic",
+    "label": "\"Tarefa\"",
+    "prop": "OnSelect",
+    "code": "Navigate(EntradaTarefa,ScreenTransition.Cover);NewForm(TarefaBRC)"
+   },
+   {
+    "control": "button_gerenciamento",
+    "type": "Classic",
+    "label": "\"Gerenciamento\"",
+    "prop": "OnSelect",
+    "code": "Navigate(COD_GERENCIAMENTO,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_ferramenta",
+    "type": "Classic",
+    "label": "\"Ferramentaria\"",
+    "prop": "OnSelect",
+    "code": "Navigate(T_Ferramentaria,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_ferramenta_1",
+    "type": "Classic",
+    "label": "\"Serviços Internos\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Controle_Caldeiraria,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_ferramenta_2",
+    "type": "Classic",
+    "label": "\"Rotas\"",
+    "prop": "OnSelect",
+    "code": "Navigate(SelecaoTrajeto,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_ferramenta_3",
+    "type": "Classic",
+    "label": "\"Controle Terceirizado\"",
+    "prop": "OnSelect",
+    "code": "Navigate(ControleTerceirizado,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_ferramenta_11",
+    "type": "Classic",
+    "label": "\"Registro de requisição\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Requisição_PCP,ScreenTransition.Cover);NewForm(FormRequisicao)"
+   },
+   {
+    "control": "button_ferramenta_12",
+    "type": "Classic",
+    "label": "\"Departamento Técnico\"",
+    "prop": "OnSelect",
+    "code": "Navigate(DepTecnico,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_ferramenta_14",
+    "type": "Classic",
+    "label": "\"Controle de QRCodes\"",
+    "prop": "OnSelect",
+    "code": "Navigate(QRCodeLaudos,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_ferramenta_15",
+    "type": "Classic",
+    "label": "\"Escopo de Manutenção\"",
+    "prop": "OnSelect",
+    "code": "Navigate(EscopoDeManuten,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_ferramenta_16",
+    "type": "Classic",
+    "label": "\"Gerar link relatórios\"",
+    "prop": "OnSelect",
+    "code": "Navigate(GerarLink_DPT,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_peritagem",
+    "type": "Classic",
+    "label": "\"Relatório Fotográfico\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Rel_Foto_Escolha,ScreenTransition.Cover)"
+   },
+   {
+    "control": "button_balanceamento",
+    "type": "Classic",
+    "label": "\"Relatório Balanceamento\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Rel_Balanceamento,ScreenTransition.Cover)"
+   }
+  ]
+ },
+ {
+  "screen": "Screen1",
+  "file": "Screen1.pa.yaml",
+  "lines": 29,
+  "background": "RGBA(234, 234, 234, 1)",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "ModernText": 1
+  },
+  "controlTotal": 1,
+  "dataSources": [
+   "ZB6_Relatorio"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": []
+ },
+ {
+  "screen": "Screen2",
+  "file": "Screen2.pa.yaml",
+  "lines": 324,
+  "background": "RGBA(255, 255, 255, 1)",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "ModernText": 3,
+   "Rectangle": 2,
+   "Image": 2,
+   "AddMedia": 1,
+   "GroupContainer": 1,
+   "Gallery": 1,
+   "ModernDropdown": 1,
+   "Button": 1
+  },
+  "controlTotal": 12,
+  "dataSources": [
+   "Credenciaiss",
+   "Relatorio_Fotografico",
+   "Relatório"
+  ],
+  "flows": [
+   "Imagens_JSON",
+   "salvarfotosperitagem"
+  ],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [
+   "Relatorio_Fotografico"
+  ],
+  "collections": [
+   "colAllFotos",
+   "colLote",
+   "colRelatorioLinha"
+  ],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Gallery20",
+    "items": "Sort(colFilaFotos,Data,SortOrder.Descending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "AddMediaButton1_1",
+    "type": "AddMedia",
+    "label": "\"Adicionar\"",
+    "prop": "OnChange",
+    "code": "With( { j: JSON(UploadedImage1_1.Image, JSONFormat.IncludeBinaryData) }, Collect( colFilaFotos, { Id: GUID(), Cliente: varCliente, OS: varOS, Progresso: 0, Data: Now(), Filial: varfilial, Tipo: DropdownCanvas3.Selected.Value, DataUri: Mid(j, 2, Len(j) - 2), // remove as aspas do JSON \"...\" Status: \"Pendente\", MsgErro: \"\" } ) ); Notify(\"Foto adicionada na fila.\", NotificationType.Success)"
+   },
+   {
+    "control": "ButtonCanvas35_2",
+    "type": "Button",
+    "label": "\"Subir Imagens\"",
+    "prop": "OnSelect",
+    "code": "// 1) Pega até 10 fotos pendentes ClearCollect( colLote, FirstN( Filter(colFilaFotos, Status = \"Pendente\"), 10 ) ); If( CountRows(colLote) = 0, Notify(\"Não há fotos pendentes.\", NotificationType.Information), false ); // 2) Marca como Enviando ForAll( colLote, UpdateIf( colFilaFotos, Id = ThisRecord.Id, { Status: \"Enviando\", MsgErro: \"\" } ) ); // 3) Envia 1 por 1 chamando o Flow (DATA URI) /* ForA"
+   }
+  ]
+ },
+ {
+  "screen": "Seleção_trajeto_SSMA",
+  "file": "Sele+º+úo_trajeto_SSMA.pa.yaml",
+  "lines": 8305,
+  "background": "telaSSMA",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 266,
+   "TypedDataCard": 85,
+   "Classic": 84,
+   "Image": 13,
+   "Rectangle": 5,
+   "Gallery": 4,
+   "Form": 2,
+   "Attachments": 2,
+   "PartialCircle": 1
+  },
+  "controlTotal": 462,
+  "dataSources": [
+   "CheckList_Veicular",
+   "Credenciaiss",
+   "Trajetos"
+  ],
+  "flows": [],
+  "navTargets": [
+   "ImprimirSSMA"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "allcheck",
+   "allviagens",
+   "check",
+   "viagens"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "FormChecklist_View_1",
+    "dataSource": "CheckList_Veicular",
+    "item": "Galeriachecklist.Selected",
+    "default": ""
+   },
+   {
+    "name": "Form_vere",
+    "dataSource": "Trajetos",
+    "item": "Galeriatrajetoslz_1.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "Galeriatrajetoslz_1",
+    "items": "Filter(Trajetos,Datafim = Blank(), Unidade = \"São Luís\" )"
+   },
+   {
+    "name": "Galeriachecklist",
+    "items": "Sort(Filter(CheckList_Veicular,Unidade = \"São Luís\"),ID,SortOrder.Descending)"
+   },
+   {
+    "name": "Gallery1_1",
+    "items": "Galeriachecklist.Selected.Anexos"
+   },
+   {
+    "name": "Gallery8_1",
+    "items": "Galeriatrajetoslz_1.Selected.Anexos"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Galeriatrajetoslz_1",
+    "type": "Gallery",
+    "label": "Galeriatrajetoslz_1",
+    "prop": "OnSelect",
+    "code": "UpdateContext({viagens:true});ViewForm(Form_vere);UpdateContext({check:false})"
+   },
+   {
+    "control": "Galeriachecklist",
+    "type": "Gallery",
+    "label": "Galeriachecklist",
+    "prop": "OnSelect",
+    "code": "UpdateContext({check:true});EditForm(FormChecklist_View);UpdateContext({viagens:false})"
+   },
+   {
+    "control": "FormChecklist_View_1",
+    "type": "Form",
+    "label": "FormChecklist_View_1",
+    "prop": "OnSuccess",
+    "code": "Notify(\"Check-List submetido com sucesso\");UpdateContext({check:false})"
+   },
+   {
+    "control": "Label8",
+    "type": "Label",
+    "label": "\"Imprimir\"",
+    "prop": "OnSelect",
+    "code": "Navigate(ImprimirSSMA)"
+   },
+   {
+    "control": "Botaocadastro_28",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormChecklist_View_1)"
+   }
+  ]
+ },
+ {
+  "screen": "SelecaoTrajeto",
+  "file": "SelecaoTrajeto.pa.yaml",
+  "lines": 291,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Classic": 5,
+   "Label": 4,
+   "Image": 3,
+   "GroupContainer": 1,
+   "Gallery": 1,
+   "Rectangle": 1
+  },
+  "controlTotal": 15,
+  "dataSources": [
+   "Credenciaiss",
+   "Trajetos"
+  ],
+  "flows": [],
+  "navTargets": [
+   "Checklist_veicular_slz",
+   "Controle_Caldeiraria",
+   "HistóricoTrajeto",
+   "Histórico_check_SLZ",
+   "SELEC_COD",
+   "TelaTrajetos",
+   "TrajetoFinal"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "Galeriatrajetoslz",
+    "items": "Filter(Trajetos,Datafim = Blank(), Unidade = varfilial )"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Image1_25",
+    "type": "Image",
+    "label": "Image1_25",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   },
+   {
+    "control": "Button1_100",
+    "type": "Classic",
+    "label": "\"Caldeiraria\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Controle_Caldeiraria)"
+   },
+   {
+    "control": "botaotrajetosaoluis_12",
+    "type": "Classic",
+    "label": "\"Rotas\"",
+    "prop": "OnSelect",
+    "code": "Navigate(TelaTrajetos,ScreenTransition.Cover);NewForm(Trajetoform);Refresh(Trajetos)"
+   },
+   {
+    "control": "botaotrajetosaoluis_13",
+    "type": "Classic",
+    "label": "\"Histórico Rotas\"",
+    "prop": "OnSelect",
+    "code": "Navigate(HistóricoTrajeto,ScreenTransition.Cover);Refresh(Trajetos)"
+   },
+   {
+    "control": "botaotrajetosaoluis_14",
+    "type": "Classic",
+    "label": "\"Check List de Verificação\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Checklist_veicular_slz,ScreenTransition.Cover);NewForm(FormChecklist_1)"
+   },
+   {
+    "control": "botaotrajetosaoluis_16",
+    "type": "Classic",
+    "label": "\"Histórico Check List\"",
+    "prop": "OnSelect",
+    "code": "Navigate(Histórico_check_SLZ,ScreenTransition.Cover);NewForm(Trajetoform)"
+   },
+   {
+    "control": "Galeriatrajetoslz",
+    "type": "Gallery",
+    "label": "Galeriatrajetoslz",
+    "prop": "OnSelect",
+    "code": "Navigate(TrajetoFinal,ScreenTransition.Cover);EditForm(Trajetoformfinal)"
+   }
+  ]
+ },
+ {
+  "screen": "ServiçosExternos",
+  "file": "Servi+ºosExternos.pa.yaml",
+  "lines": 1597,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 53,
+   "Classic": 20,
+   "TypedDataCard": 17,
+   "Image": 1,
+   "Form": 1,
+   "Attachments": 1
+  },
+  "controlTotal": 93,
+  "dataSources": [
+   "ServiçosExternosPortugal"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "ServExternosform",
+    "dataSource": "ServiçosExternosPortugal",
+    "item": "historicoavr.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button2",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(ServExternosform)"
+   }
+  ]
+ },
+ {
+  "screen": "T_Ferramentaria",
+  "file": "T_Ferramentaria.pa.yaml",
+  "lines": 135,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Classic": 4,
+   "Label": 1,
+   "Image": 1
+  },
+  "controlTotal": 6,
+  "dataSources": [],
+  "flows": [],
+  "navTargets": [
+   "T_Ferramentaria_Banco",
+   "T_Ferramentaria_Checklist",
+   "T_Ferramentaria_FerrPorSetor",
+   "T_Ferramentaria_historic"
+  ],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Button1_67",
+    "type": "Classic",
+    "label": "\"Banco de Ferramentas\"",
+    "prop": "OnSelect",
+    "code": "Navigate(T_Ferramentaria_Banco)"
+   },
+   {
+    "control": "Button1_68",
+    "type": "Classic",
+    "label": "\"Quadro de Ferramentas\"",
+    "prop": "OnSelect",
+    "code": "Navigate(T_Ferramentaria_FerrPorSetor)"
+   },
+   {
+    "control": "Button1_70",
+    "type": "Classic",
+    "label": "\"Histórico de Checagens\"",
+    "prop": "OnSelect",
+    "code": "Navigate(T_Ferramentaria_historic)"
+   },
+   {
+    "control": "Button1_71",
+    "type": "Classic",
+    "label": "\"Checagem\"",
+    "prop": "OnSelect",
+    "code": "Navigate(T_Ferramentaria_Checklist)"
+   }
+  ]
+ },
+ {
+  "screen": "T_Ferramentaria_Banco",
+  "file": "T_Ferramentaria_Banco.pa.yaml",
+  "lines": 1599,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 49,
+   "Classic": 14,
+   "TypedDataCard": 14,
+   "Rectangle": 7,
+   "Image": 6,
+   "Form": 2,
+   "Attachments": 2,
+   "Gallery": 1,
+   "AddMedia": 1
+  },
+  "controlTotal": 96,
+  "dataSources": [
+   "Lista Auxiliar - Ferramentas",
+   "Lista Auxiliar - Ferramentas por Setor"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "atribferr",
+   "atualizar",
+   "confirsetor"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "form_ferram_nova",
+    "dataSource": "'Lista Auxiliar - Ferramentas'",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "Form_atualizar_bancoferramentas",
+    "dataSource": "'Lista Auxiliar - Ferramentas'",
+    "item": "GaleriaFerramentasBanco.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "GaleriaFerramentasBanco",
+    "items": "Sort(\n\nSearch(\n\n    'Lista Auxiliar - Ferramentas',pesquisa_banco.Text,Título,NomeTipo\n    \n)    \n    ,\n    Título,\n    SortOrder.Ascending\n)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Button8_1",
+    "type": "Classic",
+    "label": "\"Adicionar Ferramenta\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({atribferr:true});NewForm(form_ferram_nova)"
+   },
+   {
+    "control": "form_ferram_nova",
+    "type": "Form",
+    "label": "form_ferram_nova",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({atribferr:false});Notify(\"Ferramente incluída com sucesso!\",NotificationType.Success,1500)"
+   },
+   {
+    "control": "Button10",
+    "type": "Classic",
+    "label": "\"Incluir\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(form_ferram_nova)"
+   },
+   {
+    "control": "Form_atualizar_bancoferramentas",
+    "type": "Form",
+    "label": "Form_atualizar_bancoferramentas",
+    "prop": "OnSuccess",
+    "code": "Notify(\"OK\",NotificationType.Success,1000);UpdateContext({atualizar:false})"
+   },
+   {
+    "control": "Button11",
+    "type": "Classic",
+    "label": "\"Atualizar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_atualizar_bancoferramentas)"
+   }
+  ]
+ },
+ {
+  "screen": "T_Ferramentaria_Checklist",
+  "file": "T_Ferramentaria_Checklist.pa.yaml",
+  "lines": 3741,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 111,
+   "Classic": 38,
+   "TypedDataCard": 29,
+   "Rectangle": 15,
+   "Image": 14,
+   "Gallery": 7,
+   "Form": 2,
+   "Attachments": 2,
+   "AddMedia": 1
+  },
+  "controlTotal": 219,
+  "dataSources": [
+   "Balanceamento",
+   "Controle Ferramentas",
+   "Credenciaiss",
+   "Lista Auxiliar - Ferramentas",
+   "Lista Auxiliar - Ferramentas por Setor"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "atribferr",
+   "check",
+   "confirsetor",
+   "fotogrande",
+   "fotoparecer",
+   "parecer"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form1",
+    "dataSource": "'Controle Ferramentas'",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "Form_tratativa",
+    "dataSource": "'Controle Ferramentas'",
+    "item": "GaleriaFerramentascompendencia.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "GaleriaFerramentascompendencia",
+    "items": "Sort(\n    Filter(\n        'Controle Ferramentas',\n        xUnidade = LookUp(\n            Credenciaiss,\n            varlogin = Usuário,\n            Filial\n        ),\n        xSetor = drop_ferramenta_por_setor_1.Selected.Value,\n        xEstado = \"Impróprio\" Or xEstado = \"Ausente\",\n        IsBlank(Fechado)\n    ),\n    'Data de Criação',\n    SortOrder.Descending\n)"
+   },
+   {
+    "name": "GaleriaFerramentascheck",
+    "items": "Sort(\n       Filter(\n            'Lista Auxiliar - Ferramentas por Setor',\n            LookUp(\n                Credenciaiss,\n                varlogin = Usuário,\n                Filial\n            ) = xUnidade,\n            drop_ferramenta_por_setor_1.Selected.Value = Setor\n        )\n    ,\n    Título,\n    SortOrder.Ascending\n)"
+   },
+   {
+    "name": "GaleriaFerramentasporsetor_3",
+    "items": "Sort(\n\n\n    Filter(\n        'Controle Ferramentas',\n        xUnidade = LookUp(\n            Credenciaiss,\n            varlogin = Usuário,\n            Filial\n        ),\n        xSetor = drop_ferramenta_por_setor_1.Selected.Value,\n        DataVer = Text(Today())\n    )\n\n    \n    \n    \n    \n    ,\n    'Data de Criação',\n    SortOrder.Descending\n)"
+   },
+   {
+    "name": "GaleriaFerramentascheck_1",
+    "items": "GaleriaFerramentascheck.Selected.Anexos"
+   },
+   {
+    "name": "Gallery9_1",
+    "items": "DataCardValue373.Attachments"
+   },
+   {
+    "name": "Gallery8_7",
+    "items": "DataCardValue383.Attachments"
+   },
+   {
+    "name": "Gallery10",
+    "items": "Filter('Lista Auxiliar - Ferramentas por Setor', ID = GaleriaFerramentascompendencia.Selected.'ID xBase')"
+   }
+  ],
+  "actions": [
+   {
+    "control": "GaleriaFerramentascompendencia",
+    "type": "Gallery",
+    "label": "GaleriaFerramentascompendencia",
+    "prop": "OnSelect",
+    "code": "UpdateContext({parecer:true});EditForm(Form_tratativa)"
+   },
+   {
+    "control": "Button8_2",
+    "type": "Classic",
+    "label": "\"Novo Check-List\"",
+    "prop": "OnSelect",
+    "code": "NewForm(Form1);UpdateContext({check:true})"
+   },
+   {
+    "control": "Form1",
+    "type": "Form",
+    "label": "Form1",
+    "prop": "OnSuccess",
+    "code": "NewForm(Form1);UpdateContext({fotogrande:false})"
+   },
+   {
+    "control": "Button8_3",
+    "type": "Classic",
+    "label": "\"Submeter\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form1)"
+   },
+   {
+    "control": "Form_tratativa",
+    "type": "Form",
+    "label": "Form_tratativa",
+    "prop": "OnSuccess",
+    "code": "Notify(\"Parecer atualizado com sucesso!\",NotificationType.Success,1000);UpdateContext({parecer:false});UpdateContext({fotoparecer:false})"
+   },
+   {
+    "control": "Button19",
+    "type": "Classic",
+    "label": "\"Atualizar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_tratativa)"
+   }
+  ]
+ },
+ {
+  "screen": "T_Ferramentaria_FerrPorSetor",
+  "file": "T_Ferramentaria_FerrPorSetor.pa.yaml",
+  "lines": 2490,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 78,
+   "Classic": 24,
+   "TypedDataCard": 20,
+   "Image": 11,
+   "Rectangle": 10,
+   "Gallery": 4,
+   "Form": 2,
+   "Attachments": 2
+  },
+  "controlTotal": 151,
+  "dataSources": [
+   "Balanceamento",
+   "Credenciaiss",
+   "Lista Auxiliar - Ferramentas",
+   "Lista Auxiliar - Ferramentas por Setor"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "atribferr",
+   "atualizar",
+   "confirsetor"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "form_ferram_setor",
+    "dataSource": "'Lista Auxiliar - Ferramentas por Setor'",
+    "item": "",
+    "default": ""
+   },
+   {
+    "name": "FormAtualizarFerrPorSetor",
+    "dataSource": "'Lista Auxiliar - Ferramentas por Setor'",
+    "item": "GaleriaFerramentasporsetor.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "GaleriaFerramentasporsetor",
+    "items": "Sort(Search(Filter('Lista Auxiliar - Ferramentas por Setor',LookUp(Credenciaiss,varlogin = Usuário,Filial) = xUnidade,drop_ferramenta_por_setor.Selected.Value = Setor),pesquisa_atrib.Text,Título),Título,SortOrder.Ascending)"
+   },
+   {
+    "name": "galeriaferr_setor",
+    "items": "Sort(Search('Lista Auxiliar - Ferramentas',pesquisaferr.Text,Título),Título,SortOrder.Ascending)"
+   },
+   {
+    "name": "Gallery7",
+    "items": "imagens_ferr_setor.Attachments"
+   },
+   {
+    "name": "Gallery12_1",
+    "items": "DataCardValue367.Attachments"
+   }
+  ],
+  "actions": [
+   {
+    "control": "Button8",
+    "type": "Classic",
+    "label": "\"Atribuir Ferramenta\"",
+    "prop": "OnSelect",
+    "code": "UpdateContext({atribferr:true});NewForm(form_ferram_setor)"
+   },
+   {
+    "control": "Image37",
+    "type": "Image",
+    "label": "Image37",
+    "prop": "OnSelect",
+    "code": "If(IsBlank(drop_ferramenta_por_setor.Selected.Value),Notify(\"Selecione o setor.\",NotificationType.Warning,1500),UpdateContext({confirsetor:true}))"
+   },
+   {
+    "control": "form_ferram_setor",
+    "type": "Form",
+    "label": "form_ferram_setor",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({atribferr:false});UpdateContext({confirsetor:false});Notify(\"Ferramente atribuída com sucesso!\",NotificationType.Success,1500)"
+   },
+   {
+    "control": "Button9",
+    "type": "Classic",
+    "label": "\"Confirmar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(form_ferram_setor)"
+   },
+   {
+    "control": "FormAtualizarFerrPorSetor",
+    "type": "Form",
+    "label": "FormAtualizarFerrPorSetor",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({atualizar:false});Notify(\"Atualizado com sucesso!\",NotificationType.Success,1000)"
+   },
+   {
+    "control": "Button17",
+    "type": "Classic",
+    "label": "\"Atualizar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(FormAtualizarFerrPorSetor)"
+   }
+  ]
+ },
+ {
+  "screen": "T_Ferramentaria_historic",
+  "file": "T_Ferramentaria_historic.pa.yaml",
+  "lines": 277,
+  "background": "t",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 7,
+   "Image": 5,
+   "Rectangle": 3,
+   "Gallery": 2,
+   "Classic": 1
+  },
+  "controlTotal": 18,
+  "dataSources": [
+   "Controle Ferramentas",
+   "Lista Auxiliar - Ferramentas",
+   "Lista Auxiliar - Ferramentas por Setor"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "confirsetor",
+   "fotoparecer",
+   "parecer"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [],
+  "galleries": [
+   {
+    "name": "GaleriaFerramentascompendencia_1",
+    "items": " Sort(Filter('Controle Ferramentas','ID xBase' = pesquisa_atrib_2.Text),DataVer,SortOrder.Descending)"
+   },
+   {
+    "name": "Gallery10_1",
+    "items": "Filter('Lista Auxiliar - Ferramentas por Setor', ID = GaleriaFerramentascompendencia_1.Selected.'ID xBase')"
+   }
+  ],
+  "actions": []
+ },
+ {
+  "screen": "TelaInicial_Medro_Nova",
+  "file": "TelaInicial_Medro_Nova.pa.yaml",
+  "lines": 2400,
+  "background": "Fundo_Input_Medro_2",
+  "onVisible": "",
+  "onHidden": "UpdateContext({os:true,conf:false,hist:false,histp:false,contagem:false,pend:false,edicao:false})",
+  "controls": {
+   "Text": 43,
+   "Image": 27,
+   "Label": 27,
+   "GroupContainer": 15,
+   "TypedDataCard": 12,
+   "TextInput": 10,
+   "Gallery": 6,
+   "Classic": 5,
+   "Rectangle": 4,
+   "Button": 3,
+   "ComboBox": 3,
+   "Star": 2,
+   "ModernTextInput": 2,
+   "Form": 1
+  },
+  "controlTotal": 160,
+  "dataSources": [
+   "Base_Medro",
+   "Caldeiraria_Controle",
+   "Credenciaiss",
+   "ZB6010"
+  ],
+  "flows": [],
+  "navTargets": [
+   "EdicaoOS_Medro",
+   "Entrada_Medro_Nova",
+   "Finalizar_Medro_Nova",
+   "Gestao_Pendencias_Medro",
+   "SELEC_COD"
+  ],
+  "globalVars": [],
+  "contextVars": [
+   "contagem",
+   "edicao",
+   "hist",
+   "histp",
+   "openOS",
+   "os"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "OS_Info",
+    "dataSource": "Base_Medro",
+    "item": "EmAberto_Medro_Novo_1.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "EmAberto_Medro_Novo_3",
+    "items": "If(\n    \"_OS_PESQ\" in LookUp(\n        Credenciaiss,\n        varlogin = Usuário,\n        acesso_mod\n    ),\n    Sort(\n        Search(\n            Base_Medro,\n            TextInputCanvas3_2.Value,\n            OS_Comp,\n            Responsavel\n        ),\n        'Data de Criação',\n        SortOrder.Descending\n    ),\n    Sort(\n        Search(\n            Filter(\n                Base_Medro,\n                Unidade = varfilial\n            ),\n            TextInputCanvas3_2.Value,\n            OS_Comp,\n            Responsavel\n        ),\n        'Data de Criação',\n        SortOrder.Descending\n    )\n)"
+   },
+   {
+    "name": "EmAberto_Medro_Novo",
+    "items": "Filter(Base_Medro,fCadastro = \"Pendente\" , Unidade = varfilial\n)"
+   },
+   {
+    "name": "EmAberto_Medro_Novo_1",
+    "items": "If(\n    \"_OS_PESQ\" in LookUp(\n        Credenciaiss,\n        varlogin = Usuário,\n        acesso_mod\n    ),\n    Sort(\n        Search(\n            Base_Medro,\n            TextInputCanvas3.Value,\n            OS_Comp,\n            Responsavel\n        ),\n        'Data de Criação',\n        SortOrder.Descending\n    ),\n    Sort(\n        Search(\n            Filter(\n                Base_Medro,\n                Unidade = varfilial\n            ),\n            TextInputCanvas3.Value,\n            OS_Comp,\n            Responsavel\n        ),\n        'Data de Criação',\n        SortOrder.Descending\n    )\n)"
+   },
+   {
+    "name": "EmAberto_Medro_Novo_2",
+    "items": "Sort(\n    Search(\n        Filter(\n            Base_Medro,\n            Responsavel = LookUp(Credenciaiss, Usuário = varlogin,Título)\n        ),\n        TextInputCanvas3_1.Value,\n        OS_Comp\n    ),\n    'Data de Criação',\n    SortOrder.Descending\n)"
+   },
+   {
+    "name": "Gallery8",
+    "items": "Distinct( Filter(Base_Medro, Responsavel = LookUp(\n        Credenciaiss,\n        Usuário = varlogin,\n        Título\n\n\n\n    ), Setor<> \"AGUARDANDO PROCESSO\"    )   ,Setor)"
+   },
+   {
+    "name": "Pendencias_Medro",
+    "items": "Filter(Base_Medro,Check_aprov = 1,Status_Reprov = \"Pendente\" || Status_Reprov = \"Em tratamento\", Unidade = varfilial)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "EmAberto_Medro_Novo_3",
+    "type": "Gallery",
+    "label": "EmAberto_Medro_Novo_3",
+    "prop": "OnSelect",
+    "code": "Navigate(EdicaoOS_Medro)"
+   },
+   {
+    "control": "EmAberto_Medro_Novo",
+    "type": "Gallery",
+    "label": "EmAberto_Medro_Novo",
+    "prop": "OnSelect",
+    "code": "Navigate(Finalizar_Medro_Nova)"
+   },
+   {
+    "control": "EmAberto_Medro_Novo_1",
+    "type": "Gallery",
+    "label": "EmAberto_Medro_Novo_1",
+    "prop": "OnSelect",
+    "code": "Navigate(Finalizar_Medro_Nova,ScreenTransition.Cover)"
+   },
+   {
+    "control": "Image24",
+    "type": "Image",
+    "label": "Image24",
+    "prop": "OnSelect",
+    "code": "Remove(Base_Medro,EmAberto_Medro_Novo_1.Selected)"
+   },
+   {
+    "control": "ButtonCanvas43",
+    "type": "Button",
+    "label": "\"Salvar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(OS_Info)"
+   },
+   {
+    "control": "Image57",
+    "type": "Image",
+    "label": "Image57",
+    "prop": "OnSelect",
+    "code": "Navigate(SELEC_COD)"
+   },
+   {
+    "control": "Image50",
+    "type": "Image",
+    "label": "Image50",
+    "prop": "OnSelect",
+    "code": "Navigate(Entrada_Medro_Nova);NewForm(FormEntradaMedro)"
+   },
+   {
+    "control": "EmAberto_Medro_Novo_2",
+    "type": "Gallery",
+    "label": "EmAberto_Medro_Novo_2",
+    "prop": "OnSelect",
+    "code": "Navigate(Finalizar_Medro_Nova,ScreenTransition.Cover)"
+   },
+   {
+    "control": "Pendencias_Medro",
+    "type": "Gallery",
+    "label": "Pendencias_Medro",
+    "prop": "OnSelect",
+    "code": "Navigate(Gestao_Pendencias_Medro)"
+   }
+  ]
+ },
+ {
+  "screen": "TelaPCP_SLZ",
+  "file": "TelaPCP_SLZ.pa.yaml",
+  "lines": 7882,
+  "background": "telaSSMA",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 247,
+   "Classic": 79,
+   "TypedDataCard": 51,
+   "Image": 36,
+   "Rectangle": 32,
+   "Gallery": 9,
+   "Form": 4,
+   "Attachments": 2
+  },
+  "controlTotal": 460,
+  "dataSources": [
+   "CheckList_Veicular",
+   "Credenciaiss",
+   "Lista Auxiliar - Clientes Medro",
+   "PF e IQ",
+   "RDS",
+   "RDS-Managements",
+   "Serviços Terceirizados",
+   "Trajetos",
+   "servicosterceirizados"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "RDS1",
+   "allcheck",
+   "allviagens",
+   "check",
+   "clientes",
+   "config",
+   "contagemrds",
+   "esc_aux",
+   "esc_mot",
+   "filtrords",
+   "inclu_cliente",
+   "menutercei",
+   "pcp",
+   "progrds",
+   "rds",
+   "resumords",
+   "rh",
+   "terce",
+   "viagens"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form_vere_2",
+    "dataSource": "Trajetos",
+    "item": "Galeriatrajetoslz_4.Selected",
+    "default": ""
+   },
+   {
+    "name": "Form_ComercialSLZ_4",
+    "dataSource": "'PF e IQ'",
+    "item": "GaleriaComercialSLZ_5.Selected",
+    "default": "FormMode.View"
+   },
+   {
+    "name": "Form_inclusaocliente_1",
+    "dataSource": "'Lista Auxiliar - Clientes Medro'",
+    "item": "galeriaclientesmedro_1.Selected",
+    "default": ""
+   },
+   {
+    "name": "formatualretifica",
+    "dataSource": "servicosterceirizados",
+    "item": "galeriatornei.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "galeriatornei",
+    "items": "If(IsBlank(empresatornei.Selected.Value) And  IsBlank(retornotornei.Selected.Value) ,\nSort(Search(Filter(servicosterceirizados,Data_retorno = Blank()),pesquisatornei.Text,Título,Data_registro,Data_retorno,N_OR),'Data de Criação',SortOrder.Descending),\n\n!IsBlank(empresatornei.Selected.Value) And  IsBlank(retornotornei.Selected.Value) ,\nSort(Search(Filter(servicosterceirizados, empresatornei.Selected.Value = Empresa),pesquisatornei.Text,Título,Data_registro,Data_retorno,N_OR),'Data de Criação',SortOrder.Descending),\n\nIsBlank(empresatornei.Selected.Value) And  !IsBlank(retornotornei.Selected.Value) ,\nSort(Search(Filter(servicosterceirizados,Data_retorno <> Blank()),pesquisatornei.Text,Título,Data_registro,Data_retorno,N_OR),'Data de Criação',SortOrder.Descending),\n\n!IsBlank(empresatornei.Selected.Value) And  !IsBlank(retornotornei.Selected.Value) ,\nSort(Search(Filter(servicosterceirizados, empresatornei.Selected.Value = Empresa,Data_retorno <> Blank()),pesquisatornei.Text,Título,Data_registro,Data_retorno,N_OR),'Data de Criação',SortOrder.Descending)\n)\n\n\n\n\n\n"
+   },
+   {
+    "name": "Galeriatrajetoslz_4",
+    "items": "Filter(Trajetos,Datafim = Blank(), Unidade = varfilial )"
+   },
+   {
+    "name": "Gallery8_3",
+    "items": "Galeriatrajetoslz_4.Selected.Anexos"
+   },
+   {
+    "name": "GaleriaComercialSLZ_5",
+    "items": "If(\n    checkpcp_5.Value = false,\n    Sort(\n        Search(\n            Filter(\n                'PF e IQ',\n                Filial = FilialMEDRO_1.SelectedText.Value\n            ),\n            pesquisaos_5.Text,\n            Title,\n            Filial,\n            Data,\n            DataInspeção\n        ),\n        Criado,\n        SortOrder.Descending\n    ),\n    Sort(\n        Search(\n            Filter(\n                'PF e IQ',\n                Filial = FilialMEDRO_1.SelectedText.Value,\n                DataInspeção = Blank()\n            ),\n            pesquisaos_5.Text,\n            Title,\n            Filial,\n            Data,\n            DataInspeção\n        ),\n        Criado,\n        SortOrder.Descending\n    )\n)"
+   },
+   {
+    "name": "Gallery6_5",
+    "items": "GaleriaComercialSLZ_5.Selected.Anexos"
+   },
+   {
+    "name": "galeriaclientesmedro_1",
+    "items": "Sort(Filter('Lista Auxiliar - Clientes Medro', Unidade.Value = varfilial,Title <> \" -\"),Nome_completo,SortOrder.Ascending)"
+   },
+   {
+    "name": "Galfotosretifica",
+    "items": "galeriatornei.Selected.xImagem"
+   },
+   {
+    "name": "galeriaRDS",
+    "items": "If(\n    RDS_radio.Selected.Value = \"Em andamento\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                Atendimento = \"Pendente\" Or Atendimento = \"Programado\" Or Atendimento = \"Atendido\" Or Atendimento = \"Em atendimento\"\n            ),\n            pesquisaRDS_P.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio.Selected.Value = \"Pendentes\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                Atendimento = \"Pendente\"\n            ),\n            pesquisaRDS_P.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio.Selected.Value = \"Concluídos\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                Atendimento = \"Concluído\"\n            ),\n            pesquisaRDS_P.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio.Selected.Value = \"Cancelados\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                Atendimento = \"Cancelado\"\n            ),\n            pesquisaRDS_P.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio.Selected.Value = \"Atendidos\",\n    Sort(\n        Search(\n            Filter(\n                'RDS-Managements',\n                Atendimento = \"Atendido\"\n            ),\n            pesquisaRDS_P.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    ),\n    RDS_radio.Selected.Value = \"Todos\",\n    Sort(\n        Search(\n            'RDS-Managements',\n            pesquisaRDS_P.Text,\n            cr4a1_titulo,\n            cr4a1_datareq,\n            cr4a1_nomereq,\n            cr4a1_motorista,\n            cr4a1_desclog,\n            cr4a1_nf\n        ),\n        IDBASE,\n        SortOrder.Descending\n    )\n)"
+   },
+   {
+    "name": "Gallery3",
+    "items": "Sort(Filter('RDS-Managements', Atendimento = \"Programado\"),DataNecess,SortOrder.Ascending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "galeriatornei",
+    "type": "Gallery",
+    "label": "galeriatornei",
+    "prop": "OnSelect",
+    "code": "UpdateContext({menutercei: true});EditForm(formatualretifica)"
+   },
+   {
+    "control": "Galeriatrajetoslz_4",
+    "type": "Gallery",
+    "label": "Galeriatrajetoslz_4",
+    "prop": "OnSelect",
+    "code": "UpdateContext({viagens:true});ViewForm(Form_vere_2);UpdateContext({check:false})"
+   },
+   {
+    "control": "GaleriaComercialSLZ_5",
+    "type": "Gallery",
+    "label": "GaleriaComercialSLZ_5",
+    "prop": "OnSelect",
+    "code": "EditForm(Form_ComercialSLZ_4)"
+   },
+   {
+    "control": "Button5_6",
+    "type": "Classic",
+    "label": "\"Novo Cliente\"",
+    "prop": "OnSelect",
+    "code": "NewForm(Form_inclusaocliente_1);UpdateContext({inclu_cliente:true})"
+   },
+   {
+    "control": "Button5_7",
+    "type": "Classic",
+    "label": "\"Editar Cliente\"",
+    "prop": "OnSelect",
+    "code": "EditForm(Form_inclusaocliente_1);UpdateContext({inclu_cliente:true})"
+   },
+   {
+    "control": "Button5_4",
+    "type": "Classic",
+    "label": "\"Submeter\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form_inclusaocliente_1)"
+   },
+   {
+    "control": "formatualretifica",
+    "type": "Form",
+    "label": "formatualretifica",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({menutercei: false});Notify(\"Atualização deita com sucesso\")"
+   },
+   {
+    "control": "Button4_2",
+    "type": "Classic",
+    "label": "\"Concluído\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(formatualretifica)"
+   }
+  ]
+ },
+ {
+  "screen": "TelaPCP_SLZ_1",
+  "file": "TelaPCP_SLZ_1.pa.yaml",
+  "lines": 6268,
+  "background": "telaSSMA",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 201,
+   "Classic": 63,
+   "TypedDataCard": 46,
+   "Image": 32,
+   "Rectangle": 21,
+   "Gallery": 7,
+   "Form": 3,
+   "Attachments": 2
+  },
+  "controlTotal": 375,
+  "dataSources": [
+   "CheckList_Veicular",
+   "Lista Auxiliar - Clientes Medro",
+   "PF e IQ",
+   "RDS",
+   "Serviços Terceirizados",
+   "Trajetos"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "RDS1",
+   "allcheck",
+   "allviagens",
+   "check",
+   "clientes",
+   "config",
+   "contagemrds",
+   "filtrords",
+   "menutercei",
+   "pcp",
+   "progrds",
+   "rds",
+   "resumords",
+   "rh",
+   "terce",
+   "viagens"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form_vere_6",
+    "dataSource": "Trajetos",
+    "item": "Galeriatrajetoslz_8.Selected",
+    "default": ""
+   },
+   {
+    "name": "Form_ComercialSLZ_8",
+    "dataSource": "'PF e IQ'",
+    "item": "GaleriaComercialSLZ_9.Selected",
+    "default": "FormMode.View"
+   },
+   {
+    "name": "formatualretifica_1",
+    "dataSource": "'Serviços Terceirizados'",
+    "item": "galeriatornei_1.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [
+   {
+    "name": "galeriatornei_1",
+    "items": "If(IsBlank(empresatornei_1.Selected.Value) And  IsBlank(retornotornei_1.Selected.Value) ,\nSort(Search(Filter('Serviços Terceirizados',Data_retorno = Blank()),pesquisatornei_1.Text,Título,Data_registro,Data_retorno,N_OR),Criado,SortOrder.Descending),\n\n!IsBlank(empresatornei_1.Selected.Value) And  IsBlank(retornotornei_1.Selected.Value) ,\nSort(Search(Filter('Serviços Terceirizados', empresatornei_1.Selected.Value = Empresa.Value),pesquisatornei_1.Text,Título,Data_registro,Data_retorno,N_OR),Criado,SortOrder.Descending),\n\nIsBlank(empresatornei_1.Selected.Value) And  !IsBlank(retornotornei_1.Selected.Value) ,\nSort(Search(Filter('Serviços Terceirizados',Data_retorno <> Blank()),pesquisatornei_1.Text,Título,Data_registro,Data_retorno,N_OR),Criado,SortOrder.Descending),\n\n!IsBlank(empresatornei_1.Selected.Value) And  !IsBlank(retornotornei_1.Selected.Value) ,\nSort(Search(Filter('Serviços Terceirizados', empresatornei_1.Selected.Value = Empresa.Value,Data_retorno <> Blank()),pesquisatornei_1.Text,Título,Data_registro,Data_retorno,N_OR),Criado,SortOrder.Descending)\n\n)\n\n\n\n\n\n"
+   },
+   {
+    "name": "Galeriatrajetoslz_8",
+    "items": "Filter(Trajetos,Datafim = Blank(), Unidade = FilialMEDRO_5.SelectedText.Value )"
+   },
+   {
+    "name": "Gallery8_8",
+    "items": "Galeriatrajetoslz_8.Selected.Anexos"
+   },
+   {
+    "name": "GaleriaComercialSLZ_9",
+    "items": "If(\n    checkpcp_9.Value = false,\n    Sort(\n        Search(\n            Filter(\n                'PF e IQ',\n                Filial = FilialMEDRO_5.SelectedText.Value\n            ),\n            pesquisaos_9.Text,\n            Title,\n            Filial,\n            Data,\n            DataInspeção\n        ),\n        Criado,\n        SortOrder.Descending\n    ),\n    Sort(\n        Search(\n            Filter(\n                'PF e IQ',\n                Filial = FilialMEDRO_5.SelectedText.Value,\n                DataInspeção = Blank()\n            ),\n            pesquisaos_9.Text,\n            Title,\n            Filial,\n            Data,\n            DataInspeção\n        ),\n        Criado,\n        SortOrder.Descending\n    )\n)"
+   },
+   {
+    "name": "Gallery6_9",
+    "items": "GaleriaComercialSLZ_9.Selected.Anexos"
+   },
+   {
+    "name": "Galfotosretifica_1",
+    "items": "galeriatornei_1.Selected.Anexos"
+   },
+   {
+    "name": "Gallery3_1",
+    "items": "Sort(Filter(RDS, Atendimento = \"Programado\"),DataNecess,SortOrder.Ascending)"
+   }
+  ],
+  "actions": [
+   {
+    "control": "galeriatornei_1",
+    "type": "Gallery",
+    "label": "galeriatornei_1",
+    "prop": "OnSelect",
+    "code": "UpdateContext({menutercei: true});EditForm(formatualretifica_1)"
+   },
+   {
+    "control": "Galeriatrajetoslz_8",
+    "type": "Gallery",
+    "label": "Galeriatrajetoslz_8",
+    "prop": "OnSelect",
+    "code": "UpdateContext({viagens:true});ViewForm(Form_vere_6);UpdateContext({check:false})"
+   },
+   {
+    "control": "GaleriaComercialSLZ_9",
+    "type": "Gallery",
+    "label": "GaleriaComercialSLZ_9",
+    "prop": "OnSelect",
+    "code": "EditForm(Form_ComercialSLZ_8)"
+   },
+   {
+    "control": "formatualretifica_1",
+    "type": "Form",
+    "label": "formatualretifica_1",
+    "prop": "OnSuccess",
+    "code": "UpdateContext({menutercei: false});Notify(\"Atualização deita com sucesso\")"
+   },
+   {
+    "control": "Button4_1",
+    "type": "Classic",
+    "label": "\"Concluído\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(formatualretifica_1)"
+   }
+  ]
+ },
+ {
+  "screen": "TelaTrajetos",
+  "file": "TelaTrajetos.pa.yaml",
+  "lines": 2733,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 95,
+   "TypedDataCard": 30,
+   "Classic": 30,
+   "Form": 1,
+   "ComboBox": 1,
+   "Attachments": 1,
+   "Image": 1
+  },
+  "controlTotal": 159,
+  "dataSources": [
+   "Credenciaiss",
+   "Lista Auxiliar - Clientes Medro",
+   "Trajetos"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Trajetoform",
+    "dataSource": "Trajetos",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Botaocadastro_18",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "If( DropColeta.Selected.Value = \"Recebimento/ Entrega do Cliente\" And confunção.Text = \"MOTORISTA\", SubmitForm(Trajetoform); Office365Outlook.SendEmailV2( \"aplicativo@kairosmotores.com\", \"SLZ \" & concliente.Text & \" - REMESSA\", \"Recebimento de Equipamentos em São Luís.<br>Cliente: \" & concliente.Text & \"<br>Quantidade: \" & conequip.Text & \".<br>Responsável pela entrega: \" & connome.Text & \"<br><br"
+   },
+   {
+    "control": "Image1_26",
+    "type": "Image",
+    "label": "Image1_26",
+    "prop": "OnSelect",
+    "code": "Back();ResetForm(Trajetoform)"
+   }
+  ]
+ },
+ {
+  "screen": "TrajetoFinal",
+  "file": "TrajetoFinal.pa.yaml",
+  "lines": 2529,
+  "background": "Fundo",
+  "onVisible": "",
+  "onHidden": "",
+  "controls": {
+   "Label": 89,
+   "TypedDataCard": 28,
+   "Classic": 28,
+   "Form": 1,
+   "Attachments": 1,
+   "Image": 1
+  },
+  "controlTotal": 148,
+  "dataSources": [
+   "Credenciaiss",
+   "Trajetos"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Trajetoformfinal",
+    "dataSource": "Trajetos",
+    "item": "Galeriatrajetoslz.Selected",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "Botaocadastro_24",
+    "type": "Classic",
+    "label": "\"Concluir\"",
+    "prop": "OnSelect",
+    "code": "If( DropColeta_5.Selected.Value = \"Coleta no Cliente\" And DataCardKey122_11.Text = \"MOTORISTA\", SubmitForm(Trajetoformfinal); Office365Outlook.SendEmailV2( \"rodrigo.nascimento@kairosmotores.com\", \"SLZ \" & concliente_5.Text & \" - COLETA\", \"Coleta de Equipamentos em São Luís.<br>Cliente: \" & concliente_5.Text & \"<br>Quantidade: \" & conequip_5.Text & \".<br>Responsável pela coleta: \" & connome_5.Text "
+   },
+   {
+    "control": "Image1_33",
+    "type": "Image",
+    "label": "Image1_33",
+    "prop": "OnSelect",
+    "code": "Back();ResetForm(Trajetoform)"
+   }
+  ]
+ },
+ {
+  "screen": "VotaçãoCIPA",
+  "file": "Vota+º+úoCIPA.pa.yaml",
+  "lines": 391,
+  "background": "RGBA(234, 234, 234, 1)",
+  "onVisible": "UpdateContext({ch:false,an:false,rod:false,mar:false,co:false,nulo:false});NewForm(Form2)",
+  "onHidden": "",
+  "controls": {
+   "Text": 13,
+   "Image": 6,
+   "Octagon": 5,
+   "TypedDataCard": 4,
+   "TextInput": 4,
+   "Button": 1,
+   "Form": 1
+  },
+  "controlTotal": 34,
+  "dataSources": [
+   "CIPA_2026"
+  ],
+  "flows": [],
+  "navTargets": [],
+  "globalVars": [],
+  "contextVars": [
+   "ch",
+   "co",
+   "mar",
+   "nulo",
+   "rv",
+   "sm"
+  ],
+  "patchTargets": [],
+  "collections": [],
+  "forms": [
+   {
+    "name": "Form2",
+    "dataSource": "CIPA_2026",
+    "item": "",
+    "default": ""
+   }
+  ],
+  "galleries": [],
+  "actions": [
+   {
+    "control": "ButtonCanvas23_1",
+    "type": "Button",
+    "label": "\"Votar\"",
+    "prop": "OnSelect",
+    "code": "SubmitForm(Form2)"
+   },
+   {
+    "control": "Form2",
+    "type": "Form",
+    "label": "Form2",
+    "prop": "OnSuccess",
+    "code": "Notify(\"Voto Enviado!!!\",NotificationType.Success,3000);Back();UpdateContext({ch:false,an:false,rod:false,mar:false,co:false,nulo:false})"
+   }
+  ]
+ }
+]

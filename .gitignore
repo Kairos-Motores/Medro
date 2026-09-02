@@ -1,0 +1,34 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# build
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# editor / os
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# PowerApps source (referência local; não versionar o dump de 22MB)
+extracted/
+Medro_*.zip
+# obs: docs/_data/*.json (modelo de dados extraído) É versionado — é a entrada do codegen
+
+# test / coverage
+coverage/

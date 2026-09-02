@@ -1,0 +1,88 @@
+/* Reshaped ⟶ paleta Medro. Remapeia os tokens da Reshaped para a paleta fornecida
+   (#4A7FB0 primary, #2B3642 foreground, #E9EEF3 page, #B7C6D6 border) + semânticos.
+   Mantém a estética iOS 15 (raios pequenos, tipografia system). */
+
+[data-rs-theme~="reshaped"] {
+  --rs-font-family-title: -apple-system, "SF Pro Display", "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
+  --rs-font-family-body: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
+
+  /* primary */
+  --rs-color-background-primary: #4a7fb0;
+  --rs-color-rgb-background-primary: 74, 127, 176;
+  --rs-color-background-primary-faded: #eaf1f7;
+  --rs-color-rgb-background-primary-faded: 234, 241, 247;
+  --rs-color-foreground-primary: #3e6e9c;
+  --rs-color-rgb-foreground-primary: 62, 110, 156;
+  --rs-color-border-primary: #4a7fb0;
+  --rs-color-rgb-border-primary: 74, 127, 176;
+  --rs-color-border-primary-faded: #b7c6d6;
+  --rs-color-rgb-border-primary-faded: 183, 198, 214;
+  --rs-color-on-background-primary: #ffffff;
+  --rs-color-rgb-on-background-primary: 255, 255, 255;
+
+  /* neutros / superfícies */
+  --rs-color-background-page: #e9eef3;
+  --rs-color-rgb-background-page: 233, 238, 243;
+  --rs-color-background-page-faded: #eef2f6;
+  --rs-color-rgb-background-page-faded: 238, 242, 246;
+  --rs-color-background-elevation-base: #ffffff;
+  --rs-color-rgb-background-elevation-base: 255, 255, 255;
+  --rs-color-background-elevation-raised: #ffffff;
+  --rs-color-rgb-background-elevation-raised: 255, 255, 255;
+  --rs-color-background-elevation-overlay: #ffffff;
+  --rs-color-rgb-background-elevation-overlay: 255, 255, 255;
+  --rs-color-background-neutral: #dbe3ec;
+  --rs-color-rgb-background-neutral: 219, 227, 236;
+  --rs-color-background-neutral-faded: #f1f4f7;
+  --rs-color-rgb-background-neutral-faded: 241, 244, 247;
+  --rs-color-border-neutral: #b7c6d6;
+  --rs-color-rgb-border-neutral: 183, 198, 214;
+  --rs-color-border-neutral-faded: #d7e0e9;
+  --rs-color-rgb-border-neutral-faded: 215, 224, 233;
+  --rs-color-foreground-neutral: #2b3642;
+  --rs-color-rgb-foreground-neutral: 43, 54, 66;
+  --rs-color-foreground-neutral-faded: #5a6c7d;
+  --rs-color-rgb-foreground-neutral-faded: 90, 108, 125;
+  --rs-color-on-background-neutral: #2b3642;
+  --rs-color-rgb-on-background-neutral: 43, 54, 66;
+
+  /* semânticos */
+  --rs-color-background-critical: #b4453f;
+  --rs-color-rgb-background-critical: 180, 69, 63;
+  --rs-color-foreground-critical: #b4453f;
+  --rs-color-rgb-foreground-critical: 180, 69, 63;
+  --rs-color-background-positive: #3b9a63;
+  --rs-color-rgb-background-positive: 59, 154, 99;
+  --rs-color-foreground-positive: #3b9a63;
+  --rs-color-rgb-foreground-positive: 59, 154, 99;
+  --rs-color-background-warning: #c9922e;
+  --rs-color-rgb-background-warning: 201, 146, 46;
+  --rs-color-foreground-warning: #9a6f22;
+  --rs-color-rgb-foreground-warning: 154, 111, 34;
+
+  /* raios — enxuto */
+  --rs-unit-radius-small: 4px;
+  --rs-unit-radius-medium: 6px;
+  --rs-unit-radius-large: 8px;
+}
+
+[data-rs-theme~="reshaped"][data-rs-color-mode="dark"] {
+  --rs-color-background-page: #1c2530;
+  --rs-color-rgb-background-page: 28, 37, 48;
+  --rs-color-background-elevation-base: #243040;
+  --rs-color-rgb-background-elevation-base: 36, 48, 64;
+  --rs-color-background-elevation-raised: #243040;
+  --rs-color-rgb-background-elevation-raised: 36, 48, 64;
+  --rs-color-background-elevation-overlay: #243040;
+  --rs-color-rgb-background-elevation-overlay: 36, 48, 64;
+  --rs-color-background-primary: #6fa0cb;
+  --rs-color-rgb-background-primary: 111, 160, 203;
+  --rs-color-foreground-primary: #8fb6d8;
+  --rs-color-rgb-foreground-primary: 143, 182, 216;
+  --rs-color-foreground-neutral: #e9eef3;
+  --rs-color-rgb-foreground-neutral: 233, 238, 243;
+  --rs-color-border-neutral: #3c4c5e;
+  --rs-color-rgb-border-neutral: 60, 76, 94;
+  --rs-color-on-background-primary: #141c26;
+  --rs-color-rgb-on-background-primary: 20, 28, 38;
+}

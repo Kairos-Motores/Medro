@@ -1,0 +1,7 @@
+dist/
+node_modules/
+extracted/
+docs/_data/
+pnpm-lock.yaml
+apps/web/src/components/ui/
+packages/shared/src/generated/
