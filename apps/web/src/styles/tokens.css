@@ -1,77 +1,94 @@
-/* Design tokens Medro — paleta fornecida + estética iOS 15 (refinada).
-   Cores em canais RGB (sem vírgula) para `rgb(var(--x) / <alpha>)` do Tailwind. */
+/* Design tokens Medro — linguagem macOS (Big Sur/Sonoma), responsivo para smartphone.
+   Canais RGB (sem vírgula) para `rgb(var(--x) / <alpha>)` do Tailwind. */
 
 :root {
-  /* paleta base */
-  --surface: 255 255 255; /* #FFFFFF */
-  --bg: 236 240 244; /* levemente mais claro que #E9EEF3 */
-  --surface-muted: 240 243 246;
-  --border: 205 214 224; /* #CDD6E0 — hairline mais suave */
-  --border-strong: 183 198 214; /* #B7C6D6 */
-  --muted: 183 198 214;
-  --muted-foreground: 96 112 128; /* #607080 */
-  --primary: 74 127 176; /* #4A7FB0 */
-  --primary-hover: 63 111 156;
-  --primary-press: 52 93 133;
-  --primary-foreground: 255 255 255;
-  --foreground: 39 50 62; /* #27323E — um pouco mais escuro/neutro */
-  --elevated-dark: 39 50 62;
+  /* superfícies */
+  --surface: 255 255 255;
+  --surface-2: 246 246 248; /* conteúdo secundário / linhas */
+  --bg: 236 237 240; /* fundo da "janela" (desktop) */
+  --border: 209 211 216; /* hairline */
+  --border-strong: 190 193 200;
+  --muted: 190 193 200;
+  --muted-foreground: 110 112 120;
+  --foreground: 32 34 38; /* label primário macOS */
+  --foreground-secondary: 96 98 105;
 
-  /* semânticos (dessaturados, profissionais) */
-  --danger: 176 74 68; /* #B04A44 */
-  --success: 66 146 100; /* #429264 */
-  --warning: 191 140 66; /* #BF8C42 */
+  /* acento (o azul fornecido) — usado em seleção, foco, controles */
+  --primary: 74 127 176; /* #4A7FB0 */
+  --primary-hover: 66 116 162;
+  --primary-press: 56 100 142;
+  --primary-foreground: 255 255 255;
+  --elevated-dark: 40 44 52; /* barras escuras / faixas */
+
+  /* materiais (vibrância macOS) — usados com backdrop-filter */
+  --material-sidebar: 244 244 247 / 0.68;
+  --material-toolbar: 255 255 255 / 0.72;
+  --material-menu: 255 255 255 / 0.8;
+  --vibrancy: saturate(180%) blur(30px);
+
+  /* semânticos */
+  --danger: 197 74 66; /* vermelho macOS ~ */
+  --success: 63 156 92;
+  --warning: 202 149 61;
   --info: 74 127 176;
 
-  /* acentos por módulo — esquema coeso (azuis/teal/slate + 2 quentes reservados) */
-  --accent-blue: 74 127 176; /* #4A7FB0 */
-  --accent-indigo: 94 108 153; /* #5E6C99 */
-  --accent-teal: 62 139 132; /* #3E8B84 */
-  --accent-cyan: 69 137 168; /* #4589A8 */
-  --accent-slate: 100 118 138; /* #64768A */
-  --accent-green: 78 154 110; /* #4E9A6E */
-  --accent-amber: 185 139 62; /* #B98B3E */
-  --accent-violet: 119 107 156; /* #776B9C */
-  --accent-rose: 168 107 99; /* #A86B63 */
+  /* acentos por área (coeso, discreto) */
+  --accent-blue: 74 127 176;
+  --accent-indigo: 92 104 156;
+  --accent-teal: 58 140 132;
+  --accent-cyan: 66 133 166;
+  --accent-slate: 104 116 134;
+  --accent-green: 74 152 106;
+  --accent-amber: 188 141 62;
+  --accent-violet: 122 108 158;
+  --accent-rose: 170 104 96;
 
-  /* raio — enxuto, iOS 15 discreto */
+  /* raio — moderado, macOS */
   --radius-xs: 3px;
   --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  --radius-md: 5px;
+  --radius-lg: 7px;
+  --radius-xl: 10px;
+  --radius-window: 10px;
 
-  /* elevação — mais sutil */
-  --shadow-1: 0 1px 2px rgba(39, 50, 62, 0.05), 0 1px 1px rgba(39, 50, 62, 0.04);
-  --shadow-2: 0 6px 20px rgba(39, 50, 62, 0.09);
-  --sheet-shadow: 0 -8px 30px rgba(39, 50, 62, 0.16);
+  /* elevação — sombras suaves e difusas (janelas/popovers macOS) */
+  --shadow-1: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-2: 0 8px 28px rgba(0, 0, 0, 0.16), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  --shadow-popover: 0 10px 40px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
 
   --hairline: 1px;
-  --tap-target: 44px;
-  --blur: saturate(180%) blur(20px);
-  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --ring: 0 0 0 3px rgb(var(--primary) / 0.35);
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
 
   color-scheme: light;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter",
+    "Segoe UI", Roboto, system-ui, sans-serif;
 }
 
 :root[data-theme="dark"] {
-  --surface: 36 47 60;
-  --bg: 26 34 44;
-  --surface-muted: 31 41 52;
-  --border: 55 70 87;
-  --border-strong: 70 88 108;
-  --muted: 60 76 94;
-  --muted-foreground: 150 166 182;
-  --primary: 111 160 203;
-  --primary-hover: 128 173 213;
-  --primary-press: 96 145 188;
-  --primary-foreground: 18 26 35;
-  --foreground: 233 238 243;
-  --elevated-dark: 18 26 35;
+  --surface: 44 46 54;
+  --surface-2: 38 40 47;
+  --bg: 28 30 36;
+  --border: 66 69 78;
+  --border-strong: 82 86 96;
+  --muted: 82 86 96;
+  --muted-foreground: 150 153 162;
+  --foreground: 236 237 240;
+  --foreground-secondary: 168 171 180;
 
-  --danger: 210 105 99;
-  --success: 96 186 135;
-  --warning: 219 176 100;
+  --primary: 96 150 200;
+  --primary-hover: 112 164 212;
+  --primary-press: 84 138 188;
+  --primary-foreground: 18 22 30;
+  --elevated-dark: 18 20 26;
+
+  --material-sidebar: 40 42 50 / 0.62;
+  --material-toolbar: 44 46 54 / 0.7;
+  --material-menu: 52 55 64 / 0.82;
+
+  --danger: 224 108 100;
+  --success: 96 186 128;
+  --warning: 222 176 98;
 
   color-scheme: dark;
 }

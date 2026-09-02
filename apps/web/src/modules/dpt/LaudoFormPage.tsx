@@ -95,7 +95,7 @@ export function LaudoFormPage() {
   const busy = create.isPending || update.isPending;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-2xl space-y-4 pb-24">
+    <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-2xl space-y-4">
       <h1 className="px-1 text-[20px] font-semibold tracking-tight text-foreground">
         {editing ? "Editar laudo" : "Novo laudo"}
       </h1>
@@ -175,7 +175,7 @@ export function LaudoFormPage() {
         </Field>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface/95 p-3 backdrop-blur lg:left-[264px]">
+      <div className="sticky bottom-0 z-20 -mx-4 mt-2 border-t border-border bg-surface/95 p-3 backdrop-blur">
         <div className="mx-auto flex max-w-2xl gap-2">
           <Button type="button" variant="neutral" block onClick={() => navigate(-1)}>
             Cancelar

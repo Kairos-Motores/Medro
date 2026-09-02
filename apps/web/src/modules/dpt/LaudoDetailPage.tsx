@@ -221,7 +221,7 @@ export function LaudoDetailPage() {
       </p>
 
       <Sheet open={confirmArchive} onOpenChange={setConfirmArchive}>
-        <SheetContent side="bottom" className="mx-auto max-w-md">
+        <SheetContent side="center">
           <SheetTitle>Arquivar laudo?</SheetTitle>
           <SheetDescription>
             O laudo {l.os} ficará com <code>xStatus = "Inativo"</code> e sairá da listagem.

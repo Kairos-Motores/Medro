@@ -94,7 +94,7 @@ export function LaudosMaster({ activeId }: { activeId?: string }) {
       )}
 
       <div className="flex items-center gap-2">
-        <Select value={filial} onChange={(e) => setFilial(e.target.value)} className="h-9 text-[13px]">
+        <Select value={filial} onChange={(e) => setFilial(e.target.value)} className="h-8 flex-1 text-[12.5px]">
           <option value="">Todas as filiais</option>
           {FILIAIS.map((f) => (
             <option key={f} value={f}>
@@ -102,14 +102,21 @@ export function LaudosMaster({ activeId }: { activeId?: string }) {
             </option>
           ))}
         </Select>
-        <span className="shrink-0 text-[12px] text-muted-foreground">{items.length}</span>
         <button
           onClick={() => q.refetch()}
-          className="ml-auto flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-[13px] text-primary active:opacity-60"
+          className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border text-muted-foreground transition hover:bg-surface-2"
+          aria-label="Atualizar"
         >
           <RefreshCw className={cn("size-3.5", q.isFetching && "animate-spin")} />
         </button>
+        <button
+          onClick={() => navigate("/dpt/laudo/novo")}
+          className="flex h-8 shrink-0 items-center gap-1.5 rounded-md bg-primary px-2.5 text-[12.5px] font-semibold text-primary-foreground transition hover:bg-primary-hover"
+        >
+          <Plus className="size-4" /> Novo
+        </button>
       </div>
+      <p className="text-[11px] text-muted-foreground">{items.length} laudo(s)</p>
 
       {q.isLoading ? (
         <div className="space-y-2">
@@ -187,15 +194,6 @@ export function LaudosMaster({ activeId }: { activeId?: string }) {
           ))}
         </div>
       )}
-
-      <button
-        onClick={() => navigate("/dpt/laudo/novo")}
-        className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] right-4 z-20 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-ios-2 transition-transform duration-200 ease-ios active:scale-90 lg:static lg:h-10 lg:w-full lg:gap-2 lg:rounded-md lg:text-[13.5px] lg:font-semibold lg:shadow-none"
-        aria-label="Novo laudo"
-      >
-        <Plus className="size-7 lg:size-4" />
-        <span className="hidden lg:inline">Novo laudo</span>
-      </button>
     </div>
   );
 }

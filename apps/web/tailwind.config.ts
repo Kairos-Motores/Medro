@@ -2,30 +2,26 @@ import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
 /**
- * Tema Medro — paleta fornecida + estética iOS 15.
- * As cores referenciam CSS vars definidas em src/styles/tokens.css (permite dark mode
- * e ajuste sem rebuild). Ver docs/05-arquitetura-alvo.md §5.
+ * Tema Medro — linguagem macOS (paleta fornecida como acento).
+ * Cores referenciam CSS vars de src/styles/tokens.css (dark mode + ajuste sem rebuild).
  */
 export default {
   darkMode: ["class", '[data-theme="dark"]'],
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
-    screens: {
-      xs: "400px",
-      sm: "640px",
-      md: "768px",
-      lg: "1024px",
-    },
+    screens: { xs: "400px", sm: "640px", md: "768px", lg: "1024px", xl: "1280px" },
     extend: {
       colors: {
         bg: "rgb(var(--bg) / <alpha-value>)",
         surface: "rgb(var(--surface) / <alpha-value>)",
-        "surface-muted": "rgb(var(--surface-muted) / <alpha-value>)",
+        "surface-2": "rgb(var(--surface-2) / <alpha-value>)",
+        "surface-muted": "rgb(var(--surface-2) / <alpha-value>)",
         border: "rgb(var(--border) / <alpha-value>)",
         "border-strong": "rgb(var(--border-strong) / <alpha-value>)",
         muted: "rgb(var(--muted) / <alpha-value>)",
         "muted-foreground": "rgb(var(--muted-foreground) / <alpha-value>)",
         foreground: "rgb(var(--foreground) / <alpha-value>)",
+        "foreground-secondary": "rgb(var(--foreground-secondary) / <alpha-value>)",
         primary: {
           DEFAULT: "rgb(var(--primary) / <alpha-value>)",
           hover: "rgb(var(--primary-hover) / <alpha-value>)",
@@ -42,28 +38,33 @@ export default {
           indigo: "rgb(var(--accent-indigo) / <alpha-value>)",
           teal: "rgb(var(--accent-teal) / <alpha-value>)",
           cyan: "rgb(var(--accent-cyan) / <alpha-value>)",
+          slate: "rgb(var(--accent-slate) / <alpha-value>)",
           green: "rgb(var(--accent-green) / <alpha-value>)",
           amber: "rgb(var(--accent-amber) / <alpha-value>)",
-          rose: "rgb(var(--accent-rose) / <alpha-value>)",
           violet: "rgb(var(--accent-violet) / <alpha-value>)",
-          slate: "rgb(var(--accent-slate) / <alpha-value>)",
+          rose: "rgb(var(--accent-rose) / <alpha-value>)",
         },
       },
       borderRadius: {
         xs: "3px",
         sm: "4px",
-        md: "6px",
-        lg: "8px",
-        xl: "12px",
+        md: "5px",
+        lg: "7px",
+        xl: "10px",
+        window: "10px",
       },
       boxShadow: {
-        "ios-1": "0 1px 2px rgba(39,50,62,.05), 0 1px 1px rgba(39,50,62,.04)",
-        "ios-2": "0 6px 20px rgba(39,50,62,.09)",
-        sheet: "0 -8px 30px rgba(39,50,62,.16)",
+        "ios-1": "0 0 0 0.5px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.05)",
+        "ios-2": "0 8px 28px rgba(0,0,0,.16), 0 0 0 0.5px rgba(0,0,0,.06)",
+        "mac-1": "0 0 0 0.5px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.05)",
+        "mac-2": "0 8px 28px rgba(0,0,0,.16), 0 0 0 0.5px rgba(0,0,0,.06)",
+        sheet: "0 10px 40px rgba(0,0,0,.18), 0 0 0 0.5px rgba(0,0,0,.08)",
+        popover: "0 10px 40px rgba(0,0,0,.18), 0 0 0 0.5px rgba(0,0,0,.08)",
       },
       fontFamily: {
         sans: [
           "-apple-system",
+          "BlinkMacSystemFont",
           "SF Pro Text",
           "SF Pro Display",
           "Inter",
@@ -73,12 +74,8 @@ export default {
           "sans-serif",
         ],
       },
-      transitionTimingFunction: {
-        ios: "cubic-bezier(.32,.72,0,1)",
-      },
-      minHeight: {
-        tap: "44px",
-      },
+      transitionTimingFunction: { ios: "cubic-bezier(.25,.1,.25,1)", mac: "cubic-bezier(.25,.1,.25,1)" },
+      minHeight: { tap: "36px" },
     },
   },
   plugins: [animate],

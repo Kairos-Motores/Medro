@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import type { UserSession } from "@medro/shared";
 import { api, ApiError } from "@/lib/api";
@@ -9,7 +8,6 @@ import { Input, Field } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 
 export function LoginPage() {
-  const navigate = useNavigate();
   const setSession = useAuth((s) => s.setSession);
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
@@ -20,10 +18,7 @@ export function LoginPage() {
         method: "POST",
         body: { usuario, senha },
       }),
-    onSuccess: ({ token, user }) => {
-      setSession(token, user);
-      navigate("/", { replace: true });
-    },
+    onSuccess: ({ token, user }) => setSession(token, user),
   });
 
   const devLogin = useMutation({
@@ -32,10 +27,7 @@ export function LoginPage() {
         method: "POST",
         body: { usuario: usuario || "douglasnou" },
       }),
-    onSuccess: ({ token, user }) => {
-      setSession(token, user);
-      navigate("/", { replace: true });
-    },
+    onSuccess: ({ token, user }) => setSession(token, user),
   });
 
   return (

@@ -16,7 +16,7 @@ export function DropdownMenuContent({
       <DM.Content
         sideOffset={sideOffset}
         className={cn(
-          "z-50 min-w-[13rem] overflow-hidden rounded-lg border border-border bg-surface p-1.5 shadow-ios-2",
+          "material-menu z-50 min-w-[12rem] overflow-hidden rounded-lg border border-border p-1 shadow-popover",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in data-[state=open]:zoom-in-95",
           className,
         )}

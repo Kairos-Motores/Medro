@@ -60,10 +60,10 @@
   --rs-color-foreground-warning: #9a6f22;
   --rs-color-rgb-foreground-warning: 154, 111, 34;
 
-  /* raios — enxuto */
+  /* raios — macOS moderado */
   --rs-unit-radius-small: 4px;
-  --rs-unit-radius-medium: 6px;
-  --rs-unit-radius-large: 8px;
+  --rs-unit-radius-medium: 5px;
+  --rs-unit-radius-large: 7px;
 }
 
 [data-rs-theme~="reshaped"][data-rs-color-mode="dark"] {

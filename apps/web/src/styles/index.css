@@ -12,74 +12,101 @@
   body {
     @apply bg-bg text-foreground font-sans antialiased;
     margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
   }
-  /* remove realce azul de toque no mobile */
   button,
   a {
     -webkit-tap-highlight-color: transparent;
   }
   :focus-visible {
-    outline: 2px solid rgb(var(--primary));
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: var(--ring);
     border-radius: 4px;
+  }
+  ::selection {
+    background: rgb(var(--primary) / 0.25);
   }
 }
 
 @layer components {
-  /* lista agrupada estilo iOS ("inset grouped table view") */
-  .ios-list {
-    @apply overflow-hidden rounded-lg bg-surface shadow-ios-1;
+  /* materiais translúcidos (vibrância macOS) */
+  .material-sidebar {
+    background: rgb(var(--material-sidebar));
+    backdrop-filter: var(--vibrancy);
+    -webkit-backdrop-filter: var(--vibrancy);
   }
-  .ios-list > * + * {
-    border-top: var(--hairline) solid rgb(var(--border) / 0.7);
+  .material-toolbar {
+    background: rgb(var(--material-toolbar));
+    backdrop-filter: var(--vibrancy);
+    -webkit-backdrop-filter: var(--vibrancy);
   }
-  .ios-row {
-    @apply flex min-h-tap items-center gap-3 px-4 py-3 text-[15px] transition-colors;
-  }
-  .ios-row:active {
-    @apply bg-surface-muted;
+  .material-menu {
+    background: rgb(var(--material-menu));
+    backdrop-filter: var(--vibrancy);
+    -webkit-backdrop-filter: var(--vibrancy);
   }
 
-  /* barra de navegação / tab bar com blur */
+  /* lista agrupada macOS: hairlines, cantos discretos */
+  .mac-list,
+  .ios-list {
+    @apply overflow-hidden rounded-lg border border-border bg-surface;
+  }
+  .mac-list > * + *,
+  .ios-list > * + * {
+    border-top: var(--hairline) solid rgb(var(--border) / 0.8);
+  }
+  .mac-row,
+  .ios-row {
+    @apply flex min-h-tap items-center gap-2.5 px-3 py-2 text-[13px] transition-colors;
+  }
+  .mac-row:hover,
+  .ios-row:hover {
+    @apply bg-surface-2;
+  }
+
+  /* item de source-list (sidebar) */
+  .source-item {
+    @apply flex items-center gap-2.5 rounded-md px-2 py-[5px] text-[13px] font-medium transition-colors;
+  }
+
+  /* barra escura legada (mantida p/ compat) */
   .ios-bar {
     background: rgb(var(--elevated-dark) / 0.92);
-    backdrop-filter: var(--blur);
-    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--vibrancy);
+    -webkit-backdrop-filter: var(--vibrancy);
     color: rgb(var(--primary-foreground));
   }
 }
 
 @layer utilities {
-  /* transição de página estilo iOS (push) */
+  /* transição de conteúdo — cross-fade discreto (macOS) */
   .page-enter {
-    animation: page-enter 320ms var(--ease-ios) both;
+    animation: page-enter 180ms var(--ease) both;
   }
   @keyframes page-enter {
     from {
       opacity: 0;
-      transform: translate3d(16px, 0, 0);
+      transform: translate3d(0, 3px, 0);
     }
     to {
       opacity: 1;
       transform: translate3d(0, 0, 0);
     }
   }
-
-  /* entrada escalonada de itens (hub, listas) */
   .stagger-item {
-    animation: stagger-in 420ms var(--ease-ios) both;
+    animation: stagger-in 240ms var(--ease) both;
   }
   @keyframes stagger-in {
     from {
       opacity: 0;
-      transform: translate3d(0, 10px, 0) scale(0.98);
+      transform: translate3d(0, 4px, 0);
     }
     to {
       opacity: 1;
-      transform: translate3d(0, 0, 0) scale(1);
+      transform: translate3d(0, 0, 0);
     }
   }
-
   @media (prefers-reduced-motion: reduce) {
     .page-enter,
     .stagger-item {
@@ -89,9 +116,12 @@
 }
 
 @media print {
+  .material-sidebar,
+  .material-toolbar,
   .ios-bar,
+  aside,
   header,
-  .page-enter > * > .print\:hidden {
+  .no-print {
     display: none !important;
   }
   body {
