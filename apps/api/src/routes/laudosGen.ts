@@ -5,8 +5,10 @@ import {
   buscarOs,
   getRascunho,
   salvarRascunho,
+  listarRascunhos,
   listarModelos,
   criarModelo,
+  getModeloIa,
   getModeloIaConfig,
   setModeloIaConfig,
   registrarHistoricoPdf,
@@ -16,6 +18,11 @@ import {
   getHistoricoServicos,
 } from "../services/laudosGen/dataverse.js";
 import { listFotos, uploadReportPdf } from "../services/laudosGen/sharepoint.js";
+import {
+  gerarTextoIA,
+  gerarDiagnosticoLoteIA,
+  iaProviderConfigurado,
+} from "../services/laudosGen/ia.js";
 
 /**
  * Gerador de Laudos — rotas (porte de Gerador_relatorios/backend/server.js).
@@ -39,6 +46,8 @@ export async function laudosGenRoutes(app: FastifyInstance) {
   });
 
   // ── rascunho ──────────────────────────────────────────────────────────────
+  app.get("/laudos-gen/rascunhos", async () => listarRascunhos());
+
   app.get("/laudos-gen/rascunho/:osId", async (req) => {
     const { osId } = req.params as { osId: string };
     const tipo = (req.query as { tipo?: string }).tipo || "padrao";
@@ -83,6 +92,63 @@ export async function laudosGenRoutes(app: FastifyInstance) {
     if (!body.success) return reply.code(400).send({ error: "bad_request" });
     await setModeloIaConfig(id, body.data);
     return { success: true };
+  });
+
+  // ── IA do diagnóstico (não persiste nada — só sugere para o técnico revisar) ─
+  async function resolverModeloIa(id: string, reply: import("fastify").FastifyReply) {
+    const { prompt, provider } = await getModeloIa(id);
+    if (!iaProviderConfigurado(provider)) {
+      reply
+        .code(400)
+        .send({ error: "ia_nao_configurada", message: `Provedor de IA "${provider}" sem chave no servidor.` });
+      return null;
+    }
+    return { prompt, provider };
+  }
+
+  app.post("/laudos-gen/modelos/:id/ia-gerar", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const body = z
+      .object({ resumo: z.string().min(1), campoLabel: z.string().optional() })
+      .safeParse(req.body);
+    if (!body.success) return reply.code(400).send({ error: "bad_request", message: "Informe um resumo." });
+    const m = await resolverModeloIa(id, reply);
+    if (!m) return;
+    try {
+      const texto = await gerarTextoIA({
+        provider: m.provider,
+        systemPrompt: m.prompt,
+        resumo: body.data.resumo,
+        campoLabel: body.data.campoLabel || "",
+      });
+      return { texto };
+    } catch (err) {
+      return reply.code(502).send({ error: "ia_erro", message: (err as Error).message });
+    }
+  });
+
+  app.post("/laudos-gen/modelos/:id/ia-gerar-lote", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const body = z
+      .object({
+        resumo: z.string().min(1),
+        campos: z.array(z.object({ key: z.string().min(1), label: z.string().min(1) })).min(1),
+      })
+      .safeParse(req.body);
+    if (!body.success) return reply.code(400).send({ error: "bad_request" });
+    const m = await resolverModeloIa(id, reply);
+    if (!m) return;
+    try {
+      const campos = await gerarDiagnosticoLoteIA({
+        provider: m.provider,
+        systemPrompt: m.prompt,
+        resumo: body.data.resumo,
+        campos: body.data.campos,
+      });
+      return { campos };
+    } catch (err) {
+      return reply.code(502).send({ error: "ia_erro", message: (err as Error).message });
+    }
   });
 
   // ── histórico de PDFs ─────────────────────────────────────────────────────

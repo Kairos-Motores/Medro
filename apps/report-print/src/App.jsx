@@ -68,6 +68,14 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isPrintMode, setIsPrintMode] = useState(false);
 
+  // Modo "prévia embutida": o módulo Gerador de Laudos do Medro carrega este
+  // bundle num iframe (?print=true&embed=1) e empurra o estado do rascunho por
+  // postMessage — sem nenhuma chamada à API (evita CORS) e sem a interface
+  // antiga (toolbar, FABs). Só a folha A4 do laudo é renderizada.
+  const isEmbed =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('embed') === '1';
+
   const [balanceData, setBalanceData] = useState(null);
   const [progresso, setProgresso] = useState(0);
   const [mensagemProgresso, setMensagemProgresso] = useState('');
@@ -415,6 +423,54 @@ function App() {
     }
   }, [isPrintMode, osData, historyData]);
 
+  // Prévia embutida: recebe o estado inteiro do rascunho do Medro por
+  // postMessage e reidrata os mesmos setters que o loadFullData usa a partir do
+  // snapshot — em tempo real, a cada tecla no editor, sem tocar na API.
+  useEffect(() => {
+    if (!isEmbed) return;
+    const onMsg = (e) => {
+      const msg = e.data;
+      if (!msg || msg.type !== 'laudo:preview' || !msg.state) return;
+      const s = msg.state;
+      if (s.osData) setOsData(s.osData);
+      if (s.historyData) setHistoryData(s.historyData);
+      if (s.photos) setPhotos(s.photos);
+      if ('balanceData' in s) setBalanceData(s.balanceData);
+      if (s.modelConfig?.layout) {
+        const correctedLayout = s.modelConfig.layout.map((page, index) => ({
+          ...page,
+          id:
+            page.id +
+            (s.modelConfig.layout.filter((p) => p.id === page.id).length > 1 ? `_${index}` : ''),
+        }));
+        setModelConfig({ ...s.modelConfig, layout: correctedLayout });
+      }
+      if (s.customTableRows) setCustomTableRows(s.customTableRows);
+      if (s.tableHeaders) setTableHeaders(s.tableHeaders);
+      if (s.tableColumns) setTableColumns(s.tableColumns);
+      if (s.tableSubColumns) setTableSubColumns(s.tableSubColumns);
+      if (s.textBlocks) setTextBlocks(s.textBlocks);
+      if (s.imageBlocks) setImageBlocks(s.imageBlocks);
+      if (s.freePageBlocks) setFreePageBlocks(s.freePageBlocks);
+      if (s.diagValues) setDiagValues(s.diagValues);
+      if (s.motorSections) setMotorSections(s.motorSections);
+      if (s.mechData) setMechData(s.mechData);
+      if (s.p11Data) setP11Data(s.p11Data);
+      if (s.resistanceData) setResistanceData(s.resistanceData);
+      if (s.normativeData) setNormativeData(s.normativeData);
+      if (s.diagVisibility) setDiagVisibility(s.diagVisibility);
+      setIsLoading(false);
+      setIsReady(true);
+      window.reportIsReady = true;
+    };
+    window.addEventListener('message', onMsg);
+    // avisa o Medro que o iframe já pode receber o estado
+    try {
+      window.parent?.postMessage({ type: 'laudo:preview-ready' }, '*');
+    } catch (_) {}
+    return () => window.removeEventListener('message', onMsg);
+  }, [isEmbed]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.key === 'Enter' && osData && isReady && !isLoading && !isPrintMode) {
@@ -542,6 +598,7 @@ function App() {
   };
 
   useEffect(() => {
+    if (isEmbed) return; // prévia embutida: estado vem por postMessage, nada de API
     if (auth.isAuthenticated) {
       fetchTemplatesAlbum();
       const params = new URLSearchParams(window.location.search);
@@ -998,6 +1055,12 @@ function AdminApp(props) {
     handleSincronizarFotosManual, isSincronizandoFotos
   } = props;
 
+  // Prévia embutida no Medro: esconde toda a interface antiga (toolbar, FABs,
+  // overlays) — só a folha A4 do laudo fica visível dentro do iframe.
+  const isEmbed =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('embed') === '1';
+
   // 👇 NOVO: estado para o modal de compartilhamento
   const [shareModal, setShareModal] = useState({ isOpen: false, contato: '', senha: '' });
 
@@ -1384,7 +1447,29 @@ function AdminApp(props) {
 
   // JSX do Admin
   return (
-    <div className={`report-app ${menuOpen ? 'menu-open' : ''}`}>
+    <div className={`report-app ${menuOpen ? 'menu-open' : ''} ${isEmbed ? 'embed-mode' : ''}`}>
+      {isEmbed && (
+        <style>{`
+          /* interface antiga do bundle — fora da prévia */
+          .embed-mode .report-toolbar,
+          .embed-mode .menu-fab,
+          .embed-mode .menu-overlay,
+          .embed-mode .scroll-top-fab,
+          .embed-mode .loading-overlay,
+          .embed-mode .loading-bar { display: none !important; }
+          /* a prévia é só leitura: replica o @media print — some com os inputs/
+             botões de edição e mostra os valores. A edição é toda na interface
+             Medro; sobram interações "de documento" (sumário, gráficos). */
+          .embed-mode .no-print { display: none !important; }
+          .embed-mode .print-only { display: revert !important; }
+          /* nenhum campo editável na prévia (alguns não têm .no-print) */
+          .embed-mode input,
+          .embed-mode textarea,
+          .embed-mode select { display: none !important; }
+          .embed-mode { background: #fff; }
+          .embed-mode .report-container { margin: 0 auto; }
+        `}</style>
+      )}
       {!isPrintMode && (
         <Toaster
           position="top-right"

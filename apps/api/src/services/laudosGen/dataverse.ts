@@ -83,6 +83,26 @@ export async function getRascunho(osId: string, tipo = "padrao"): Promise<unknow
   }
 }
 
+export type RascunhoResumo = {
+  osId: string;
+  tipo: string;
+  atualizadoEm: string | null;
+};
+
+/** Lista os rascunhos existentes (para "continuar de onde parou"). */
+export async function listarRascunhos(top = 50): Promise<RascunhoResumo[]> {
+  const { value } = await dataverse.list<Record<string, string>>(RASCUNHO_SET, {
+    select: ["cr4a1_osid", "cr4a1_tipo", "modifiedon"],
+    orderby: "modifiedon desc",
+    top,
+  });
+  return value.map((r) => ({
+    osId: r.cr4a1_osid ?? "",
+    tipo: r.cr4a1_tipo ?? "padrao",
+    atualizadoEm: r.modifiedon ?? null,
+  }));
+}
+
 export async function salvarRascunho(osId: string, state: unknown, tipo = "padrao"): Promise<void> {
   const conteudo = JSON.stringify(state);
   const { value } = await dataverse.list<{ cr4a1_rascunhorelatorioid: string }>(RASCUNHO_SET, {
@@ -126,6 +146,17 @@ export async function criarModelo(nome: string, configuracaoJson: string): Promi
     cr4a1_nome_modelo: nome,
     cr4a1_configuracao_json: configuracaoJson,
   });
+}
+
+/** prompt + provider do modelo (sem máscara) — a chave vem do .env do Medro. */
+export async function getModeloIa(id: string): Promise<{ prompt: string; provider: string }> {
+  const row = await dataverse.get<Record<string, string | null>>(MODELOS_SET, id, {
+    select: ["cr4a1_ia_prompt", "cr4a1_ia_provider"],
+  });
+  return {
+    prompt: row.cr4a1_ia_prompt ?? "",
+    provider: row.cr4a1_ia_provider ?? "gemini",
+  };
 }
 
 export async function getModeloIaConfig(

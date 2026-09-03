@@ -51,7 +51,15 @@ export async function listFotos(
       out[servico] = value
         .filter((f) => f.file)
         .map((f) => ({ id: f.id, nome: f.name, url: f["@microsoft.graph.downloadUrl"] ?? "" }));
-    } catch {
+    } catch (err) {
+      // 404 = pasta sem fotos (normal); outros erros são de path/permissão.
+      const msg = (err as Error).message ?? String(err);
+      if (!/\b404\b/.test(msg)) {
+        console.warn(
+          `[laudos-gen] listFotos ${osId}/${servico}: ${msg.slice(0, 200)} ` +
+            `(path: Fotos Peritagens/${unidade}/${cliente}/${osId}/${servico})`,
+        );
+      }
       out[servico] = [];
     }
   }

@@ -21,9 +21,20 @@ export type ModeloRow = {
 const keys = {
   os: (osId: string) => ["laudos-gen", "os", osId] as const,
   rascunho: (osId: string, tipo: string) => ["laudos-gen", "rascunho", osId, tipo] as const,
+  rascunhos: ["laudos-gen", "rascunhos"] as const,
   modelos: ["laudos-gen", "modelos"] as const,
   historicoPdf: ["laudos-gen", "historico-pdf"] as const,
 };
+
+export type RascunhoResumo = { osId: string; tipo: string; atualizadoEm: string | null };
+
+/** Lista de rascunhos existentes — "continuar de onde parou". */
+export function useRascunhos() {
+  return useQuery({
+    queryKey: keys.rascunhos,
+    queryFn: () => api<RascunhoResumo[]>("/laudos-gen/rascunhos"),
+  });
+}
 
 export function useOs(osId: string | null) {
   return useQuery({
@@ -48,8 +59,10 @@ export function useSalvarRascunho() {
   return useMutation({
     mutationFn: (body: { osId: string; state: unknown; tipo?: string }) =>
       api<{ success: true }>("/laudos-gen/rascunho", { method: "POST", body }),
-    onSuccess: (_d, v) =>
-      qc.invalidateQueries({ queryKey: keys.rascunho(v.osId, v.tipo ?? "padrao") }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: keys.rascunho(v.osId, v.tipo ?? "padrao") });
+      qc.invalidateQueries({ queryKey: keys.rascunhos });
+    },
   });
 }
 
@@ -63,6 +76,32 @@ export function useCriarModelo() {
     mutationFn: (body: { cr4a1_nome_modelo: string; cr4a1_configuracao_json: string }) =>
       api<{ success: true }>("/laudos-gen/modelos", { method: "POST", body }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.modelos }),
+  });
+}
+
+/** Gera o texto de UM campo do diagnóstico por IA (não persiste). */
+export function useIaGerar() {
+  return useMutation({
+    mutationFn: (body: { modeloId: string; resumo: string; campoLabel: string }) =>
+      api<{ texto: string }>(`/laudos-gen/modelos/${encodeURIComponent(body.modeloId)}/ia-gerar`, {
+        method: "POST",
+        body: { resumo: body.resumo, campoLabel: body.campoLabel },
+      }),
+  });
+}
+
+/** Gera vários campos do diagnóstico numa chamada só. */
+export function useIaGerarLote() {
+  return useMutation({
+    mutationFn: (body: {
+      modeloId: string;
+      resumo: string;
+      campos: { key: string; label: string }[];
+    }) =>
+      api<{ campos: Record<string, string> }>(
+        `/laudos-gen/modelos/${encodeURIComponent(body.modeloId)}/ia-gerar-lote`,
+        { method: "POST", body: { resumo: body.resumo, campos: body.campos } },
+      ),
   });
 }
 

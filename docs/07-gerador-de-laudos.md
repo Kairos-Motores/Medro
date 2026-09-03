@@ -1,6 +1,8 @@
 # 07 — Gerador de Laudos (módulo `laudos-gen`)
 
-> **Handoff para o próximo chat.** Documento vivo. Última atualização: 2026-09-03.
+> **Handoff para o próximo chat.** Documento vivo. Última atualização: 2026-09-03
+> (17 editores + prévia tempo real só-leitura + navegação + IA do diagnóstico +
+> seletor de fotos do SharePoint — §4.4).
 > Contexto: incorporar o app **standalone `Gerador_relatorios`** (gerador de laudo técnico
 > de OS, saída PDF A4 padrão Kairós) ao Medro como **módulo próprio `laudos-gen`,
 > acessível SOMENTE ao Departamento Técnico** (`access: ["DPT"]`).
@@ -169,10 +171,68 @@ Assim o bundle refaz as leituras já autenticado como DPT.
   our_services, summary, process_data, diagnosis, motor_p7, motor_p8, mechanical, bearing, components,
   resistance, normative, static_desc, custom_table_default, balanceamento, final).
 - **`src/modules/laudos-gen/LaudosGenApp.tsx`** — shell do módulo com identidade Medro:
-  toolbar (busca de OS, "Carregar", chips OS/cliente/unidade, "Salvar rascunho", "Gerar PDF"),
-  banner de status do PDF, e corpo `grid lg:grid-cols-[260px_minmax(0,1fr)]` =
-  **navegador de páginas (esquerda, pronto)** + **editor (direita, PLACEHOLDER)**.
-  O editor por enquanto só mostra contagem de campos + uma mini-tabela na página `summary`.
+  toolbar (busca de OS, "Carregar", chips OS/cliente/unidade, **seletor de Modelo**,
+  toggle da prévia, "Salvar"/"Salvo", "Gerar PDF"), banner do PDF com **"Abrir PDF gerado"**
+  + link do SharePoint quando arquivado, e corpo em 3 colunas
+  `lg:grid-cols-[220px_minmax(340px,440px)_minmax(0,1fr)]` =
+  **navegador de páginas** + **editor (forms Medro)** + **prévia do PDF em tempo real**.
+  Salva o rascunho ao trocar de página (se sujo). Sem OS carregada, mostra
+  **"Rascunhos — continuar de onde parou"** (`GET /laudos-gen/rascunhos`) e
+  **"Últimos PDFs emitidos"** (`GET /laudos-gen/historico-pdf`) — clicar carrega a OS.
+  Seletor de Modelo usa `useModelos` + `L.applyModelo(row)` (`applyModelo()` em `state.ts`,
+  mesma lógica do `handleSelectTemplate` antigo — troca layout/tabelas/blocos, seta
+  `activeTemplateId`, não mexe em `osData` nem nos dados já preenchidos).
+- **`src/modules/laudos-gen/state.ts`** — tipo `LaudoState` = objeto `state` do rascunho
+  1:1 com o que o `apps/report-print/src/App.jsx` lê/escreve (`osData`, `modelConfig`,
+  `diagValues`, `motorSections`, `mechData`, `p11Data`, `resistanceData`, `normativeData`,
+  `customTableRows`/`tableHeaders`/`tableSubColumns`, `textBlocks`, `imageBlocks`,
+  `freePageBlocks`, `balanceData`, `diagVisibility`, …). `emptyLaudoState()` espelha os
+  `useState(...)` do App.jsx; `mergeRascunho(raw)` funde o rascunho salvo sobre os defaults.
+- **`src/modules/laudos-gen/useLaudoDoc.ts`** — reúne OS + rascunho + auxiliares num único
+  documento editável; semeia `osData`/`historyData`/`balanceData` das queries quando o
+  rascunho ainda não os tem (o PDF em `?print=true` lê essas chaves do rascunho e NÃO refaz
+  o fetch); `patch(recipe)` (structuredClone + mutate), `dirty`, `save()` (persiste o
+  documento inteiro, sempre com `osData` embutido).
+- **`src/modules/laudos-gen/fields.tsx`** — primitivos de form Medro (`EditorSection`,
+  `FieldGrid`, `TextField`, `AreaField`, `SelectField`, `TriToggle` SIM/NÃO/—,
+  `StatusToggle` Aprovado/Reprovado, `DeferredNote`).
+- **`src/modules/laudos-gen/editors.tsx`** — **os 17 editores portados** com UI Medro, um
+  por `page.type`, + `renderEditor({page, doc, patch})`:
+  Capa, Sumário (títulos das páginas), Dados de Processo (campos da `osData`),
+  Diagnóstico (f1–f8 + visibilidade + histórico só-leitura), Relatório Fotográfico
+  (`motorSections`: título/evidências/serviços/nomes por bloco), Avaliação Mecânica e de
+  Mancais (`mechData`: Ø/interf/toler/exced/aprovado), Componentes Auxiliares (`p11Data`:
+  instrumentos + rolamentos/vedação/auxiliar), Ensaios de Resistência (`resistanceData`),
+  Referências Normativas (`normativeData` + IA/IP calculados), Tabela Livre
+  (`customTableRows`/headers/subcolunas), Balanceamento (`balanceData` editável), Texto/
+  Imagem/Página Livre, e fallback "sem campos" (contracapa, nossos serviços, descrição dos
+  ensaios, encerramento).
+  **IA do Diagnóstico** (`DiagnosisEditor`): campo "Resumo do problema" + botão "Gerar
+  diagnóstico completo" (lote) + botão "IA" por campo (f2/f4/f5/f6). Habilita só com um
+  **Modelo** selecionado. `useIaGerar`/`useIaGerarLote` → rotas abaixo. O resultado preenche
+  os campos para o técnico revisar (não salva sozinho).
+  **Fotos** (`PhotoField` em `editors.tsx`): seletor "Escolher do SharePoint" por slot no
+  Relatório Fotográfico (`motorSections[k].photos[i] = [{id,nome,url}]`) e na Avaliação
+  Mecânica/Mancais (`mechData[k].photo = {id,nome,url}`) — galeria de `useFotosOs`
+  (`GET /laudos-gen/os/:osId/fotos`, 4 categorias). Upload local ainda não portado.
+- **Prévia do PDF**: `iframe` para `${VITE_REPORT_PRINT_URL}/admin?os=…&print=true&embed=1&t=<jwt>`.
+  No `embed=1` o `report-print` não chama a API, esconde a interface antiga **e todos os
+  inputs/botões de edição** (só leitura) e recebe o `state` por `postMessage` — prévia **em
+  tempo real** (~250 ms após cada edição). Ver §7.3.
+  Nova env do front **`VITE_REPORT_PRINT_URL`** (default `http://localhost:5180`).
+- **`apps/report-print/src/App.jsx`** — 2ª mudança de lógica (além do `window.reportIsReady`):
+  const `isEmbed` + `useEffect` que escuta `message` (`laudo:preview`) e reidrata os setters;
+  `?os=` effect e `fetchTemplatesAlbum` pulados no embed; `<style>` inline + classe
+  `embed-mode` escondem `report-toolbar`/FABs/overlays, `.no-print`, e todo `input/textarea/
+  select` (mostra `.print-only`). Caminho do pdf-worker (`?print=true` sem `embed`) **intocado**.
+- **Backend novo**:
+  - `GET /laudos-gen/rascunhos` — `listarRascunhos()` (`select osid/tipo/modifiedon`).
+  - `POST /laudos-gen/modelos/:id/ia-gerar` e `.../ia-gerar-lote` — `services/laudosGen/ia.ts`
+    (gemini com fallback de modelo em 429, groq e openrouter OpenAI-compatible). O modelo
+    dá `cr4a1_ia_provider` + `cr4a1_ia_prompt` (`getModeloIa()`); a **chave vem do `.env`**
+    (`GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY`). Sem chave → 400
+    `ia_nao_configurada` ("Provedor de IA … sem chave no servidor").
+  - `listFotos` agora loga o erro do Graph (path/permissão) em vez de engolir — ver §7.1.
 
 ### 4.5 Infra / deploy
 
@@ -194,35 +254,25 @@ Assim o bundle refaz as leituras já autenticado como DPT.
 
 ---
 
-## 5. Estado do repositório (nada commitado ainda)
+## 5. Estado do repositório
 
-Branch `main`. Último commit: `9c4f11e`. **Toda a implementação abaixo está sem commit:**
+Branch `main`. Commitado e enviado (`origin/main`):
+- `e3fb06a` — `feat(desktop): controles de janela a direita, organizar janelas (tile) e TaskView`
+- `0d3848f` — `feat(laudos-gen): modulo Gerador de Laudos (DPT) — leitura, rascunho e emissao de PDF`
+  (backend + `apps/pdf-worker` + `apps/report-print` + shell do módulo + `render.yaml` +
+  `.env.example` + `.gitignore` + `pnpm-workspace.yaml` + este doc).
 
-**Novos (untracked):**
-- `apps/api/src/routes/laudosGen.ts`
-- `apps/api/src/services/laudosGen/` (`dataverse.ts`, `sharepoint.ts`)
-- `apps/pdf-worker/` (código; `node_modules` ignorado)
-- `apps/report-print/` (código; `node_modules` e `dist` ignorados)
-- `apps/web/src/modules/laudos-gen/` (`LaudosGenApp.tsx`, `api.ts`, `layout.ts`)
-- `apps/web/src/components/desktop/TaskView.tsx` ← **não é do laudos-gen**, ver abaixo
-
-**Modificados:**
-- `apps/api/src/config.ts`, `apps/api/src/server.ts`
-- `apps/web/src/modules/registry.ts`, `apps/web/src/modules/ModuleHost.tsx`
-- `.env.example`, `.gitignore`, `render.yaml`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`
-- **`apps/web/src/components/desktop/{Desktop,Dock,MenuBar,WindowFrame}.tsx` + `apps/web/src/lib/wm.ts`**
-  → trabalho do **window manager** ainda **não commitado**: controles de janela estilo
-  **Windows/Linux à direita** (minimizar/maximizar/fechar com ícones lucide, não os "traffic lights"),
-  botão **"Organizar janelas na tela"** (`tile()` em `wm.ts` — grade proporcional para 2/3/4/5+ janelas),
-  **TaskView** (multitarefa, botão `AppWindow` com badge de contagem na MenuBar), `bounds` no store.
-  ⚠️ O resumo anterior dizia que isso estava em `447c758`, mas **está pendente de commit**.
-
-**Sugestão de commits** (separar os dois assuntos):
-1. `feat(desktop): controles de janela à direita, organizar janelas (tile) e TaskView`
-   → `Desktop/Dock/MenuBar/WindowFrame.tsx`, `wm.ts`, `TaskView.tsx`.
-2. `feat(laudos-gen): módulo Gerador de Laudos (DPT) — leitura, rascunho e emissão de PDF`
-   → tudo de `laudos-gen`, `apps/pdf-worker`, `apps/report-print`, config/server/registry/ModuleHost,
-   `render.yaml`, `.env.example`, `.gitignore`, `pnpm-workspace.yaml`.
+**Sem commit** (porte dos editores + prévia tempo real + navegação + IA + fotos — §4.4/§7.3):
+- Novos: `apps/web/src/modules/laudos-gen/{state.ts,useLaudoDoc.ts,fields.tsx,editors.tsx}`,
+  `apps/api/src/services/laudosGen/ia.ts`
+- Modificados:
+  - `apps/web/src/modules/laudos-gen/{LaudosGenApp.tsx,api.ts}` (modelo, rascunhos/histórico
+    na tela vazia, prévia `postMessage`, `useRascunhos`/`useIaGerar`/`useIaGerarLote`)
+  - `apps/report-print/src/App.jsx` (modo `embed=1` — postMessage + esconde chrome/inputs)
+  - `apps/api/src/routes/laudosGen.ts` (`GET /rascunhos`, `POST .../ia-gerar[-lote]`)
+  - `apps/api/src/services/laudosGen/dataverse.ts` (`listarRascunhos`, `getModeloIa`)
+  - `apps/api/src/services/laudosGen/sharepoint.ts` (log do erro Graph em `listFotos`)
+  - `apps/web/.env.example` (`VITE_REPORT_PRINT_URL`), este doc
 
 ---
 
@@ -236,9 +286,10 @@ pnpm --filter @medro/api dev
 pnpm --filter @medro/pdf-worker dev
 
 # 3. bundle de impressão (porta 5180) — use preview (build servido), não o dev server
+#    também é a prévia dentro do módulo; precisa de WEB_ORIGIN da API incluindo :5180 (§7.3)
 pnpm --filter @medro/report-print build && pnpm --filter @medro/report-print preview
 
-# 4. web Medro
+# 4. web Medro — precisa de apps/web/.env (ou default) com VITE_REPORT_PRINT_URL=http://localhost:5180
 pnpm --filter @medro/web dev
 ```
 
@@ -274,28 +325,44 @@ pnpm --filter @medro/web dev
 - `POST /api/auth/dev-login` é **dev-only** — remover ou manter atrás de guard antes de produção.
 - Chaves de IA vão no `.env` do Medro (autorizado). O model no Dataverse guarda só o *provider*.
 
+### 7.3 Prévia do PDF no módulo — como funciona
+- `iframe` do `apps/report-print` em **`?print=true&embed=1`**. No modo `embed=1` o bundle:
+  (a) **não faz nenhuma chamada à API** — não há CORS a resolver; (b) esconde toda a
+  interface antiga (toolbar, FABs, overlays) **e todo campo editável** (`.no-print`, mais
+  `input`/`textarea`/`select` — alguns campos do report não têm `.no-print`), mostrando
+  `.print-only` — a prévia é só leitura, a edição é toda na interface Medro (exceto
+  interações "de documento": sumário clicável, gráficos); (c) recebe o `state` inteiro do
+  rascunho por **`postMessage`** e reidrata os mesmos setters do `loadFullData`.
+- O Medro empurra `{type:'laudo:preview', state: doc}` ~250 ms depois de cada edição →
+  **prévia em tempo real**, sem precisar salvar.
+- Front: env **`VITE_REPORT_PRINT_URL`** (default `http://localhost:5180`).
+- O `POST /render` (pdf-worker) continua usando `?print=true` **sem** `embed=1` — caminho
+  intocado; `WEB_ORIGIN` não precisa mais listar :5180.
+- A prévia reflete o rascunho em memória (não salvo). "Gerar PDF" salva antes de renderizar.
+
 ---
 
 ## 8. Pendências
 
 ### Fase 1 (o que falta para o módulo funcionar de ponta a ponta)
-1. **Portar os ~50 editores** de `Gerador_relatorios/frontend/src/features/report-builder/pages`
-   e `.../blocks` para `apps/web/src/modules/laudos-gen/` **com identidade visual Medro**
-   (o output/print das páginas continua como está). É o grosso do trabalho.
-   Substituir o placeholder do painel direito em `LaudosGenApp.tsx`, ligado aos hooks
-   `useRascunho`/`useSalvarRascunho` já existentes.
-   Sugestão de fatia vertical inicial: capa, sumário, dados de processo, diagnóstico,
-   relatório fotográfico, ensaios de resistência, encerramento.
-   **Confirmar com o usuário** se porta todas as páginas ou começa por um subconjunto.
-2. **Endpoints de IA de diagnóstico** — portar `gerarTextoIA` e `gerarDiagnosticoLoteIA` de
-   `Gerador_relatorios/backend/.../ia.js` (rotas `/modelos/:id/ia-gerar` e `/ia-gerar-lote`),
-   usando as chaves do `.env` do Medro (o model só tem o provider).
-3. **Upload de capa** — portar `/api/upload-capa` + `/api/capas/:id`.
+1. ✅ **Editores portados** (17) + prévia em tempo real + navegação (rascunhos, modelos,
+   histórico de PDFs) — ver §4.4.
+2. ✅ **IA do diagnóstico** — rotas `ia-gerar`/`ia-gerar-lote` + `services/laudosGen/ia.ts`
+   (gemini/groq/openrouter), botões religados no `DiagnosisEditor`.
+   ⚠️ Falta pôr **`GEMINI_API_KEY`** (ou `GROQ_/OPENROUTER_`) no `apps/api/.env` — sem isso
+   retorna "Provedor de IA … sem chave no servidor". Modelo precisa ter `cr4a1_ia_provider`
+   preenchido (config via rota `ia-config`, ainda sem UI Medro — usar o app antigo por ora).
+3. **Fotos** — seletor "Escolher do SharePoint" já religado (`PhotoField`). Falta:
+   (a) `listFotos` retornou vazio p/ 11539-AL — ver §7.1 (agora loga o erro do Graph);
+   (b) portar **upload local** (`/api/upload-temp/:categoria`) e **upload de capa**
+   (`/api/upload-capa` + `/api/capas/:id`); (c) auto-import da peritagem
+   (`/api/os/:id/peritagem-fotos` + `aplicarFotosAutomaticas`).
 4. **Confirmar upload SharePoint no Render** (§7.1).
+5. **UI Medro para config de IA do modelo** (prompt + provider) — hoje só via app antigo.
 
 ### Depois
-5. **Commitar** os dois blocos (§5).
-6. **Apagar `Gerador_relatorios/`** quando o módulo estiver completo (plano do usuário).
+6. **Commitar** o porte + esta rodada (§5).
+7. **Apagar `Gerador_relatorios/`** quando o módulo estiver completo (plano do usuário).
 
 ---
 
@@ -324,10 +391,11 @@ pnpm --filter @medro/web dev
 
 ```
 apps/api/src/
-  routes/laudosGen.ts                     rotas DPT-gated + POST /render + status
+  routes/laudosGen.ts  (mod)             + GET /rascunhos, POST .../ia-gerar[-lote]
   services/laudosGen/
-    dataverse.ts                          queries (OS, rascunho, modelos, histórico, balanceamento…)
-    sharepoint.ts                         uploadReportPdf() + listFotos()
+    dataverse.ts  (mod)                   + listarRascunhos(), getModeloIa()
+    sharepoint.ts (mod)                   listFotos() loga erro do Graph
+    ia.ts         (novo)                  gerarTextoIA / gerarDiagnosticoLoteIA (gemini/groq/openrouter)
   config.ts  (mod)                        REPORT_PRINT_URL, PDF_WORKER_URL, PDF_WORKER_TOKEN, *_API_KEY
   server.ts  (mod)                        register(laudosGenRoutes, { prefix: "/api" })
 
@@ -337,16 +405,22 @@ apps/pdf-worker/                          Express + Puppeteer → PDF A4
 apps/report-print/                       React 19 / Vite 7 — cópia print-only do frontend do Gerador
   src/config.js  (reescrito)             API_BASE_URL, AUTH_TOKEN, apiFetch
   src/main.jsx   (reescrito)             shim window.fetch → Bearer t
-  src/App.jsx    (1 mudança)             condição do window.reportIsReady
+  src/App.jsx    (2 mudanças)            window.reportIsReady + modo embed=1 (postMessage)
   src/features/report-builder/pages|blocks   ~50 páginas do laudo (INTOCADAS)
 
 apps/web/src/modules/
   registry.ts   (mod)                    MODULES["laudos-gen"], access ["DPT"]
   ModuleHost.tsx (mod)                   render <LaudosGenApp />
   laudos-gen/
-    LaudosGenApp.tsx                     shell Medro (toolbar + navegador + editor PLACEHOLDER)
-    api.ts                               hooks React Query
+    LaudosGenApp.tsx  (mod)              navegador + editor + prévia tempo real + modelo +
+                                        rascunhos/histórico na tela vazia
+    api.ts            (mod)              hooks RQ + useRascunhos/useIaGerar/useIaGerarLote
     layout.ts                            DEFAULT_LAYOUT (17 páginas)
+    state.ts          (novo)             LaudoState + emptyLaudoState/mergeRascunho/applyModelo
+    useLaudoDoc.ts    (novo)             OS+rascunho+auxiliares → doc; patch/save/applyModelo
+    fields.tsx        (novo)             primitivos de form Medro
+    editors.tsx       (novo)             17 editores + renderEditor() + PhotoField + IA
 
-render.yaml (mod)                        medro-api + medro-pdf-worker + medro-report-print
+apps/web/.env.example (mod)             VITE_REPORT_PRINT_URL
+render.yaml                             medro-api + medro-pdf-worker + medro-report-print
 ```
