@@ -26,7 +26,8 @@ export interface MechCell {
   exced: string;
   /** "X" = SIM, "N" = NÃO, "" = não avaliado */
   approvedX: string;
-  photo: { url: string; nome?: string } | null;
+  /** ref da foto no SharePoint — `<img src>` é montado a partir do id */
+  photo: { id?: string; nome?: string; url?: string } | null;
 }
 
 export interface P11Instrument {

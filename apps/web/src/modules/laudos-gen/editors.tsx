@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
 import { Plus, Trash2, Eye, EyeOff, Sparkles, Loader2, ImagePlus, X } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { LaudoPage } from "./layout";
 import type { LaudoState, DiagKey, MechKey } from "./state";
 import { DIAG_ITEMS } from "./state";
 import type { PatchFn } from "./useLaudoDoc";
-import { useFotosOs, useIaGerar, useIaGerarLote } from "./api";
+import { useFotosOs, useIaGerar, useIaGerarLote, fotoSrc } from "./api";
 import {
   EditorSection,
   FieldGrid,
@@ -30,7 +31,7 @@ export interface EditorProps {
 /** campos do diagnóstico que têm botão de IA (mesmos do app original). */
 const CAMPOS_IA = new Set<DiagKey>(["f2", "f4", "f5", "f6"]);
 
-type Foto = { id: string; nome: string; url: string };
+type Foto = { id: string; nome: string };
 
 /** Seletor de foto do SharePoint (galeria por categoria da OS). */
 function PhotoField({
@@ -41,7 +42,7 @@ function PhotoField({
   label,
 }: {
   osData: Record<string, unknown> | null;
-  value?: { url?: string; nome?: string } | null;
+  value?: { id?: string; nome?: string; url?: string } | null;
   onPick: (f: Foto) => void;
   onClear: () => void;
   label?: string;
@@ -49,6 +50,7 @@ function PhotoField({
   const osId = (osData?.cr4a1_novacoluna as string) || null;
   const unidade = osData?.unidade_nome as string | undefined;
   const cliente = osData?.cr4a1_cliente_nome as string | undefined;
+  const token = useAuth((s) => s.token);
   const fotos = useFotosOs(osId, unidade, cliente);
   const [open, setOpen] = useState(false);
 
@@ -57,15 +59,18 @@ function PhotoField({
     [fotos.data],
   );
 
+  // compat: rascunhos antigos podem ter `url` gravada (expirada) em vez de `id`
+  const previewSrc = value?.id ? fotoSrc(value.id, token) : value?.url || null;
+
   return (
     <div className="space-y-1">
       {label && <span className="block text-[12px] font-medium text-foreground-secondary">{label}</span>}
       <div className="flex items-center gap-2">
-        {value?.url ? (
+        {previewSrc ? (
           <div className="relative">
             <img
-              src={value.url}
-              alt={value.nome ?? ""}
+              src={previewSrc}
+              alt={value?.nome ?? ""}
               className="size-14 rounded-md border border-border object-cover"
             />
             <button
@@ -108,13 +113,13 @@ function PhotoField({
                         key={f.id}
                         type="button"
                         onClick={() => {
-                          onPick(f);
+                          onPick({ id: f.id, nome: f.nome });
                           setOpen(false);
                         }}
                         className="size-12 overflow-hidden rounded border border-border hover:ring-2 hover:ring-primary/40"
                         title={f.nome}
                       >
-                        <img src={f.url} alt={f.nome} className="size-full object-cover" />
+                        <img src={fotoSrc(f.id, token)} alt={f.nome} className="size-full object-cover" />
                       </button>
                     ))}
                   </div>
@@ -440,10 +445,10 @@ function DiagnosisEditor({ doc, patch }: EditorProps) {
 
 /* ────────────── Relatório fotográfico (motorSections) ────────────── */
 
-function slotFoto(slot: unknown): { url?: string; nome?: string } | null {
+function slotFoto(slot: unknown): { id?: string; nome?: string; url?: string } | null {
   if (!slot) return null;
   const s = Array.isArray(slot) ? slot[0] : slot;
-  return s && typeof s === "object" ? (s as { url?: string; nome?: string }) : null;
+  return s && typeof s === "object" ? (s as { id?: string; nome?: string; url?: string }) : null;
 }
 
 function PhotoReportEditor({ page, doc, patch }: EditorProps) {

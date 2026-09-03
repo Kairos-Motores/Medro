@@ -35,7 +35,41 @@ import { DiagnosisContent } from './features/report-builder/pages/DiagnosisConte
 import { MotorElectricContent } from './features/report-builder/pages/MotorElectricContent';
 import { PaginatedPage } from './features/report-builder/components/PaginatedPage';
 import { splitDiagnosisIntoPages, computeLayoutPageCounts, computeStartingPageNumbers, DIAG_ITEMS_COM_IA } from './features/report-builder/utils/pagination';
-import { API_BASE_URL } from './config';
+import { API_BASE_URL, AUTH_TOKEN } from './config';
+
+// As fotos ficam gravadas no rascunho só como { id, nome } — a downloadUrl do
+// SharePoint expira em ~1 h. Aqui montamos a src do <img> apontando para o
+// redirect autenticado do backend (que resolve uma URL fresca a cada carga).
+function fotoSrcFromId(id) {
+  return `${API_BASE_URL}/foto/${encodeURIComponent(id)}${AUTH_TOKEN ? `?t=${encodeURIComponent(AUTH_TOKEN)}` : ''}`;
+}
+function fotoObj(o) {
+  if (!o || typeof o !== 'object') return o;
+  if (o.id && !o.url) return { ...o, url: fotoSrcFromId(o.id) };
+  return o;
+}
+function hydrateMotorSections(sections) {
+  if (!sections) return sections;
+  const out = {};
+  for (const [k, blk] of Object.entries(sections)) {
+    if (!blk || !Array.isArray(blk.photos)) { out[k] = blk; continue; }
+    out[k] = {
+      ...blk,
+      photos: blk.photos.map((slot) =>
+        Array.isArray(slot) ? slot.map(fotoObj) : slot ? fotoObj(slot) : slot,
+      ),
+    };
+  }
+  return out;
+}
+function hydrateMechData(mech) {
+  if (!mech) return mech;
+  const out = {};
+  for (const [k, cell] of Object.entries(mech)) {
+    out[k] = cell && cell.photo ? { ...cell, photo: fotoObj(cell.photo) } : cell;
+  }
+  return out;
+}
 
 function App() {
   // === Autenticação (unificada) ===
@@ -453,8 +487,8 @@ function App() {
       if (s.imageBlocks) setImageBlocks(s.imageBlocks);
       if (s.freePageBlocks) setFreePageBlocks(s.freePageBlocks);
       if (s.diagValues) setDiagValues(s.diagValues);
-      if (s.motorSections) setMotorSections(s.motorSections);
-      if (s.mechData) setMechData(s.mechData);
+      if (s.motorSections) setMotorSections(hydrateMotorSections(s.motorSections));
+      if (s.mechData) setMechData(hydrateMechData(s.mechData));
       if (s.p11Data) setP11Data(s.p11Data);
       if (s.resistanceData) setResistanceData(s.resistanceData);
       if (s.normativeData) setNormativeData(s.normativeData);
@@ -633,8 +667,8 @@ function App() {
         if (snapshotData.imageBlocks) setImageBlocks(snapshotData.imageBlocks);
         if (snapshotData.freePageBlocks) setFreePageBlocks(snapshotData.freePageBlocks);
         if (snapshotData.diagValues) setDiagValues(snapshotData.diagValues);
-        if (snapshotData.motorSections) setMotorSections(snapshotData.motorSections);
-        if (snapshotData.mechData) setMechData(snapshotData.mechData);
+        if (snapshotData.motorSections) setMotorSections(hydrateMotorSections(snapshotData.motorSections));
+        if (snapshotData.mechData) setMechData(hydrateMechData(snapshotData.mechData));
         if (snapshotData.p11Data) setP11Data(snapshotData.p11Data);
         if (snapshotData.resistanceData) setResistanceData(snapshotData.resistanceData);
         if (snapshotData.normativeData) setNormativeData(snapshotData.normativeData);
@@ -667,8 +701,8 @@ function App() {
           if (printState.imageBlocks) setImageBlocks(printState.imageBlocks);
           if (printState.freePageBlocks) setFreePageBlocks(printState.freePageBlocks);
           if (printState.diagValues) setDiagValues(printState.diagValues);
-          if (printState.motorSections) setMotorSections(printState.motorSections);
-          if (printState.mechData) setMechData(printState.mechData);
+          if (printState.motorSections) setMotorSections(hydrateMotorSections(printState.motorSections));
+          if (printState.mechData) setMechData(hydrateMechData(printState.mechData));
           if (printState.p11Data) setP11Data(printState.p11Data);
           if (printState.resistanceData) setResistanceData(printState.resistanceData);
           if (printState.normativeData) setNormativeData(printState.normativeData);

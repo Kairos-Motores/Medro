@@ -29,7 +29,13 @@ function enc(rel: string): string {
     .join("/");
 }
 
-export type FotoItem = { id: string; nome: string; url: string };
+/**
+ * Item de foto. NÃO devolve URL: o `@microsoft.graph.downloadUrl` é pré-assinado
+ * e expira em ~1 h — se fosse gravado no rascunho, a imagem quebrava depois
+ * (foi o bug). O front monta `<img src="/api/laudos-gen/foto/{id}?t=<jwt>">` e o
+ * backend redireciona (302) para uma URL fresca a cada carga.
+ */
+export type FotoItem = { id: string; nome: string };
 
 type GItem = {
   id: string;
@@ -38,6 +44,27 @@ type GItem = {
   folder?: unknown;
   "@microsoft.graph.downloadUrl"?: string;
 };
+
+// cache curto da downloadUrl por itemId (reduz chamadas ao Graph nos <img>)
+const urlCache = new Map<string, { url: string; exp: number }>();
+
+/** URL de download fresca para um driveItem (para o redirect de /foto/:id). */
+export async function fotoDownloadUrl(itemId: string): Promise<string | null> {
+  if (!graphEnabled()) return null;
+  const hit = urlCache.get(itemId);
+  if (hit && hit.exp > Date.now()) return hit.url;
+  try {
+    const item = await graph<GItem>(`/drives/${DRIVE_ID}/items/${encodeURIComponent(itemId)}`, {
+      signal: AbortSignal.timeout(15_000),
+    });
+    const url = item["@microsoft.graph.downloadUrl"];
+    if (!url) return null;
+    urlCache.set(itemId, { url, exp: Date.now() + 25 * 60_000 });
+    return url;
+  } catch {
+    return null;
+  }
+}
 
 /** {osId}_{item}_{hash}.jpg → "item" (categoria de exibição); senão "Peritagem". */
 function categoriaDoNome(nome: string, osId: string): string {
@@ -50,7 +77,7 @@ function categoriaDoNome(nome: string, osId: string): string {
 }
 
 function toFoto(f: GItem): FotoItem {
-  return { id: f.id, nome: f.name, url: f["@microsoft.graph.downloadUrl"] ?? "" };
+  return { id: f.id, nome: f.name };
 }
 
 async function children(idOrPath: { id?: string; path?: string }): Promise<GItem[]> {

@@ -17,7 +17,7 @@ import {
   getPeritagemPorOs,
   getHistoricoServicos,
 } from "../services/laudosGen/dataverse.js";
-import { listFotos, uploadReportPdf } from "../services/laudosGen/sharepoint.js";
+import { listFotos, fotoDownloadUrl, uploadReportPdf } from "../services/laudosGen/sharepoint.js";
 import {
   gerarTextoIA,
   gerarDiagnosticoLoteIA,
@@ -32,7 +32,23 @@ import {
  *  - fotos (SharePoint), IA e geração de PDF entram na próxima fase.
  */
 export async function laudosGenRoutes(app: FastifyInstance) {
+  // `<img src>` e o bundle de impressão não mandam header — aceitam o JWT em `?t=`.
+  app.addHook("onRequest", async (req) => {
+    const t = (req.query as { t?: string })?.t;
+    if (!req.headers.authorization && typeof t === "string" && t) {
+      req.headers.authorization = `Bearer ${t}`;
+    }
+  });
   app.addHook("preHandler", app.requireAccess("DPT"));
+
+  // ── foto da OS: redireciona para uma URL de download fresca do SharePoint ──
+  app.get("/laudos-gen/foto/:itemId", async (req, reply) => {
+    const { itemId } = req.params as { itemId: string };
+    const url = await fotoDownloadUrl(itemId);
+    if (!url) return reply.code(404).send({ error: "foto_nao_encontrada" });
+    reply.header("Cache-Control", "private, max-age=1500");
+    return reply.redirect(url);
+  });
 
   // ── OS ────────────────────────────────────────────────────────────────────
   app.get("/laudos-gen/os/:osId", async (req, reply) => {

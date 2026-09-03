@@ -199,6 +199,8 @@ export function useArquivoStatus(osId: string | null, ativo: boolean) {
   });
 }
 
+export type FotoRef = { id: string; nome: string };
+
 export function useFotosOs(osId: string | null, unidade?: string, cliente?: string) {
   return useQuery({
     queryKey: ["laudos-gen", "fotos", osId, unidade, cliente],
@@ -207,9 +209,14 @@ export function useFotosOs(osId: string | null, unidade?: string, cliente?: stri
       const p = new URLSearchParams();
       if (unidade) p.set("unidade", unidade);
       if (cliente) p.set("cliente", cliente);
-      return api<Record<string, { id: string; nome: string; url: string }[]>>(
+      return api<Record<string, FotoRef[]>>(
         `/laudos-gen/os/${encodeURIComponent(osId!)}/fotos?${p.toString()}`,
       );
     },
   });
+}
+
+/** `<img src>` para uma foto da OS — redireciona no backend p/ uma URL fresca. */
+export function fotoSrc(id: string, token: string | null): string {
+  return `${API_ORIGIN}/laudos-gen/foto/${encodeURIComponent(id)}${token ? `?t=${encodeURIComponent(token)}` : ""}`;
 }
