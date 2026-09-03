@@ -1,4 +1,5 @@
 import { useRef, type ReactNode } from "react";
+import { Minus, Square, Copy, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useWM, WIN_MIN, type MedroWindow, type WinRect } from "@/lib/wm";
 
@@ -92,42 +93,55 @@ export function WindowFrame({
   return (
     <div
       className={cn(
-        "absolute flex flex-col overflow-hidden rounded-xl border border-black/15 bg-surface",
-        focused ? "shadow-mac-2" : "shadow-mac-1",
+        "absolute flex flex-col overflow-hidden rounded-lg border bg-surface",
+        focused
+          ? "border-border-strong shadow-mac-2 ring-1 ring-primary/20"
+          : "border-border shadow-mac-1",
         drag.current ? "select-none" : "transition-[box-shadow] duration-150",
       )}
       style={{ left: win.rect.x, top: win.rect.y, width: win.rect.w, height: win.rect.h, zIndex: win.z }}
       onPointerDown={() => !focused && focus(win.id)}
     >
-      {/* barra de título */}
+      {/* barra de título — controles à direita (estilo Windows/Linux) */}
       <div
-        className="material-toolbar flex h-9 shrink-0 items-center gap-2 border-b border-border px-3"
+        className={cn(
+          "flex h-8 shrink-0 items-stretch border-b border-border",
+          focused ? "bg-surface-2" : "bg-surface",
+        )}
         onPointerDown={onTitleDown}
         onPointerMove={onTitleMove}
         onPointerUp={endDrag}
         onDoubleClick={() => toggleMax(win.id, bounds)}
       >
-        <div className="group flex items-center gap-2">
-          <button
-            onClick={() => close(win.id)}
-            className="size-3 rounded-full bg-[#ec6a5e] transition hover:brightness-90"
-            aria-label="Fechar"
-          />
-          <button
-            onClick={() => minimize(win.id)}
-            className="size-3 rounded-full bg-[#f4bf4f] transition hover:brightness-90"
-            aria-label="Minimizar"
-          />
-          <button
-            onClick={() => toggleMax(win.id, bounds)}
-            className="size-3 rounded-full bg-[#61c454] transition hover:brightness-90"
-            aria-label="Zoom"
-          />
-        </div>
-        <span className="pointer-events-none flex-1 truncate text-center text-[12.5px] font-semibold text-foreground">
+        <span className="pointer-events-none flex flex-1 items-center truncate px-3 text-[12px] font-semibold text-foreground">
           {win.title}
         </span>
-        <span className="w-[54px]" />
+        <div className="flex items-stretch">
+          <button
+            onClick={() => minimize(win.id)}
+            className="flex w-10 items-center justify-center text-foreground-secondary transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+            aria-label="Minimizar"
+            title="Minimizar"
+          >
+            <Minus className="size-3.5" strokeWidth={2.5} />
+          </button>
+          <button
+            onClick={() => toggleMax(win.id, bounds)}
+            className="flex w-10 items-center justify-center text-foreground-secondary transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+            aria-label={win.maximized ? "Restaurar" : "Maximizar"}
+            title={win.maximized ? "Restaurar" : "Maximizar"}
+          >
+            {win.maximized ? <Copy className="size-3" strokeWidth={2.5} /> : <Square className="size-3" strokeWidth={2.5} />}
+          </button>
+          <button
+            onClick={() => close(win.id)}
+            className="flex w-10 items-center justify-center text-foreground-secondary transition-colors hover:bg-danger hover:text-white"
+            aria-label="Fechar"
+            title="Fechar"
+          >
+            <X className="size-3.5" strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
 
       {/* conteúdo */}

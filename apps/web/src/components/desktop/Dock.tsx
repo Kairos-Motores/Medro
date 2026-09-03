@@ -126,15 +126,15 @@ export function Dock({ hidden = false }: { hidden?: boolean }) {
       )}
     >
       <div className="material-menu pointer-events-auto flex items-center gap-1.5 rounded-2xl border border-white/25 dark:border-white/10 px-2 py-1.5 shadow-mac-2 transition-all duration-300 ease-out">
-        {/* Botão Launchpad */}
+        {/* Botão de aplicativos */}
         <button
           onClick={() => setLaunchpad(true)}
           className="group relative flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-slate-500/90 to-slate-700/90 text-white transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
-          title="Launchpad"
+          title="Aplicativos"
         >
           <LayoutGrid className="size-5" />
           <span className="pointer-events-none absolute -top-9 whitespace-nowrap rounded-md bg-elevated-dark px-2 py-1 text-[11px] font-medium text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 shadow-sm">
-            Launchpad
+            Aplicativos
           </span>
         </button>
 

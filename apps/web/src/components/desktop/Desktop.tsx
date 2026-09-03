@@ -1,10 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 import { useWM, type WinRect } from "@/lib/wm";
 import { useIsDesktop } from "@/lib/useMedia";
 import { ModuleHost } from "@/modules/ModuleHost";
 import { MenuBar } from "./MenuBar";
 import { Dock } from "./Dock";
 import { Launchpad } from "./Launchpad";
+import { TaskView } from "./TaskView";
 import { WindowFrame } from "./WindowFrame";
 import { WallpaperBackground } from "./WallpaperBackground";
 import { FloatingDockTrigger } from "./FloatingDockTrigger";
@@ -12,7 +14,7 @@ import { FloatingDockTrigger } from "./FloatingDockTrigger";
 /** Ambiente de janelas macOS com papel de parede adaptativo, dock dinâmico e auto-ocultação inteligente. */
 export function Desktop() {
   const isDesktop = useIsDesktop();
-  const { windows, activeId, close } = useWM();
+  const { windows, activeId, close, setBounds: setStoreBounds } = useWM();
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState<WinRect>({ x: 0, y: 0, w: 1200, h: 700 });
   const [dockManualShow, setDockManualShow] = useState(false);
@@ -20,12 +22,16 @@ export function Desktop() {
   useLayoutEffect(() => {
     const el = surfaceRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() =>
-      setBounds({ x: 0, y: 0, w: el.clientWidth, h: el.clientHeight }),
-    );
+    const sync = () => {
+      const r = { x: 0, y: 0, w: el.clientWidth, h: el.clientHeight };
+      setBounds(r);
+      setStoreBounds(r);
+    };
+    sync();
+    const ro = new ResizeObserver(sync);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [isDesktop]);
+  }, [isDesktop, setStoreBounds]);
 
   const openWindows = windows.filter((w) => !w.minimized);
   const topId =
@@ -58,16 +64,17 @@ export function Desktop() {
         <div className="relative z-10 min-h-0 flex-1 overflow-auto pb-16 pt-7">
           {active && (
             <div className="flex min-h-full flex-col">
-              <div className="material-toolbar sticky top-0 z-10 flex h-10 items-center gap-2 border-b border-border px-3">
-                <button
-                  onClick={() => close(active.id)}
-                  className="size-3 rounded-full bg-[#ec6a5e]"
-                  aria-label="Fechar"
-                />
-                <span className="flex-1 truncate text-center text-[13px] font-semibold text-foreground">
+              <div className="material-toolbar sticky top-0 z-10 flex h-10 items-center gap-2 border-b border-border pl-3 pr-1">
+                <span className="flex-1 truncate text-[13px] font-semibold text-foreground">
                   {active.title}
                 </span>
-                <span className="w-3" />
+                <button
+                  onClick={() => close(active.id)}
+                  className="flex size-8 items-center justify-center rounded-md text-foreground-secondary transition hover:bg-danger hover:text-white"
+                  aria-label="Fechar"
+                >
+                  <X className="size-4" strokeWidth={2.5} />
+                </button>
               </div>
               <ModuleHost key={active.id} moduleId={active.moduleId} />
             </div>
@@ -84,6 +91,7 @@ export function Desktop() {
         )}
 
         <Launchpad />
+        <TaskView />
       </div>
     );
   }
@@ -110,6 +118,7 @@ export function Desktop() {
       )}
 
       <Launchpad />
+      <TaskView />
     </div>
   );
 }
