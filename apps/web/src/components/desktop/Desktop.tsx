@@ -1,7 +1,15 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { X, LayoutGrid, AppWindow, LayoutDashboard, FilePlus2 } from "lucide-react";
 import { useWM, type WinRect } from "@/lib/wm";
+import { useAuth } from "@/lib/auth";
 import { useIsDesktop } from "@/lib/useMedia";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+} from "@/components/ui/context-menu";
 import { ModuleHost } from "@/modules/ModuleHost";
 import { MenuBar } from "./MenuBar";
 import { Dock } from "./Dock";
@@ -14,7 +22,9 @@ import { FloatingDockTrigger } from "./FloatingDockTrigger";
 /** Ambiente de janelas macOS com papel de parede adaptativo, dock dinâmico e auto-ocultação inteligente. */
 export function Desktop() {
   const isDesktop = useIsDesktop();
-  const { windows, activeId, close, setBounds: setStoreBounds } = useWM();
+  const { windows, activeId, close, setBounds: setStoreBounds, open, tile, setTaskView, setLaunchpad } =
+    useWM();
+  const canDpt = useAuth((s) => s.can("DPT"));
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState<WinRect>({ x: 0, y: 0, w: 1200, h: 700 });
   const [dockManualShow, setDockManualShow] = useState(false);
@@ -101,6 +111,36 @@ export function Desktop() {
       <WallpaperBackground />
       <MenuBar />
       <div ref={surfaceRef} className="absolute inset-x-0 bottom-0 top-7 z-10">
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <div className="absolute inset-0" aria-hidden />
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem onSelect={() => setLaunchpad(true)}>
+              <LayoutDashboard className="size-3.5" /> Central de apps
+            </ContextMenuItem>
+            <ContextMenuItem
+              disabled={openWindows.length < 2}
+              onSelect={() => tile()}
+            >
+              <LayoutGrid className="size-3.5" /> Organizar janelas
+            </ContextMenuItem>
+            <ContextMenuItem
+              disabled={windows.length === 0}
+              onSelect={() => setTaskView(true)}
+            >
+              <AppWindow className="size-3.5" /> Ver janelas abertas
+            </ContextMenuItem>
+            {canDpt && (
+              <>
+                <ContextMenuSeparator />
+                <ContextMenuItem onSelect={() => open("laudos-gen", "Gerador de Laudos")}>
+                  <FilePlus2 className="size-3.5" /> Novo laudo
+                </ContextMenuItem>
+              </>
+            )}
+          </ContextMenuContent>
+        </ContextMenu>
         {openWindows.map((w) => (
           <WindowFrame key={w.id} win={w} bounds={bounds} focused={w.id === topId}>
             <ModuleHost moduleId={w.moduleId} />

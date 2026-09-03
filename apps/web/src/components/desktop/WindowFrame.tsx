@@ -1,7 +1,14 @@
 import { useRef, type ReactNode } from "react";
-import { Minus, Square, Copy, X } from "lucide-react";
+import { Minus, Square, Copy, X, LayoutGrid, AppWindow } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useWM, WIN_MIN, type MedroWindow, type WinRect } from "@/lib/wm";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+} from "@/components/ui/context-menu";
 
 type Dir = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
 
@@ -27,8 +34,9 @@ export function WindowFrame({
   focused: boolean;
   children: ReactNode;
 }) {
-  const { focus, close, minimize, move, resize, toggleMax } = useWM();
+  const { focus, close, minimize, move, resize, toggleMax, tile, setTaskView, windows } = useWM();
   const drag = useRef<null | { px: number; py: number; r: WinRect; dir?: Dir }>(null);
+  const canTile = windows.filter((w) => !w.minimized).length >= 2;
 
   function clampMove(x: number, y: number): [number, number] {
     const maxX = bounds.w - Math.min(win.rect.w, bounds.w);
@@ -103,6 +111,8 @@ export function WindowFrame({
       onPointerDown={() => !focused && focus(win.id)}
     >
       {/* barra de título — controles à direita (estilo Windows/Linux) */}
+      <ContextMenu>
+      <ContextMenuTrigger asChild>
       <div
         className={cn(
           "flex h-8 shrink-0 items-stretch border-b border-border",
@@ -143,6 +153,27 @@ export function WindowFrame({
           </button>
         </div>
       </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onSelect={() => minimize(win.id)}>
+          <Minus className="size-3.5" /> Minimizar
+        </ContextMenuItem>
+        <ContextMenuItem onSelect={() => toggleMax(win.id, bounds)}>
+          {win.maximized ? <Copy className="size-3.5" /> : <Square className="size-3.5" />}
+          {win.maximized ? "Restaurar" : "Maximizar"}
+        </ContextMenuItem>
+        <ContextMenuItem disabled={!canTile} onSelect={() => tile()}>
+          <LayoutGrid className="size-3.5" /> Organizar janelas
+        </ContextMenuItem>
+        <ContextMenuItem onSelect={() => setTaskView(true)}>
+          <AppWindow className="size-3.5" /> Ver janelas abertas
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem destructive onSelect={() => close(win.id)}>
+          <X className="size-3.5" /> Fechar
+        </ContextMenuItem>
+      </ContextMenuContent>
+      </ContextMenu>
 
       {/* conteúdo */}
       <div className="relative min-h-0 flex-1 overflow-auto bg-bg">{children}</div>
