@@ -1,4 +1,5 @@
 import { Construction } from "lucide-react";
+import type { WinParams } from "@/lib/wm";
 import { moduleById, type ModuleId } from "./registry";
 import { DptApp } from "./dpt/DptApp";
 import { MedroProApp } from "./medro-pro/MedroProApp";
@@ -12,10 +13,24 @@ import { FerramentariaApp } from "./ferramentaria/FerramentariaApp";
 import { LaudosGenApp } from "./laudos-gen/LaudosGenApp";
 
 /** Roteia o conteúdo de uma janela para o app do módulo. */
-export function ModuleHost({ moduleId }: { moduleId: ModuleId }) {
+export function ModuleHost({
+  moduleId,
+  params,
+  paramsNonce,
+}: {
+  moduleId: ModuleId;
+  params?: WinParams;
+  paramsNonce?: number;
+}) {
   if (moduleId === "configuracoes" || moduleId === "pcp") return <ConfiguracoesApp />;
   if (moduleId === "dpt-laudos") return <DptApp />;
-  if (moduleId === "laudos-gen") return <LaudosGenApp />;
+  if (moduleId === "laudos-gen")
+    return (
+      <LaudosGenApp
+        initialOsId={typeof params?.osId === "string" ? params.osId : null}
+        openNonce={paramsNonce}
+      />
+    );
   if (moduleId === "medro-pro") return <MedroProApp />;
   if (moduleId === "central-bobinagem") return <CentralBobinagemApp />;
   if (moduleId === "inspecao-qualidade") return <InspecaoQualidadeApp />;

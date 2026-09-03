@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/context-menu";
 import { ModuleHost } from "@/modules/ModuleHost";
 import { MenuBar } from "./MenuBar";
+import { DesktopIcons } from "./DesktopIcons";
 import { Dock } from "./Dock";
 import { Launchpad } from "./Launchpad";
 import { TaskView } from "./TaskView";
@@ -86,7 +87,12 @@ export function Desktop() {
                   <X className="size-4" strokeWidth={2.5} />
                 </button>
               </div>
-              <ModuleHost key={active.id} moduleId={active.moduleId} />
+              <ModuleHost
+                key={active.id}
+                moduleId={active.moduleId}
+                params={active.params}
+                paramsNonce={active.paramsNonce}
+              />
             </div>
           )}
         </div>
@@ -111,9 +117,10 @@ export function Desktop() {
       <WallpaperBackground />
       <MenuBar />
       <div ref={surfaceRef} className="absolute inset-x-0 bottom-0 top-7 z-10">
+        <DesktopIcons />
         <ContextMenu>
           <ContextMenuTrigger asChild>
-            <div className="absolute inset-0" aria-hidden />
+            <div className="absolute inset-0 z-0" aria-hidden />
           </ContextMenuTrigger>
           <ContextMenuContent>
             <ContextMenuItem onSelect={() => setLaunchpad(true)}>
@@ -143,7 +150,7 @@ export function Desktop() {
         </ContextMenu>
         {openWindows.map((w) => (
           <WindowFrame key={w.id} win={w} bounds={bounds} focused={w.id === topId}>
-            <ModuleHost moduleId={w.moduleId} />
+            <ModuleHost moduleId={w.moduleId} params={w.params} paramsNonce={w.paramsNonce} />
           </WindowFrame>
         ))}
       </div>

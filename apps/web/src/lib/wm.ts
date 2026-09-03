@@ -8,6 +8,9 @@ export interface WinRect {
   h: number;
 }
 
+/** parâmetros de abertura passados ao módulo (ex.: laudos-gen → { osId }). */
+export type WinParams = Record<string, string | number | boolean | null | undefined>;
+
 export interface MedroWindow {
   id: string;
   moduleId: ModuleId;
@@ -18,6 +21,9 @@ export interface MedroWindow {
   z: number;
   minimized: boolean;
   maximized: boolean;
+  params?: WinParams;
+  /** muda a cada reabertura para o módulo re-reagir aos params */
+  paramsNonce?: number;
 }
 
 export const WIN_MIN = { w: 360, h: 280 };
@@ -32,7 +38,7 @@ interface WMState {
   launchpad: boolean;
   taskview: boolean;
 
-  open: (moduleId: ModuleId, title: string) => void;
+  open: (moduleId: ModuleId, title: string, params?: WinParams) => void;
   close: (id: string) => void;
   focus: (id: string) => void;
   move: (id: string, x: number, y: number) => void;
@@ -116,15 +122,26 @@ export const useWM = create<WMState>((set, get) => ({
   launchpad: false,
   taskview: false,
 
-  open: (moduleId, title) => {
+  open: (moduleId, title, params) => {
     const existing = get().windows.find((w) => w.moduleId === moduleId);
     if (existing) {
       get().focus(existing.id);
-      if (existing.minimized)
-        set((s) => ({
-          windows: s.windows.map((w) => (w.id === existing.id ? { ...w, minimized: false } : w)),
-        }));
-      set({ activeId: existing.id, launchpad: false, taskview: false });
+      set((s) => ({
+        windows: s.windows.map((w) =>
+          w.id === existing.id
+            ? {
+                ...w,
+                minimized: false,
+                ...(params
+                  ? { params, paramsNonce: (w.paramsNonce ?? 0) + 1, title: title || w.title }
+                  : {}),
+              }
+            : w,
+        ),
+        activeId: existing.id,
+        launchpad: false,
+        taskview: false,
+      }));
       return;
     }
     const z = get().zTop + 1;
@@ -136,6 +153,8 @@ export const useWM = create<WMState>((set, get) => ({
       z,
       minimized: false,
       maximized: false,
+      params,
+      paramsNonce: params ? 1 : 0,
     };
     set((s) => ({
       windows: [...s.windows, win],

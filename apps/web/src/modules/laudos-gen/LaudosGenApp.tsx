@@ -14,14 +14,23 @@ import {
   ExternalLink,
   FileClock,
   History,
+  FolderOpen,
+  MonitorUp,
 } from "lucide-react";
 import { Skeleton } from "reshaped";
 import { cn } from "@/lib/cn";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useDesktopShortcuts } from "@/lib/desktopShortcuts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+} from "@/components/ui/context-menu";
 import {
   useGerarPdf,
   useArquivoStatus,
@@ -44,9 +53,15 @@ const REPORT_PRINT_ORIGIN = (() => {
   }
 })();
 
-export function LaudosGenApp() {
-  const [osInput, setOsInput] = useState("");
-  const [osId, setOsId] = useState<string | null>(null);
+export function LaudosGenApp({
+  initialOsId = null,
+  openNonce = 0,
+}: {
+  initialOsId?: string | null;
+  openNonce?: number;
+} = {}) {
+  const [osInput, setOsInput] = useState(initialOsId ?? "");
+  const [osId, setOsId] = useState<string | null>(initialOsId);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [pdfMsg, setPdfMsg] = useState<string | null>(null);
   const [lastPdf, setLastPdf] = useState<{ url: string; sharepointUrl: string | null } | null>(null);
@@ -99,6 +114,12 @@ export function LaudosGenApp() {
     setPdfMsg(null);
     setLastPdf(null);
   }, []);
+
+  // abertura via atalho da área de trabalho / "Novo laudo" com uma OS
+  useEffect(() => {
+    if (initialOsId) carregar(initialOsId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialOsId, openNonce]);
 
   async function salvar() {
     if (!L.dirty || !osId) return;
@@ -403,6 +424,7 @@ function PreviewFrame({
 function EmptyState({ onPick }: { onPick: (osId: string) => void }) {
   const rascunhos = useRascunhos();
   const historico = useHistoricoPdf();
+  const addShortcut = useDesktopShortcuts((s) => s.add);
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6 p-8 sm:grid-cols-2">
@@ -419,13 +441,29 @@ function EmptyState({ onPick }: { onPick: (osId: string) => void }) {
           <ul className="divide-y divide-border">
             {rascunhos.data.slice(0, 12).map((r) => (
               <li key={`${r.osId}:${r.tipo}`}>
-                <button
-                  onClick={() => onPick(r.osId)}
-                  className="flex w-full items-center justify-between gap-2 px-1 py-1.5 text-left text-[12.5px] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
-                >
-                  <span className="font-medium text-foreground">{r.osId}</span>
-                  <span className="text-[11px] text-muted-foreground">{fmtData(r.atualizadoEm)}</span>
-                </button>
+                <ContextMenu>
+                  <ContextMenuTrigger asChild>
+                    <button
+                      onClick={() => onPick(r.osId)}
+                      className="flex w-full items-center justify-between gap-2 px-1 py-1.5 text-left text-[12.5px] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
+                    >
+                      <span className="font-medium text-foreground">{r.osId}</span>
+                      <span className="text-[11px] text-muted-foreground">{fmtData(r.atualizadoEm)}</span>
+                    </button>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem onSelect={() => onPick(r.osId)}>
+                      <FolderOpen className="size-3.5" /> Abrir
+                    </ContextMenuItem>
+                    <ContextMenuItem
+                      onSelect={() =>
+                        addShortcut({ kind: "laudo", moduleId: "laudos-gen", osId: r.osId, label: `Laudo ${r.osId}` })
+                      }
+                    >
+                      <MonitorUp className="size-3.5" /> Fixar na área de trabalho
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
               </li>
             ))}
           </ul>
