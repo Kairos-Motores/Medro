@@ -20,7 +20,8 @@ import { cn } from "@/lib/cn";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Input, Select } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
+import { Combobox } from "@/components/ui/combobox";
 import {
   useGerarPdf,
   useArquivoStatus,
@@ -170,19 +171,20 @@ export function LaudosGenApp() {
               <Building2 className="size-3.5" /> {unidade}
             </span>
 
-            <Select
-              value={L.doc.activeTemplateId ?? ""}
-              onChange={(e) => trocarModelo(e.target.value)}
-              className="ml-2 hidden h-[26px] w-40 text-[12px] lg:block"
-              title="Modelo do laudo"
-            >
-              <option value="">— sem modelo —</option>
-              {modelos.data?.map((m) => (
-                <option key={m.cr4a1_modelos_relatoriosid} value={m.cr4a1_modelos_relatoriosid}>
-                  {m.cr4a1_nome_modelo}
-                </option>
-              ))}
-            </Select>
+            <div className="ml-2 hidden w-48 lg:block">
+              <Combobox
+                size="sm"
+                value={L.doc.activeTemplateId}
+                onChange={trocarModelo}
+                allowClear
+                placeholder="— sem modelo —"
+                emptyText="Nenhum modelo."
+                options={(modelos.data ?? []).map((m) => ({
+                  value: m.cr4a1_modelos_relatoriosid,
+                  label: m.cr4a1_nome_modelo,
+                }))}
+              />
+            </div>
 
             <div className="ml-auto flex items-center gap-2">
               <Button

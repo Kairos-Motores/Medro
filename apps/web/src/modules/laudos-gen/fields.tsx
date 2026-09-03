@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
-import { Input, Textarea, Select } from "@/components/ui/input";
+import { Input, Textarea } from "@/components/ui/input";
+import { Select, SelectItem } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { CheckboxField } from "@/components/ui/checkbox";
+
+export { CheckboxField };
 
 /** Cabeçalho de uma seção do editor. */
 export function EditorSection({
@@ -110,22 +115,44 @@ export function SelectField({
   value,
   onChange,
   options,
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
+  placeholder?: string;
 }) {
   return (
     <label className="block space-y-1">
       <span className="text-[12px] font-medium text-foreground-secondary">{label}</span>
-      <Select value={value} onChange={(e) => onChange(e.target.value)}>
+      <Select value={value} onValueChange={onChange} placeholder={placeholder}>
         {options.map((o) => (
-          <option key={o.value} value={o.value}>
+          <SelectItem key={o.value} value={o.value}>
             {o.label}
-          </option>
+          </SelectItem>
         ))}
       </Select>
+    </label>
+  );
+}
+
+export function DateField({
+  label,
+  value,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  hint?: string;
+}) {
+  return (
+    <label className="block space-y-1">
+      <span className="text-[12px] font-medium text-foreground-secondary">{label}</span>
+      <DatePicker value={value ?? ""} onChange={onChange} />
+      {hint && <span className="block text-[11px] text-muted-foreground">{hint}</span>}
     </label>
   );
 }

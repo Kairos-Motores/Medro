@@ -1,8 +1,9 @@
 # 07 — Gerador de Laudos (módulo `laudos-gen`)
 
 > **Handoff para o próximo chat.** Documento vivo. Última atualização: 2026-09-03
-> (17 editores + prévia tempo real só-leitura + navegação + IA do diagnóstico +
-> seletor de fotos do SharePoint — §4.4).
+> (17 editores + prévia tempo real só-leitura + navegação + IA do diagnóstico
+> FUNCIONANDO + seletor de fotos do SharePoint + primitivos de UI Medro:
+> Select/Combobox/DatePicker/Checkbox/Popover — §4.4).
 > Contexto: incorporar o app **standalone `Gerador_relatorios`** (gerador de laudo técnico
 > de OS, saída PDF A4 padrão Kairós) ao Medro como **módulo próprio `laudos-gen`,
 > acessível SOMENTE ao Departamento Técnico** (`access: ["DPT"]`).
@@ -194,8 +195,19 @@ Assim o bundle refaz as leituras já autenticado como DPT.
   o fetch); `patch(recipe)` (structuredClone + mutate), `dirty`, `save()` (persiste o
   documento inteiro, sempre com `osData` embutido).
 - **`src/modules/laudos-gen/fields.tsx`** — primitivos de form Medro (`EditorSection`,
-  `FieldGrid`, `TextField`, `AreaField`, `SelectField`, `TriToggle` SIM/NÃO/—,
-  `StatusToggle` Aprovado/Reprovado, `DeferredNote`).
+  `FieldGrid`, `TextField`, `AreaField`, `SelectField`, `DateField`, `TriToggle` SIM/NÃO/—,
+  `StatusToggle` Aprovado/Reprovado, `CheckboxField`, `DeferredNote`).
+- **Primitivos de UI Medro** (`apps/web/src/components/ui/`, reutilizáveis fora do módulo) —
+  substituem os `<select>`/checkbox/data nativos pela identidade do app:
+  `select.tsx` (Radix Select — painel renderizado pelo app), `combobox.tsx` (lista com
+  busca), `date-picker.tsx` (`react-day-picker` v10 + `date-fns` pt-BR — input de texto +
+  calendário; grava `dd/MM/yyyy`, lê vários formatos), `checkbox.tsx` (Radix Checkbox +
+  `CheckboxField`), `popover.tsx` (Radix Popover no estilo do `dropdown-menu.tsx`).
+  Deps novas: `@radix-ui/react-select`, `-checkbox`, `-popover`, `react-day-picker`.
+  Adotados no módulo: seletor de Modelo → `Combobox`; Capa → `SelectField`; datas de
+  Dados de Processo (`cr4a1_data_rec`, `cr4a1_data_relat`) → `DateField`; "usar subcolunas"
+  da Tabela Livre → `CheckboxField`. (Outros módulos ainda usam o `<select>` nativo — migrar
+  aos poucos.)
 - **`src/modules/laudos-gen/editors.tsx`** — **os 17 editores portados** com UI Medro, um
   por `page.type`, + `renderEditor({page, doc, patch})`:
   Capa, Sumário (títulos das páginas), Dados de Processo (campos da `osData`),
@@ -228,10 +240,13 @@ Assim o bundle refaz as leituras já autenticado como DPT.
 - **Backend novo**:
   - `GET /laudos-gen/rascunhos` — `listarRascunhos()` (`select osid/tipo/modifiedon`).
   - `POST /laudos-gen/modelos/:id/ia-gerar` e `.../ia-gerar-lote` — `services/laudosGen/ia.ts`
-    (gemini com fallback de modelo em 429, groq e openrouter OpenAI-compatible). O modelo
-    dá `cr4a1_ia_provider` + `cr4a1_ia_prompt` (`getModeloIa()`); a **chave vem do `.env`**
-    (`GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY`). Sem chave → 400
-    `ia_nao_configurada` ("Provedor de IA … sem chave no servidor").
+    (gemini com fallback de modelo em **429 e 404**, groq e openrouter OpenAI-compatible).
+    Lista de modelos Gemini: `gemini-3.6-flash` primeiro (o `2.5-flash` foi aposentado
+    p/ contas novas). O modelo dá `cr4a1_ia_provider` + `cr4a1_ia_prompt` (`getModeloIa()`);
+    a **chave vem do `.env`** (`GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY` —
+    já copiadas do `Gerador_relatorios/backend/.env` p/ `apps/api/.env`). Sem chave → 400
+    `ia_nao_configurada`. ✅ **Testado ponta a ponta** (modelo "Modelo Padrão", provider
+    gemini): 200 OK, os 4 campos do diagnóstico preenchidos.
   - `listFotos` agora loga o erro do Graph (path/permissão) em vez de engolir — ver §7.1.
 
 ### 4.5 Infra / deploy
@@ -257,22 +272,21 @@ Assim o bundle refaz as leituras já autenticado como DPT.
 ## 5. Estado do repositório
 
 Branch `main`. Commitado e enviado (`origin/main`):
-- `e3fb06a` — `feat(desktop): controles de janela a direita, organizar janelas (tile) e TaskView`
-- `0d3848f` — `feat(laudos-gen): modulo Gerador de Laudos (DPT) — leitura, rascunho e emissao de PDF`
-  (backend + `apps/pdf-worker` + `apps/report-print` + shell do módulo + `render.yaml` +
-  `.env.example` + `.gitignore` + `pnpm-workspace.yaml` + este doc).
+- `e3fb06a` — `feat(desktop): controles de janela à direita, tile, TaskView`
+- `0d3848f` — `feat(laudos-gen): módulo base (leitura, rascunho, emissão de PDF)`
+- `083981b` — `feat(laudos-gen): 17 editores Medro, prévia em tempo real, IA e fotos do SharePoint`
 
-**Sem commit** (porte dos editores + prévia tempo real + navegação + IA + fotos — §4.4/§7.3):
-- Novos: `apps/web/src/modules/laudos-gen/{state.ts,useLaudoDoc.ts,fields.tsx,editors.tsx}`,
-  `apps/api/src/services/laudosGen/ia.ts`
+**Sem commit** (config de IA + primitivos de UI Medro):
+- Novos: `apps/web/src/components/ui/{select,combobox,date-picker,checkbox,popover}.tsx`
 - Modificados:
-  - `apps/web/src/modules/laudos-gen/{LaudosGenApp.tsx,api.ts}` (modelo, rascunhos/histórico
-    na tela vazia, prévia `postMessage`, `useRascunhos`/`useIaGerar`/`useIaGerarLote`)
-  - `apps/report-print/src/App.jsx` (modo `embed=1` — postMessage + esconde chrome/inputs)
-  - `apps/api/src/routes/laudosGen.ts` (`GET /rascunhos`, `POST .../ia-gerar[-lote]`)
-  - `apps/api/src/services/laudosGen/dataverse.ts` (`listarRascunhos`, `getModeloIa`)
-  - `apps/api/src/services/laudosGen/sharepoint.ts` (log do erro Graph em `listFotos`)
-  - `apps/web/.env.example` (`VITE_REPORT_PRINT_URL`), este doc
+  - `apps/api/src/services/laudosGen/ia.ts` (modelos Gemini atuais; fallback também em 404)
+  - `apps/web/src/modules/laudos-gen/{LaudosGenApp.tsx,editors.tsx,fields.tsx}` (adotam
+    Combobox/Select/DatePicker/Checkbox)
+  - `apps/web/package.json` + `pnpm-lock.yaml` (`@radix-ui/react-select`, `-checkbox`,
+    `-popover`, `react-day-picker`)
+  - este doc
+- Local (gitignored): `apps/api/.env` — `GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY`
+  copiadas de `Gerador_relatorios/backend/.env`.
 
 ---
 
@@ -347,11 +361,9 @@ pnpm --filter @medro/web dev
 ### Fase 1 (o que falta para o módulo funcionar de ponta a ponta)
 1. ✅ **Editores portados** (17) + prévia em tempo real + navegação (rascunhos, modelos,
    histórico de PDFs) — ver §4.4.
-2. ✅ **IA do diagnóstico** — rotas `ia-gerar`/`ia-gerar-lote` + `services/laudosGen/ia.ts`
-   (gemini/groq/openrouter), botões religados no `DiagnosisEditor`.
-   ⚠️ Falta pôr **`GEMINI_API_KEY`** (ou `GROQ_/OPENROUTER_`) no `apps/api/.env` — sem isso
-   retorna "Provedor de IA … sem chave no servidor". Modelo precisa ter `cr4a1_ia_provider`
-   preenchido (config via rota `ia-config`, ainda sem UI Medro — usar o app antigo por ora).
+2. ✅ **IA do diagnóstico FUNCIONANDO** — rotas + `services/laudosGen/ia.ts`, botões no
+   `DiagnosisEditor`, chaves no `apps/api/.env`, modelos Gemini atuais. Testado: 200 OK.
+   O modelo precisa de `cr4a1_ia_provider` preenchido (UI de config ainda pendente — item 5).
 3. **Fotos** — seletor "Escolher do SharePoint" já religado (`PhotoField`). Falta:
    (a) `listFotos` retornou vazio p/ 11539-AL — ver §7.1 (agora loga o erro do Graph);
    (b) portar **upload local** (`/api/upload-temp/:categoria`) e **upload de capa**
@@ -418,8 +430,15 @@ apps/web/src/modules/
     layout.ts                            DEFAULT_LAYOUT (17 páginas)
     state.ts          (novo)             LaudoState + emptyLaudoState/mergeRascunho/applyModelo
     useLaudoDoc.ts    (novo)             OS+rascunho+auxiliares → doc; patch/save/applyModelo
-    fields.tsx        (novo)             primitivos de form Medro
+    fields.tsx        (novo)             primitivos de form Medro (+ DateField, CheckboxField)
     editors.tsx       (novo)             17 editores + renderEditor() + PhotoField + IA
+
+apps/web/src/components/ui/             primitivos reutilizáveis (fora do módulo)
+  select.tsx       (novo)               Radix Select — lista suspensa do app
+  combobox.tsx     (novo)               lista suspensa com busca
+  date-picker.tsx  (novo)               react-day-picker + date-fns pt-BR
+  checkbox.tsx     (novo)               Radix Checkbox + CheckboxField
+  popover.tsx      (novo)               Radix Popover no estilo do dropdown-menu
 
 apps/web/.env.example (mod)             VITE_REPORT_PRINT_URL
 render.yaml                             medro-api + medro-pdf-worker + medro-report-print

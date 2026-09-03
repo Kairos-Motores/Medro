@@ -24,12 +24,13 @@ function keyFor(provider: IaProvider): string | undefined {
   }[provider];
 }
 
-// Fallback de modelo do Gemini: um 429 (cota) num modelo tenta o próximo — cada
-// modelo tem cota própria no tier gratuito.
+// Fallback de modelo do Gemini: um 429 (cota) OU 404 (modelo aposentado) num
+// modelo tenta o próximo. Ordem: recomendado atual primeiro, depois alternativas.
 const GEMINI_MODELS = [
-  "gemini-2.5-flash",
+  "gemini-3.6-flash",
   "gemini-2.5-flash-lite",
-  "gemini-2.0-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-2.5-flash",
 ];
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const OPENROUTER_MODEL = "google/gemini-2.0-flash-exp:free";
@@ -105,9 +106,12 @@ async function chatGemini(
       return texto.trim();
     }
     const txt = await res.text();
-    if (res.status === 429) {
-      geminiCooldown[model] = Date.now() + COOLDOWN_MS;
-      lastErr = new Error(`Gemini (${model}): cota esgotada.`);
+    // 429 = cota esgotada; 404 = modelo aposentado/indisponível — nos dois casos
+    // o próximo modelo da lista pode funcionar. Outros erros (chave inválida,
+    // prompt bloqueado) não melhoram trocando de modelo → propaga na hora.
+    if (res.status === 429 || res.status === 404) {
+      if (res.status === 429) geminiCooldown[model] = Date.now() + COOLDOWN_MS;
+      lastErr = new Error(`Gemini (${model}) → ${res.status}: ${txt.slice(0, 160)}`);
       continue;
     }
     throw new Error(`Gemini (${model}) → ${res.status}: ${txt.slice(0, 300)}`);

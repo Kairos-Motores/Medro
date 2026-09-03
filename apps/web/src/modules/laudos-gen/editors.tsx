@@ -14,9 +14,11 @@ import {
   TextField,
   AreaField,
   SelectField,
+  DateField,
   TriToggle,
   StatusToggle,
   DeferredNote,
+  CheckboxField,
 } from "./fields";
 
 export interface EditorProps {
@@ -228,6 +230,8 @@ const EQUIP_FIELDS: [string, string][] = [
   ["cr4a1_eq_peso", "Peso"],
 ];
 
+const DATE_FIELDS = new Set(["cr4a1_data_rec", "cr4a1_data_relat"]);
+
 function ProcessDataEditor({ doc, patch }: EditorProps) {
   const os = (doc.osData ?? {}) as Record<string, unknown>;
   const set = (field: string) => (v: string) =>
@@ -235,24 +239,22 @@ function ProcessDataEditor({ doc, patch }: EditorProps) {
       d.osData = { ...((d.osData as Record<string, unknown>) ?? {}), [field]: v };
     });
   const val = (field: string) => (os[field] == null ? "" : String(os[field]));
+  const renderField = ([f, label]: [string, string]) =>
+    DATE_FIELDS.has(f) ? (
+      <DateField key={f} label={label} value={val(f)} onChange={set(f)} />
+    ) : (
+      <TextField key={f} label={label} value={val(f)} onChange={set(f)} />
+    );
   return (
     <>
       <EditorSection
         title="Dados do cliente"
         subtitle="Vêm do Dataverse; ajustes aqui valem só para este laudo."
       >
-        <FieldGrid>
-          {CLIENTE_FIELDS.map(([f, label]) => (
-            <TextField key={f} label={label} value={val(f)} onChange={set(f)} />
-          ))}
-        </FieldGrid>
+        <FieldGrid>{CLIENTE_FIELDS.map(renderField)}</FieldGrid>
       </EditorSection>
       <EditorSection title="Dados do equipamento">
-        <FieldGrid>
-          {EQUIP_FIELDS.map(([f, label]) => (
-            <TextField key={f} label={label} value={val(f)} onChange={set(f)} />
-          ))}
-        </FieldGrid>
+        <FieldGrid>{EQUIP_FIELDS.map(renderField)}</FieldGrid>
       </EditorSection>
     </>
   );
@@ -826,14 +828,11 @@ function CustomTableEditor({ page, doc, patch }: EditorProps) {
         ))}
       </FieldGrid>
 
-      <label className="flex items-center gap-2 text-[12px] text-foreground-secondary">
-        <input
-          type="checkbox"
-          checked={hasSub}
-          onChange={(e) => patch((d) => void (d.tableSubColumns[id] = e.target.checked))}
-        />
-        Usar subcolunas
-      </label>
+      <CheckboxField
+        label="Usar subcolunas"
+        checked={hasSub}
+        onCheckedChange={(v) => patch((d) => void (d.tableSubColumns[id] = v))}
+      />
 
       <div className="space-y-2">
         {pageData.rows.map((row, ri) => (
