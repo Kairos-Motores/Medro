@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./auth";
 
-const BASE = import.meta.env.VITE_API_URL ?? "/api";
+const BASE = import.meta.env.VITE_API_URL || "/api";
 
 /** Busca a foto de perfil (cr4a1_imgperfil) como object URL. null se não houver. */
 export function useProfilePhoto() {

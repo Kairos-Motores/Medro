@@ -1,10 +1,26 @@
 import { Construction } from "lucide-react";
 import { moduleById, type ModuleId } from "./registry";
 import { DptApp } from "./dpt/DptApp";
+import { MedroProApp } from "./medro-pro/MedroProApp";
+import { CentralBobinagemApp } from "./bobinagem/CentralBobinagemApp";
+import { InspecaoQualidadeApp } from "./qualidade/InspecaoQualidadeApp";
+import { EnsaiosApp } from "./ensaios/EnsaiosApp";
+import { ConfiguracoesApp } from "./configuracoes/ConfiguracoesApp";
+import { PlanejamentoApp } from "./planejamento/PlanejamentoApp";
+import { AlmoxarifadoApp } from "./almoxarifado/AlmoxarifadoApp";
+import { FerramentariaApp } from "./ferramentaria/FerramentariaApp";
 
 /** Roteia o conteúdo de uma janela para o app do módulo. */
 export function ModuleHost({ moduleId }: { moduleId: ModuleId }) {
+  if (moduleId === "configuracoes" || moduleId === "pcp") return <ConfiguracoesApp />;
   if (moduleId === "dpt-laudos") return <DptApp />;
+  if (moduleId === "medro-pro") return <MedroProApp />;
+  if (moduleId === "central-bobinagem") return <CentralBobinagemApp />;
+  if (moduleId === "inspecao-qualidade") return <InspecaoQualidadeApp />;
+  if (moduleId === "peritagem") return <EnsaiosApp />;
+  if (moduleId === "planejamento") return <PlanejamentoApp />;
+  if (moduleId === "almoxarifado") return <AlmoxarifadoApp />;
+  if (moduleId === "ferramentaria") return <FerramentariaApp />;
   return <StubWindow moduleId={moduleId} />;
 }
 

@@ -2,6 +2,7 @@ import { useWM } from "@/lib/wm";
 import { useClock } from "@/lib/useClock";
 import { NotificationsButton } from "@/components/layout/NotificationsButton";
 import { UserMenu } from "@/components/layout/UserMenu";
+import { AppearanceMenu } from "./AppearanceMenu";
 
 export function MenuBar() {
   const { windows, activeId, setLaunchpad } = useWM();
@@ -15,7 +16,8 @@ export function MenuBar() {
       </button>
       {active && <span className="font-medium text-foreground-secondary">{active.title}</span>}
 
-      <div className="ml-auto flex items-center gap-2.5">
+      <div className="ml-auto flex items-center gap-2">
+        <AppearanceMenu />
         <NotificationsButton />
         <span className="hidden tabular-nums text-foreground-secondary xs:inline">
           <span className="capitalize">{weekday}</span> {dateShort} · {time}

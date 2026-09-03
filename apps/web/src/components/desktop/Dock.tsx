@@ -4,15 +4,22 @@ import { useWM } from "@/lib/wm";
 import { cn } from "@/lib/cn";
 import { MODULES, ACCENT, moduleById } from "@/modules/registry";
 
-export function Dock() {
+export function Dock({ hidden = false }: { hidden?: boolean }) {
   const can = useAuth((s) => s.can);
   const { windows, open, focus, setLaunchpad, activeId } = useWM();
   const visible = MODULES.filter((m) => !m.access || can(...m.access));
   const minimized = windows.filter((w) => w.minimized);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-2 lg:pb-2.5">
-      <div className="material-menu pointer-events-auto flex items-end gap-1.5 rounded-2xl border border-white/25 px-2 py-1.5 shadow-mac-2">
+    <div
+      className={cn(
+        "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-2 lg:pb-2.5 transition-all duration-300 ease-in-out",
+        hidden
+          ? "translate-y-28 opacity-0 pointer-events-none"
+          : "translate-y-0 opacity-100",
+      )}
+    >
+      <div className="material-menu pointer-events-auto flex items-end gap-1.5 rounded-2xl border border-white/25 dark:border-white/10 px-2 py-1.5 shadow-mac-2">
         <button
           onClick={() => setLaunchpad(true)}
           className="group relative flex size-11 items-center justify-center rounded-xl bg-gradient-to-b from-slate-500/90 to-slate-700/90 text-white transition-transform duration-150 hover:-translate-y-1"
@@ -21,7 +28,7 @@ export function Dock() {
           <LayoutGrid className="size-5" />
         </button>
 
-        <span className="mx-1 h-9 w-px self-center bg-black/10" />
+        <span className="mx-1 h-9 w-px self-center bg-black/10 dark:bg-white/15" />
 
         {visible.map((m) => {
           const Icon = m.icon;
@@ -35,7 +42,7 @@ export function Dock() {
               onClick={() => open(m.id, m.label)}
               title={m.label}
               className={cn(
-                "group relative flex size-11 items-center justify-center rounded-xl border border-black/5 bg-surface transition-transform duration-150 hover:-translate-y-1",
+                "group relative flex size-11 items-center justify-center rounded-xl border border-black/5 dark:border-white/10 bg-surface/90 backdrop-blur-md transition-transform duration-150 hover:-translate-y-1",
                 a.text,
               )}
             >
@@ -55,7 +62,7 @@ export function Dock() {
           );
         })}
 
-        {minimized.length > 0 && <span className="mx-1 h-9 w-px self-center bg-black/10" />}
+        {minimized.length > 0 && <span className="mx-1 h-9 w-px self-center bg-black/10 dark:bg-white/15" />}
         {minimized.map((w) => {
           const m = moduleById(w.moduleId);
           const Icon = m.icon;

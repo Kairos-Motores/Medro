@@ -7,6 +7,7 @@ import { healthRoutes } from "./routes/health.js";
 import { authRoutes } from "./routes/auth.js";
 import { meRoutes } from "./routes/me.js";
 import { laudosRoutes } from "./routes/laudos.js";
+import { medroProRoutes } from "./routes/medroPro.js";
 
 export function buildServer() {
   const app = Fastify({
@@ -26,6 +27,7 @@ export function buildServer() {
   app.register(authRoutes, { prefix: "/api" });
   app.register(meRoutes, { prefix: "/api" });
   app.register(laudosRoutes, { prefix: "/api" });
+  app.register(medroProRoutes, { prefix: "/api" });
 
   app.get("/", async () => ({ name: "medro-api", env: config.NODE_ENV }));
 

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { useLaudo, useArchiveLaudo } from "./api";
 
-const API = import.meta.env.VITE_API_URL ?? "/api";
+const API = import.meta.env.VITE_API_URL || "/api";
 
 function fmtDate(raw: string | null) {
   if (!raw) return "—";

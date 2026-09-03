@@ -15,6 +15,12 @@ import {
   QrCode,
   ShieldCheck,
   ListChecks,
+  Activity,
+  RotateCw,
+  ClipboardCheck,
+  Settings,
+  BarChart3,
+  Boxes,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,6 +30,12 @@ import {
  */
 
 export type ModuleId =
+  | "configuracoes"
+  | "medro-pro"
+  | "central-bobinagem"
+  | "inspecao-qualidade"
+  | "planejamento"
+  | "almoxarifado"
   | "os-medro"
   | "peritagem"
   | "pcp"
@@ -57,13 +69,63 @@ export interface ModuleDef {
 }
 
 export const MODULES: ModuleDef[] = [
+  {
+    id: "medro-pro",
+    label: "Medro Pro",
+    short: "APS",
+    desc: "Torre de Controle Macro, Cockpit Operacional e Kanban Tático",
+    icon: Activity,
+    path: "/medro-pro",
+    accent: "violet",
+    ready: true,
+  },
+  {
+    id: "central-bobinagem",
+    label: "Central de Bobinagem",
+    short: "Bobinagem",
+    desc: "Cálculo de espiras, dados de enrolamento e controle de rebobinamento",
+    icon: RotateCw,
+    path: "/bobinagem",
+    accent: "amber",
+    ready: true,
+  },
+  {
+    id: "inspecao-qualidade",
+    label: "Inspeção de Qualidade",
+    short: "Qualidade",
+    desc: "Checklist pós-manutenção: itens recuperados, trocados, pintura e acabamento",
+    icon: ClipboardCheck,
+    path: "/qualidade",
+    accent: "green",
+    ready: true,
+  },
+  {
+    id: "planejamento",
+    label: "Planejamento",
+    short: "Planej.",
+    desc: "Indicadores de peritagem, escopo de serviços, peças e compras externas",
+    icon: BarChart3,
+    path: "/planejamento",
+    accent: "indigo",
+    ready: true,
+  },
+  {
+    id: "almoxarifado",
+    label: "Almoxarifado",
+    short: "Almox.",
+    desc: "Gestão de estoque físico/financeiro (SB2 Protheus) e reservas de OS",
+    icon: Boxes,
+    path: "/almoxarifado",
+    accent: "amber",
+    ready: true,
+  },
   { id: "os-medro", label: "OS Medro", short: "OS", desc: "Entrada, produção e finalização de ordens de serviço", icon: Wrench, path: "/os", access: ["OS"], accent: "blue" },
-  { id: "pcp", label: "Gerenciamento", short: "PCP", desc: "Planejamento e controle da produção", icon: ClipboardList, path: "/gerenciamento", access: ["GER"], accent: "indigo" },
-  { id: "peritagem", label: "Avaliação Final", short: "Peritagem", desc: "Peritagem, inspeção de qualidade e ensaios", icon: Gauge, path: "/avaliacao-final", access: ["AVA"], accent: "cyan" },
+  { id: "configuracoes", label: "Configurações", short: "Config", desc: "Aparência, perfil, filiais, notificações e preferências", icon: Settings, path: "/configuracoes", accent: "slate", ready: true },
+  { id: "peritagem", label: "Ensaios", short: "Ensaios", desc: "Ensaios elétricos, testes de isolamento, resistência ôhmica, Surge Test e vibração", icon: Gauge, path: "/ensaios", access: ["AVA"], accent: "cyan", ready: true },
   { id: "dpt-laudos", label: "Dep. Técnico", short: "DPT", desc: "Laudos técnicos, links e QR codes", icon: FileText, path: "/dpt", access: ["DPT"], accent: "teal", ready: true },
   { id: "caldeiraria", label: "Caldeiraria", short: "Caldeiraria", desc: "Recuperação e fabricação de peças", icon: Flame, path: "/caldeiraria", access: ["CAL"], accent: "amber" },
   { id: "balanceamento", label: "Balanceamento", short: "Balanc.", desc: "Balanceamento dinâmico de rotores", icon: Orbit, path: "/balanceamento", accent: "slate" },
-  { id: "ferramentaria", label: "Ferramentaria", short: "Ferram.", desc: "Controle de ferramentas por setor", icon: Hammer, path: "/ferramentaria", access: ["FER"], accent: "slate" },
+  { id: "ferramentaria", label: "Ferramentaria", short: "Ferram.", desc: "Gestão global de ferramentas, cautelas, calibrações RBC e rastreamento multiunidades", icon: Hammer, path: "/ferramentaria", accent: "slate", ready: true },
   { id: "trajetos-ssma", label: "Trajetos / SSMA", short: "Trajetos", desc: "Deslocamento de equipes e segurança", icon: Route, path: "/trajetos", access: ["ROT"], accent: "teal" },
   { id: "checklist-veicular", label: "Checklist Veicular", short: "Checklist", desc: "Inspeção e histórico de veículos", icon: ListChecks, path: "/checklist-veicular", accent: "cyan" },
   { id: "terceirizados", label: "Terceirizados", short: "Terceir.", desc: "Serviços externos e pendências", icon: Users, path: "/terceirizados", access: ["TER"], accent: "indigo" },
@@ -114,6 +176,8 @@ export const SCREENS: ScreenDef[] = [
   { id: "EdicaoOS_Medro", path: "/os/editar", title: "Editar OS", module: "os-medro", powerApps: "EdicaoOS_Medro", access: ["_OS_EDOS"] },
   { id: "Gestao_Pendencias_Medro", path: "/os/pendencias", title: "Pendências", module: "os-medro", powerApps: "Gestao_Pendencias_Medro", access: ["OS"] },
   { id: "EscopoDeManuten", path: "/escopo", title: "Escopo de Manutenção", module: "os-medro", powerApps: "EscopoDeManuten", access: ["ESCOPO"] },
+  // Configurações
+  { id: "CONFIG_PRINCIPAL", path: "/configuracoes", title: "Configurações", module: "configuracoes", powerApps: "CONFIG_PRINCIPAL" },
   // PCP
   { id: "COD_GERENCIAMENTO", path: "/gerenciamento", title: "Gerenciamento", module: "pcp", powerApps: "COD_GERENCIAMENTO", access: ["GER"] },
   { id: "TelaPCP_SLZ", path: "/gerenciamento/pcp", title: "PCP", module: "pcp", powerApps: "TelaPCP_SLZ", access: ["GER"] },

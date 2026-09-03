@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <!-- Paleta oficial Kairós Medro Dark -->
+    <linearGradient id="w1-dark-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1b30" />
+      <stop offset="50%" stop-color="#142a49" />
+      <stop offset="100%" stop-color="#091322" />
+    </linearGradient>
+    
+    <radialGradient id="w1-dark-radial-1" cx="25%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#1e3b63" stop-opacity="0.8" />
+      <stop offset="60%" stop-color="#142a49" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#0e1b30" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="w1-dark-radial-2" cx="85%" cy="80%" r="70%">
+      <stop offset="0%" stop-color="#355fa4" stop-opacity="0.35" />
+      <stop offset="40%" stop-color="#2a4e87" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#0e1b30" stop-opacity="0" />
+    </radialGradient>
+
+    <linearGradient id="w1-dark-wave-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#355fa4" stop-opacity="0.25" />
+      <stop offset="50%" stop-color="#1e3b63" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#142a49" stop-opacity="0.1" />
+    </linearGradient>
+
+    <linearGradient id="w1-dark-wave-2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a4e87" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#0e1b30" stop-opacity="0.6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fundo base -->
+  <rect width="1920" height="1080" fill="url(#w1-dark-bg)" />
+  <rect width="1920" height="1080" fill="url(#w1-dark-radial-1)" />
+  <rect width="1920" height="1080" fill="url(#w1-dark-radial-2)" />
+
+  <!-- Camadas orgânicas suaves no tom azul marinho -->
+  <path d="M-100,580 C320,440 650,720 1150,540 C1550,400 1820,510 2050,460 L2050,1200 L-100,1200 Z" fill="url(#w1-dark-wave-1)" />
+  <path d="M-100,710 C420,590 850,830 1340,640 C1700,510 1880,590 2050,550 L2050,1200 L-100,1200 Z" fill="url(#w1-dark-wave-2)" />
+  <path d="M-100,850 C520,740 950,950 1480,780 C1780,680 1940,730 2050,710 L2050,1200 L-100,1200 Z" fill="#0e1b30" fill-opacity="0.65" />
+</svg>

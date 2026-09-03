@@ -66,25 +66,28 @@
 }
 
 :root[data-theme="dark"] {
-  --surface: 44 46 54;
-  --surface-2: 38 40 47;
-  --bg: 28 30 36;
-  --border: 66 69 78;
-  --border-strong: 82 86 96;
-  --muted: 82 86 96;
-  --muted-foreground: 150 153 162;
-  --foreground: 236 237 240;
-  --foreground-secondary: 168 171 180;
+  /* paleta Medro Dark (azul marinho profundo / Kairós) */
+  --surface: 20 42 73; /* #142a49 - superfícies de cartões e janelas */
+  --surface-2: 14 27 48; /* #0e1b30 - barras internas / secundário */
+  --bg: 10 20 36; /* base ultra escura */
+  --border: 30 59 99; /* #1e3b63 - contornos e linhas sutis */
+  --border-strong: 42 78 135; /* #2a4e87 - bordas destacadas */
+  --muted: 42 78 135;
+  --muted-foreground: 142 168 200;
+  --foreground: 242 246 252;
+  --foreground-secondary: 165 190 220;
 
-  --primary: 96 150 200;
-  --primary-hover: 112 164 212;
-  --primary-press: 84 138 188;
-  --primary-foreground: 18 22 30;
-  --elevated-dark: 18 20 26;
+  /* acento azul marinho vibrante (#355fa4) */
+  --primary: 53 95 164;
+  --primary-hover: 68 116 195;
+  --primary-press: 42 78 135;
+  --primary-foreground: 255 255 255;
+  --elevated-dark: 14 27 48;
 
-  --material-sidebar: 40 42 50 / 0.62;
-  --material-toolbar: 44 46 54 / 0.7;
-  --material-menu: 52 55 64 / 0.82;
+  /* materiais translúcidos vibrantes (macOS dark) */
+  --material-sidebar: 20 42 73 / 0.75;
+  --material-toolbar: 20 42 73 / 0.82;
+  --material-menu: 27 47 76 / 0.88;
 
   --danger: 224 108 100;
   --success: 96 186 128;
