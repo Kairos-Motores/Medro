@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Search,
   FileDown,
@@ -15,6 +15,7 @@ import {
   FileClock,
   History,
   FolderOpen,
+  FolderCog,
   MonitorUp,
   MoreHorizontal,
   BookmarkPlus,
@@ -23,6 +24,7 @@ import { Skeleton } from "reshaped";
 import { cn } from "@/lib/cn";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useWM } from "@/lib/wm";
 import { useDesktopShortcuts } from "@/lib/desktopShortcuts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,18 +52,9 @@ import {
 } from "./api";
 import { useLaudoDoc } from "./useLaudoDoc";
 import { renderEditor } from "./editors";
+import { LaudoPreviewFrame } from "./previewFrame";
+import { modeloConfigFromDoc, type LaudoState } from "./state";
 import type { LaudoPage } from "./layout";
-import type { LaudoState } from "./state";
-
-const REPORT_PRINT_URL =
-  (import.meta.env.VITE_REPORT_PRINT_URL as string | undefined) || "http://localhost:5180";
-const REPORT_PRINT_ORIGIN = (() => {
-  try {
-    return new URL(REPORT_PRINT_URL).origin;
-  } catch {
-    return "*";
-  }
-})();
 
 export function LaudosGenApp({
   initialOsId = null,
@@ -81,6 +74,7 @@ export function LaudosGenApp({
   const [salvarModelo, setSalvarModelo] = useState(false);
 
   const token = useAuth((s) => s.token);
+  const openWin = useWM((s) => s.open);
   const L = useLaudoDoc(osId);
   const gerarPdf = useGerarPdf();
   const arquivo = useArquivoStatus(osId, acompanharArquivo);
@@ -231,6 +225,9 @@ export function LaudosGenApp({
                   <DropdownMenuItem onSelect={() => setSalvarModelo(true)}>
                     <BookmarkPlus className="size-3.5" /> Salvar laudo atual como modelo…
                   </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => openWin("modelos-folder", "Modelos de Laudo")}>
+                    <FolderCog className="size-3.5" /> Gerenciar modelos…
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -375,8 +372,8 @@ export function LaudosGenApp({
                   <RefreshCw className="size-3.5" />
                 </button>
               </div>
-              <PreviewFrame
-                osId={osId}
+              <LaudoPreviewFrame
+                osParam={osId}
                 token={token}
                 doc={L.doc}
                 reloadKey={previewReload}
@@ -386,68 +383,6 @@ export function LaudosGenApp({
         </div>
       )}
     </div>
-  );
-}
-
-/** iframe do report-print em modo embutido — recebe o estado por postMessage. */
-function PreviewFrame({
-  osId,
-  token,
-  doc,
-  reloadKey,
-}: {
-  osId: string;
-  token: string | null;
-  doc: LaudoState;
-  reloadKey: number;
-}) {
-  const ref = useRef<HTMLIFrameElement>(null);
-  const ready = useRef(false);
-  const src = `${REPORT_PRINT_URL}/admin?os=${encodeURIComponent(
-    osId,
-  )}&print=true&embed=1&t=${encodeURIComponent(token ?? "")}`;
-
-  const post = useCallback(() => {
-    ref.current?.contentWindow?.postMessage(
-      { type: "laudo:preview", state: doc },
-      REPORT_PRINT_ORIGIN,
-    );
-  }, [doc]);
-
-  // o iframe avisa quando está pronto para receber o estado
-  useEffect(() => {
-    function onMsg(e: MessageEvent) {
-      if (e.data?.type === "laudo:preview-ready") {
-        ready.current = true;
-        post();
-      }
-    }
-    window.addEventListener("message", onMsg);
-    return () => window.removeEventListener("message", onMsg);
-  }, [post]);
-
-  // empurra o estado ~250ms depois da última edição
-  useEffect(() => {
-    if (!ready.current) return;
-    const id = setTimeout(post, 250);
-    return () => clearTimeout(id);
-  }, [doc, post]);
-
-  // ao trocar de OS ou recarregar, o iframe reinicia → aguarda novo "ready"
-  useEffect(() => {
-    ready.current = false;
-  }, [osId, reloadKey]);
-
-  return (
-    <iframe
-      ref={ref}
-      key={`${src}#${reloadKey}`}
-      src={src}
-      title="Prévia do laudo"
-      onLoad={post}
-      className="min-h-0 flex-1 bg-white"
-      sandbox="allow-scripts allow-same-origin"
-    />
   );
 }
 
@@ -578,21 +513,10 @@ function SaveModeloDialog({
   async function salvar() {
     if (!nome.trim()) return;
     setErro(null);
-    const config = {
-      modelConfig: doc.modelConfig,
-      customTableRows: doc.customTableRows,
-      tableHeaders: doc.tableHeaders,
-      tableColumns: doc.tableColumns,
-      tableSubColumns: doc.tableSubColumns,
-      textBlocks: doc.textBlocks,
-      imageBlocks: doc.imageBlocks,
-      freePageBlocks: doc.freePageBlocks,
-      diagVisibility: doc.diagVisibility,
-    };
     try {
       await criar.mutateAsync({
         cr4a1_nome_modelo: nome.trim(),
-        cr4a1_configuracao_json: JSON.stringify(config),
+        cr4a1_configuracao_json: modeloConfigFromDoc(doc),
       });
       setNome("");
       onOpenChange(false);

@@ -266,6 +266,26 @@ export function applyModelo(draft: LaudoState, configuracaoJson: string, modeloI
   draft.activeTemplateId = modeloId;
 }
 
+/**
+ * Serializa só a ESTRUTURA do laudo (o payload de um modelo do álbum):
+ * layout/capa + tabelas livres + textos/imagens fixos + blocos de página livre
+ * + visibilidade do diagnóstico. NÃO inclui `osData` nem dados preenchidos.
+ * Inverso de `applyModelo`.
+ */
+export function modeloConfigFromDoc(doc: LaudoState): string {
+  return JSON.stringify({
+    modelConfig: doc.modelConfig,
+    customTableRows: doc.customTableRows,
+    tableHeaders: doc.tableHeaders,
+    tableColumns: doc.tableColumns,
+    tableSubColumns: doc.tableSubColumns,
+    textBlocks: doc.textBlocks,
+    imageBlocks: doc.imageBlocks,
+    freePageBlocks: doc.freePageBlocks,
+    diagVisibility: doc.diagVisibility,
+  });
+}
+
 type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 
 /** Merge raso-profundo do rascunho salvo sobre os defaults (arrays substituem). */

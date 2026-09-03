@@ -16,13 +16,19 @@ export type ModeloRow = {
   cr4a1_modelos_relatoriosid: string;
   cr4a1_nome_modelo: string;
   cr4a1_configuracao_json: string;
+  cr4a1_ia_provider?: string | null;
+  modifiedon?: string;
 };
+
+export type ModeloDetalhe = ModeloRow & { cr4a1_ia_prompt: string | null };
 
 const keys = {
   os: (osId: string) => ["laudos-gen", "os", osId] as const,
   rascunho: (osId: string, tipo: string) => ["laudos-gen", "rascunho", osId, tipo] as const,
   rascunhos: ["laudos-gen", "rascunhos"] as const,
   modelos: ["laudos-gen", "modelos"] as const,
+  modelo: (id: string) => ["laudos-gen", "modelo", id] as const,
+  iaConfig: (id: string) => ["laudos-gen", "modelo-ia", id] as const,
   historicoPdf: ["laudos-gen", "historico-pdf"] as const,
 };
 
@@ -83,8 +89,77 @@ export function useCriarModelo() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: { cr4a1_nome_modelo: string; cr4a1_configuracao_json: string }) =>
-      api<{ success: true }>("/laudos-gen/modelos", { method: "POST", body }),
+      api<{ success: true; id: string }>("/laudos-gen/modelos", { method: "POST", body }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.modelos }),
+  });
+}
+
+/** Um modelo por id (estrutura + prompt de IA) — usado pelo construtor. */
+export function useModelo(id: string | null) {
+  return useQuery({
+    queryKey: keys.modelo(id ?? ""),
+    enabled: !!id,
+    queryFn: () => api<ModeloDetalhe>(`/laudos-gen/modelos/${encodeURIComponent(id!)}`),
+  });
+}
+
+export function useAtualizarModelo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { id: string; nome?: string; configuracaoJson?: string }) =>
+      api<{ success: true }>(`/laudos-gen/modelos/${encodeURIComponent(body.id)}`, {
+        method: "PUT",
+        body: { nome: body.nome, configuracaoJson: body.configuracaoJson },
+      }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: keys.modelos });
+      qc.invalidateQueries({ queryKey: keys.modelo(v.id) });
+    },
+  });
+}
+
+export function useExcluirModelo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<{ success: true }>(`/laudos-gen/modelos/${encodeURIComponent(id)}`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.modelos }),
+  });
+}
+
+export function useDuplicarModelo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<{ success: true; id: string }>(`/laudos-gen/modelos/${encodeURIComponent(id)}/duplicar`, {
+        method: "POST",
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.modelos }),
+  });
+}
+
+export type IaConfig = { prompt: string; provider: string; apiKeyPreview: string | null };
+
+export function useIaConfig(id: string | null) {
+  return useQuery({
+    queryKey: keys.iaConfig(id ?? ""),
+    enabled: !!id,
+    queryFn: () => api<IaConfig>(`/laudos-gen/modelos/${encodeURIComponent(id!)}/ia-config`),
+  });
+}
+
+export function useSetIaConfig() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { id: string; prompt?: string; provider?: string }) =>
+      api<{ success: true }>(`/laudos-gen/modelos/${encodeURIComponent(body.id)}/ia-config`, {
+        method: "PUT",
+        body: { prompt: body.prompt, provider: body.provider },
+      }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: keys.iaConfig(v.id) });
+      qc.invalidateQueries({ queryKey: keys.modelos });
+    },
   });
 }
 

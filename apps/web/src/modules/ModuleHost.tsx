@@ -13,6 +13,8 @@ import { AlmoxarifadoApp } from "./almoxarifado/AlmoxarifadoApp";
 import { FerramentariaApp } from "./ferramentaria/FerramentariaApp";
 import { LaudosGenApp } from "./laudos-gen/LaudosGenApp";
 import { RascunhosFolder } from "./laudos-gen/RascunhosFolder";
+import { ModelosManager } from "./laudos-gen/ModelosManager";
+import { ModeloBuilder } from "./laudos-gen/ModeloBuilder";
 import { UsinagemCaldeirariaApp } from "./caldeiraria/UsinagemCaldeirariaApp";
 
 /** Roteia o conteúdo de uma janela para o app do módulo. */
@@ -32,6 +34,21 @@ export function ModuleHost({
 
   // "pasta" de rascunhos de laudos — DPT-only, não está em MODULES
   if (moduleId === "rascunhos-folder") return gate("DPT") ?? <RascunhosFolder />;
+
+  // gerenciador de modelos (no Dock/Launchpad via MODULES) + construtor (aberto
+  // com params, fora de MODULES) — ambos DPT-only
+  if (moduleId === "modelos-folder") return gate("DPT") ?? <ModelosManager />;
+  if (moduleId === "modelo-builder")
+    return (
+      gate("DPT") ?? (
+        <ModeloBuilder
+          modeloId={
+            typeof params?.modeloId === "string" && params.modeloId ? params.modeloId : null
+          }
+          openNonce={paramsNonce}
+        />
+      )
+    );
 
   const m = moduleById(moduleId);
   // acesso: respeita MODULES[].access — laudo é DPT-only (o registry já esconde

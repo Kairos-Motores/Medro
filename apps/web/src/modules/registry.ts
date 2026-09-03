@@ -18,6 +18,7 @@ import {
   BarChart3,
   Boxes,
   FilePlus2,
+  LayoutTemplate,
   type LucideIcon,
 } from "lucide-react";
 
@@ -43,6 +44,8 @@ export type ModuleId =
   | "dpt-laudos"
   | "laudos-gen"
   | "rascunhos-folder"
+  | "modelos-folder"
+  | "modelo-builder"
   | "cipa"
   | "ssma"
   | "tarefas";
@@ -120,6 +123,7 @@ export const MODULES: ModuleDef[] = [
   { id: "peritagem", label: "Ensaios", short: "Ensaios", desc: "Ensaios elétricos, testes de isolamento, resistência ôhmica, Surge Test e vibração", icon: Gauge, path: "/ensaios", access: ["AVA"], accent: "cyan", ready: true },
   { id: "dpt-laudos", label: "Dep. Técnico", short: "DPT", desc: "Laudos técnicos, links e QR codes", icon: FileText, path: "/dpt", access: ["DPT"], accent: "teal", ready: true },
   { id: "laudos-gen", label: "Gerador de Laudos", short: "Laudos", desc: "Montagem e emissão do laudo técnico da OS (PDF)", icon: FilePlus2, path: "/laudos-gen", access: ["DPT"], accent: "teal", ready: true },
+  { id: "modelos-folder", label: "Modelos de Laudo", short: "Modelos", desc: "Construtor e gerência dos modelos de laudo (estrutura reaproveitável entre OS)", icon: LayoutTemplate, path: "/laudos-gen/modelos", access: ["DPT"], accent: "teal", ready: true },
   { id: "caldeiraria", label: "Usinagem e Caldeiraria", short: "Usinagem & Cald.", desc: "Controle, recuperação, usinagem e fabricação de peças mecânicas", icon: Flame, path: "/caldeiraria", access: ["CAL"], accent: "amber", ready: true },
   { id: "balanceamento", label: "Balanceamento", short: "Balanc.", desc: "Balanceamento dinâmico de rotores", icon: Orbit, path: "/balanceamento", accent: "slate" },
   { id: "ferramentaria", label: "Ferramentaria", short: "Ferram.", desc: "Gestão global de ferramentas, cautelas, calibrações RBC e rastreamento multiunidades", icon: Hammer, path: "/ferramentaria", accent: "slate", ready: true },

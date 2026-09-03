@@ -9,6 +9,9 @@ import {
   listarRascunhos,
   listarModelos,
   criarModelo,
+  getModelo,
+  atualizarModelo,
+  excluirModelo,
   getModeloIa,
   getModeloIaConfig,
   setModeloIaConfig,
@@ -100,8 +103,57 @@ export async function laudosGenRoutes(app: FastifyInstance) {
   app.post("/laudos-gen/modelos", async (req, reply) => {
     const parsed = ModeloBody.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: "bad_request", issues: parsed.error.issues });
-    await criarModelo(parsed.data.cr4a1_nome_modelo, parsed.data.cr4a1_configuracao_json);
+    const novo = await criarModelo(parsed.data.cr4a1_nome_modelo, parsed.data.cr4a1_configuracao_json);
+    return { success: true, id: novo.id };
+  });
+
+  app.get("/laudos-gen/modelos/:id", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    try {
+      return await getModelo(id);
+    } catch (err) {
+      const e = err as Error & { status?: number };
+      return reply.code(e.status ?? 500).send({ error: true, message: e.message });
+    }
+  });
+
+  const ModeloPatch = z.object({
+    nome: z.string().min(1).optional(),
+    configuracaoJson: z.string().min(1).optional(),
+  });
+  app.put("/laudos-gen/modelos/:id", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const parsed = ModeloPatch.safeParse(req.body);
+    if (!parsed.success)
+      return reply.code(400).send({ error: "bad_request", issues: parsed.error.issues });
+    await atualizarModelo(id, parsed.data);
     return { success: true };
+  });
+
+  app.delete("/laudos-gen/modelos/:id", async (req) => {
+    const { id } = req.params as { id: string };
+    await excluirModelo(id);
+    return { success: true };
+  });
+
+  /** duplica um modelo (estrutura + config de IA) com sufixo "(cópia)". */
+  app.post("/laudos-gen/modelos/:id/duplicar", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    try {
+      const src = await getModelo(id);
+      const nome = `${src.cr4a1_nome_modelo || "Modelo"} (cópia)`;
+      const novo = await criarModelo(nome, src.cr4a1_configuracao_json || "{}");
+      if (src.cr4a1_ia_prompt || src.cr4a1_ia_provider) {
+        await setModeloIaConfig(novo.id, {
+          prompt: src.cr4a1_ia_prompt ?? undefined,
+          provider: src.cr4a1_ia_provider ?? undefined,
+        });
+      }
+      return { success: true, id: novo.id };
+    } catch (err) {
+      const e = err as Error & { status?: number };
+      return reply.code(e.status ?? 500).send({ error: true, message: e.message });
+    }
   });
 
   app.get("/laudos-gen/modelos/:id/ia-config", async (req) => {

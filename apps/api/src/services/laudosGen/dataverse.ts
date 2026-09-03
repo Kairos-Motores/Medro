@@ -141,21 +141,56 @@ export type ModeloRow = {
   cr4a1_modelos_relatoriosid: string;
   cr4a1_nome_modelo: string;
   cr4a1_configuracao_json: string;
+  cr4a1_ia_provider?: string | null;
+  modifiedon?: string;
 };
+
+export type ModeloDetalhe = ModeloRow & { cr4a1_ia_prompt: string | null };
+
+const MODELO_SELECT = [
+  "cr4a1_modelos_relatoriosid",
+  "cr4a1_nome_modelo",
+  "cr4a1_configuracao_json",
+  "cr4a1_ia_provider",
+  "modifiedon",
+];
 
 export async function listarModelos(): Promise<ModeloRow[]> {
   const { value } = await dataverse.list<ModeloRow>(MODELOS_SET, {
-    select: ["cr4a1_modelos_relatoriosid", "cr4a1_nome_modelo", "cr4a1_configuracao_json"],
+    select: MODELO_SELECT,
+    orderby: "modifiedon desc",
     top: 200,
   });
   return value;
 }
 
-export async function criarModelo(nome: string, configuracaoJson: string): Promise<void> {
-  await dataverse.create(MODELOS_SET, {
+/** Um modelo por id — inclui o prompt de IA (o gerenciador/construtor precisa dele). */
+export async function getModelo(id: string): Promise<ModeloDetalhe> {
+  return dataverse.get<ModeloDetalhe>(MODELOS_SET, id, {
+    select: [...MODELO_SELECT, "cr4a1_ia_prompt"],
+  });
+}
+
+export async function criarModelo(nome: string, configuracaoJson: string): Promise<{ id: string }> {
+  const row = await dataverse.create<{ cr4a1_modelos_relatoriosid: string }>(MODELOS_SET, {
     cr4a1_nome_modelo: nome,
     cr4a1_configuracao_json: configuracaoJson,
   });
+  return { id: row.cr4a1_modelos_relatoriosid };
+}
+
+export async function atualizarModelo(
+  id: string,
+  patch: { nome?: string; configuracaoJson?: string },
+): Promise<void> {
+  const body: Record<string, string> = {};
+  if (patch.nome !== undefined) body.cr4a1_nome_modelo = patch.nome;
+  if (patch.configuracaoJson !== undefined) body.cr4a1_configuracao_json = patch.configuracaoJson;
+  if (Object.keys(body).length) await dataverse.update(MODELOS_SET, id, body);
+}
+
+export async function excluirModelo(id: string): Promise<void> {
+  await dataverse.remove(MODELOS_SET, id);
 }
 
 /** prompt + provider do modelo (sem máscara) — a chave vem do .env do Medro. */

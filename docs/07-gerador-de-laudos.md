@@ -3,9 +3,10 @@
 > **Handoff para o próximo chat.** Documento vivo. Última atualização: 2026-09-03
 > (17 editores + prévia tempo real + IA FUNCIONANDO + fotos SharePoint corrigidas §7.1
 > + primitivos de UI Medro + shell: menu de contexto, status do dispositivo,
-> atalhos/pastas — §5).
-> **➡️ PRÓXIMO PASSO combinado com o usuário: §11 — construtor visual de modelos
-> de laudo + app de gerência de modelos (Fases A → B → C).**
+> atalhos/pastas — §5 **+ Fases A e B do §11: gerenciador `ModelosManager` e
+> construtor `ModeloBuilder` PRONTOS** — ver §11.7).
+> **➡️ PRÓXIMO PASSO: §11.4 — FASE C (bloco `ai-text` em página livre, upload de
+> capa própria, designer de tabela avançado).**
 > Contexto: incorporar o app **standalone `Gerador_relatorios`** (gerador de laudo técnico
 > de OS, saída PDF A4 padrão Kairós) ao Medro como **módulo próprio `laudos-gen`,
 > acessível SOMENTE ao Departamento Técnico** (`access: ["DPT"]`).
@@ -389,8 +390,11 @@ pnpm --filter @medro/web dev
    (commit `2f0c2b5`). Falta: **upload local** (`/api/upload-temp/:categoria`) e **auto-import
    da peritagem** (`/api/os/:id/peritagem-fotos` + `aplicarFotosAutomaticas`).
 4. **Confirmar upload SharePoint no Render** (§7.1).
-5. ➡️ **Construtor + gerenciador de modelos de laudo — ver §11** (inclui a UI de config de
-   IA por modelo e o upload de capa própria).
+5. ✅/➡️ **Construtor + gerenciador de modelos de laudo — ver §11.** Fases **A e B
+   PRONTAS** (§11.7): `GET/PUT/DELETE/duplicar` + hooks + `modeloConfigFromDoc` +
+   `ModelosManager` (listar/duplicar/renomear/excluir/config-IA) + `ModeloBuilder`
+   (+ adicionar página agrupada, reordenar ↑/↓, remover, prévia com OS fake).
+   Falta a **FASE C** (§11.4) e o **upload de capa própria**.
 
 ### Depois
 6. **Apagar `Gerador_relatorios/`** quando o módulo estiver completo (plano do usuário).
@@ -639,3 +643,71 @@ Pseudo-módulo `"modelo-builder"` (`ModuleHost` branch + id no union). Component
 | `apps/web/src/modules/laudos-gen/editors.tsx` | bloco `ai-text` no `FreePageEditor` (Fase C) |
 | `apps/report-print/src/features/report-builder/pages/PageBuilder.jsx` (+ `BuilderContent.jsx`) | render `ai-text` (Fase C) |
 | deps | `@hello-pangea/dnd` no `apps/web` **se** for usar drag pra reordenar (senão ↑/↓ sem dep) |
+
+### 11.7 Fases A e B — o que foi feito (rodada 2026-09-03)
+
+**Backend** (`apps/api`):
+- `services/laudosGen/dataverse.ts` — `getModelo(id)` (inclui `cr4a1_ia_prompt`),
+  `atualizarModelo(id,{nome?,configuracaoJson?})`, `excluirModelo(id)`. `criarModelo`
+  agora **devolve `{ id }`** (lê o id do `return=representation`). `listarModelos` passou a
+  pedir `cr4a1_ia_provider` + `modifiedon` e `orderby: modifiedon desc`.
+  ⚠️ **Esta tenant ignora `$select`/`$orderby` de `modifiedon` e `cr4a1_ia_provider` neste
+  entity set** — só voltam `cr4a1_configuracao_json/nome_modelo/…id`. Efeito: no card do
+  gerenciador o selo "IA: {provider}" e a data não aparecem (cai no `sem IA` / sem data).
+  Não quebra nada; se for importante, achar o nome lógico certo da coluna de provider.
+- `routes/laudosGen.ts` — `GET /laudos-gen/modelos/:id`, `PUT /laudos-gen/modelos/:id`
+  (zod `{nome?,configuracaoJson?}`), `DELETE /laudos-gen/modelos/:id`,
+  `POST /laudos-gen/modelos/:id/duplicar` (copia estrutura + prompt/provider de IA, sufixo
+  " (cópia)"). `POST /modelos` agora retorna `{ success, id }`.
+
+**Frontend** (`apps/web/src/modules/laudos-gen`):
+- `api.ts` — `ModeloDetalhe`, `useModelo`, `useAtualizarModelo`, `useExcluirModelo`,
+  `useDuplicarModelo`, `useIaConfig`, `useSetIaConfig`; `useCriarModelo` agora tipa `{id}`.
+  `keys.modelo(id)` / `keys.iaConfig(id)`.
+- `state.ts` — **`modeloConfigFromDoc(doc)`** (inverso do `applyModelo`); `SaveModeloDialog`
+  do `LaudosGenApp` passou a usá-la.
+- `previewFrame.tsx` (**novo**) — `LaudoPreviewFrame` extraído do `LaudosGenApp` (era
+  `PreviewFrame` local). Prop `osParam` + `overrideOsData` (o construtor manda uma OS
+  fictícia `{cr4a1_novacoluna:"MODELO", …}` por postMessage — sem OS real, sem chamada à API).
+  `LaudosGenApp` agora importa daqui.
+- `useModeloDoc.ts` (**novo**) — análogo ao `useLaudoDoc` sem OS. `modeloId` → `useModelo`
+  + `mergeRascunho({})` + `applyModelo`; `modeloId` null → `emptyLaudoState()`. `patch`,
+  `dirty`, `nome/setNome`, `save()` (POST se novo / PUT se existente, corpo
+  `{nome, configuracaoJson: modeloConfigFromDoc(doc)}`). Após criar, passa a editar o id
+  devolvido (se a API não devolver id, segue como "novo" **sem** zerar o doc).
+- `ModelosManager.tsx` (**novo**) — pseudo-módulo `modelos-folder`. Grid de cards
+  (nome · nº de páginas · IA/sem IA · data). Ações no `⋯`: Editar estrutura →
+  `open("modelo-builder",…,{modeloId})`; Configurar IA (`Sheet` center: `SelectField`
+  provider + `AreaField` prompt → `useSetIaConfig`); Renomear; Duplicar; Excluir
+  (`Sheet` center de confirmação). Botão **"+ Novo modelo"** → `open("modelo-builder",
+  "Novo modelo", { modeloId: "" })`.
+- `ModeloBuilder.tsx` (**novo**) — pseudo-módulo `modelo-builder`, 3 colunas:
+  esquerda = páginas (`↑/↓` sem dep, remover exceto `cover/back_cover/final`, **"+ Adicionar"**
+  = `DropdownMenu` com os ~20 `page.type` agrupados em Estruturais / De dados / Customizadas;
+  ao escolher, gera `id` `p_<ts>_<rand>`, inicializa a chave de conteúdo e `splice` depois da
+  selecionada); centro = `renderEditor({page,doc,patch})` + `Input` do título da página;
+  direita = `LaudoPreviewFrame` com `osParam="MODELO"` + `overrideOsData` fake.
+- `ModuleHost.tsx` — branches `modelos-folder` → `<ModelosManager/>` e `modelo-builder` →
+  `<ModeloBuilder modeloId={params.modeloId||null} openNonce={paramsNonce}/>`, ambos `gate("DPT")`.
+- `registry.ts` — `"modelos-folder"` e `"modelo-builder"` no union `ModuleId`. **`modelos-folder`
+  virou entrada em `MODULES`** (label "Modelos de Laudo", `short "Modelos"`, `icon LayoutTemplate`,
+  `access:["DPT"]`, `accent teal`, `ready`) → aparece no **Dock / Launchpad / busca do Dock**.
+  `modelo-builder` continua fora de `MODULES` (aberto com params).
+- **Entradas**: (a) app **"Modelos de Laudo"** no Dock/Launchpad; (b) item **"Gerenciar
+  modelos…"** no menu `⋯` ao lado do seletor de Modelo no `LaudosGenApp` (só com OS carregada).
+
+**Verificado no browser** (api+web+report-print rodando): gerenciador lista os 8 modelos com
+contagem de páginas; construtor abre "Novo modelo" com o layout padrão (17), "+ Adicionar"
+insere (ex.: Relatório Fotográfico → vira 18, com `keys`), prévia renderiza a folha A4 com a
+OS fictícia; **Salvar cria o modelo no Dataverse com 18 páginas** (`modeloConfigFromDoc` ok).
+
+⚠️ **Pendências desta rodada (para o próximo chat):**
+1. **A API de dev precisava reiniciar** para pegar as rotas novas (`GET/PUT/DELETE/duplicar`
+   deram 404 no `tsx watch` que estava rodando). Buildaram limpo (`pnpm --filter @medro/api
+   build` e `@medro/web build`). Reiniciar a API e revalidar: editar modelo existente (GET+PUT),
+   Renomear, Duplicar, Excluir, Config IA.
+2. **Nada foi commitado ainda.**
+3. Ficou um modelo de teste **"Teste Fase B (Claude)"** no Dataverse (18 páginas) — apagar
+   pelo gerenciador depois que a API reiniciar.
+4. Selo de IA / data no card do gerenciador dependem de campos que a tenant não devolve (ver
+   acima).
