@@ -99,7 +99,7 @@ export async function medroProRoutes(app: FastifyInstance) {
     async (req, reply) => {
       try {
         const forceRefresh = req.query?.refresh === "true";
-        const top = req.query?.top ? parseInt(req.query.top, 10) : 1000;
+        const top = req.query?.top ? parseInt(req.query.top, 10) : undefined;
 
         const baseRecords = await fetchFarolOSFromDataverse({ forceRefresh, top });
 
@@ -119,4 +119,64 @@ export async function medroProRoutes(app: FastifyInstance) {
       }
     },
   );
+
+  /**
+   * Listagem de Carcaças De-Para (Dataverse cr4a1_depara_carcacases + valores únicos de ZB6)
+   */
+  app.get("/medro-pro/carcacas", async (_req, reply) => {
+    try {
+      const { buscarCarcacasDepara } = await import("../services/dataverse/carcacas.js");
+      const dados = await buscarCarcacasDepara();
+      return { status: "success", data: dados };
+    } catch (err) {
+      app.log.error({ err }, "Erro ao buscar carcaças De-Para");
+      return reply.code(500).send({ status: "error", message: (err as Error).message });
+    }
+  });
+
+  /**
+   * Atualização em lote de carcaças no Dataverse
+   */
+  app.patch<{
+    Body: Array<{
+      cr4a1_depara_carcacasid?: string;
+      cr4a1_name: string;
+      cr4a1_carcaca_equivalente: string;
+    }>;
+  }>("/medro-pro/carcacas", async (req, reply) => {
+    try {
+      const { atualizarCarcacasDepara } = await import("../services/dataverse/carcacas.js");
+      await atualizarCarcacasDepara(req.body || []);
+      return { status: "success", message: "Carcaças atualizadas com sucesso no Dataverse" };
+    } catch (err) {
+      app.log.error({ err }, "Erro ao atualizar carcaças no Dataverse");
+      return reply.code(500).send({ status: "error", message: (err as Error).message });
+    }
+  });
+
+  /**
+   * Criação de nova carcaça no Dataverse
+   */
+  app.post<{
+    Body: { cr4a1_name: string; cr4a1_carcaca_equivalente: string };
+  }>("/medro-pro/carcacas", async (req, reply) => {
+    try {
+      const { original, equivalente } = {
+        original: req.body?.cr4a1_name,
+        equivalente: req.body?.cr4a1_carcaca_equivalente,
+      };
+      if (!original || !equivalente) {
+        return reply.code(400).send({
+          status: "error",
+          message: "Campos obrigatórios ausentes (cr4a1_name, cr4a1_carcaca_equivalente)",
+        });
+      }
+      const { criarCarcacaDepara } = await import("../services/dataverse/carcacas.js");
+      const criada = await criarCarcacaDepara(original, equivalente);
+      return { status: "success", data: criada, message: "Carcaça criada com sucesso no Dataverse" };
+    } catch (err) {
+      app.log.error({ err }, "Erro ao criar carcaça no Dataverse");
+      return reply.code(500).send({ status: "error", message: (err as Error).message });
+    }
+  });
 }

@@ -17,9 +17,10 @@ export interface RawOSRow {
   "TAG Kairos": string;
 }
 
-// Cache em memória para evitar requisições redundantes ao Dataverse
+// Cache em memória para evitar requisições redundantes ao Dataverse (TTL de 3 minutos como no Echoe)
 let cachedFarolData: { data: RawOSRow[]; ts: number } | null = null;
-const CACHE_TTL_MS = 60_000; // 1 minuto
+let inFlightPromise: Promise<RawOSRow[]> | null = null;
+const CACHE_TTL_MS = 180_000; // 3 minutos
 
 /**
  * Normaliza o código ou texto da Filial para o nome padrão utilizado no Medro Pro
@@ -71,7 +72,8 @@ export function formatDataProtheus(val: unknown): string {
 }
 
 /**
- * Consulta a tabela oficial cr4a1_zb6_relatorios no Dataverse e enriquece os dados para o Farol de OS.
+ * Consulta a tabela oficial cr4a1_zb6_relatorios no Dataverse em sua totalidade (todas as 15.500+ linhas)
+ * e enriquece os dados para o Farol de OS.
  */
 export async function fetchFarolOSFromDataverse(options?: {
   forceRefresh?: boolean;
@@ -82,99 +84,113 @@ export async function fetchFarolOSFromDataverse(options?: {
     return cachedFarolData.data;
   }
 
-  const limit = options?.top || 1000;
-
-  const res = await dataverse.list<Record<string, unknown>>("cr4a1_zb6_relatorios", {
-    select: [
-      "cr4a1_novacoluna",
-      "cr4a1_zb6_filial",
-      "cr4a1_cliente_nome",
-      "cr4a1_eq_descricao",
-      "cr4a1_zb6_equipa",
-      "cr4a1_eq_carcaca",
-      "cr4a1_eq_potencia_cv",
-      "cr4a1_eq_tensao",
-      "cr4a1_zb6_kw",
-      "cr4a1_data_rec",
-      "cr4a1_zb6_dtauto",
-      "cr4a1_zb6_prazc",
-      "cr4a1_zb6_prazo",
-      "cr4a1_zb6_dtentr",
-      "cr4a1_zb6_servico",
-      "cr4a1_tag_kairos",
-      "cr4a1_zb6_dtpven",
-      "cr4a1_r_e_c_d_e_l_",
-      "modifiedon",
-    ],
-    orderby: "modifiedon desc",
-    top: limit,
-  });
-
-  const rawRows: RawOSRow[] = [];
-
-  for (const item of res.value) {
-    // Ignora registros marcados como deletados no Protheus / Dataverse
-    const recdel = String(item.cr4a1_r_e_c_d_e_l_ ?? "").trim();
-    if (recdel === "1" || recdel === "*") continue;
-
-    const os = String(item.cr4a1_novacoluna ?? item.cr4a1_zb6_oskair ?? "").trim();
-    if (!os) continue;
-
-    const descServico = String(item.cr4a1_zb6_servico ?? "").trim();
-    const tagKairos = String(item.cr4a1_tag_kairos ?? "").trim();
-
-    // Filtros de exclusão para Venda Direta / Balcão
-    const osUpper = os.toUpperCase();
-    const servUpper = descServico.toUpperCase();
-    const tagUpper = tagKairos.toUpperCase();
-    if (
-      osUpper.startsWith("VD") ||
-      servUpper.includes("VENDA DIRETA") ||
-      servUpper.startsWith("VD ") ||
-      tagUpper.includes("VD")
-    ) {
-      continue;
-    }
-
-    const filial = mapFilial(item.cr4a1_zb6_filial);
-    const cliente = String(item.cr4a1_cliente_nome ?? "").trim();
-    const equipamento = String(item.cr4a1_eq_descricao ?? item.cr4a1_zb6_equipa ?? "").trim();
-    const carcaca = String(item.cr4a1_eq_carcaca ?? "").trim();
-    const tensao = String(item.cr4a1_eq_tensao ?? "").trim();
-
-    // Potência
-    const cvRaw = String(item.cr4a1_eq_potencia_cv ?? "").trim();
-    const cv = cvRaw ? cvRaw.replace(/cv/gi, "").trim() : "";
-
-    const kwRaw = String(item.cr4a1_zb6_kw ?? "").trim();
-    const kw = kwRaw ? kwRaw.replace(/kw/gi, "").trim() : "";
-
-    // Datas
-    const dtRecebimento = formatDataProtheus(item.cr4a1_data_rec);
-    const dtAutoriza = formatDataProtheus(item.cr4a1_zb6_dtauto);
-    const dtEntregEq = formatDataProtheus(item.cr4a1_zb6_dtentr);
-
-    // Prazo
-    const prazo = String(item.cr4a1_zb6_prazc ?? item.cr4a1_zb6_prazo ?? "").trim();
-
-    rawRows.push({
-      "OS Kairos": os,
-      Filial: filial,
-      "Nome Cliente": cliente,
-      Equipamento: equipamento,
-      Carcaca: carcaca,
-      Tensao: tensao,
-      CV: cv,
-      KW: kw,
-      "Dt Recebimento": dtRecebimento,
-      "DT Autoriza": dtAutoriza,
-      "Prazo Contra": prazo,
-      "Dt Entreg Eq": dtEntregEq,
-      "Desc Servico": descServico,
-      "TAG Kairos": tagKairos,
-    });
+  if (inFlightPromise && !options?.forceRefresh) {
+    return inFlightPromise;
   }
 
-  cachedFarolData = { data: rawRows, ts: now };
-  return rawRows;
+  inFlightPromise = (async () => {
+    try {
+      const items = await dataverse.listAll<Record<string, unknown>>(
+        "cr4a1_zb6_relatorios",
+        {
+          select: [
+            "cr4a1_novacoluna",
+            "cr4a1_zb6_filial",
+            "cr4a1_cliente_nome",
+            "cr4a1_eq_descricao",
+            "cr4a1_zb6_equipa",
+            "cr4a1_eq_carcaca",
+            "cr4a1_eq_potencia_cv",
+            "cr4a1_eq_tensao",
+            "cr4a1_zb6_kw",
+            "cr4a1_data_rec",
+            "cr4a1_zb6_dtauto",
+            "cr4a1_zb6_prazc",
+            "cr4a1_zb6_prazo",
+            "cr4a1_zb6_dtentr",
+            "cr4a1_zb6_servico",
+            "cr4a1_tag_kairos",
+            "cr4a1_zb6_dtpven",
+            "cr4a1_r_e_c_d_e_l_",
+            "modifiedon",
+          ],
+          orderby: "modifiedon desc",
+          maxPageSize: 5000,
+        },
+        options?.top,
+      );
+
+      const rawRows: RawOSRow[] = [];
+
+      for (const item of items) {
+        // Ignora registros marcados como deletados no Protheus / Dataverse
+        const recdel = String(item.cr4a1_r_e_c_d_e_l_ ?? "").trim();
+        if (recdel === "1" || recdel === "*") continue;
+
+        const os = String(item.cr4a1_novacoluna ?? item.cr4a1_zb6_oskair ?? "").trim();
+        if (!os) continue;
+
+        const descServico = String(item.cr4a1_zb6_servico ?? "").trim();
+        const tagKairos = String(item.cr4a1_tag_kairos ?? "").trim();
+
+        // Filtros de exclusão para Venda Direta / Balcão
+        const osUpper = os.toUpperCase();
+        const servUpper = descServico.toUpperCase();
+        const tagUpper = tagKairos.toUpperCase();
+        if (
+          osUpper.startsWith("VD") ||
+          servUpper.includes("VENDA DIRETA") ||
+          servUpper.startsWith("VD ") ||
+          tagUpper.includes("VD")
+        ) {
+          continue;
+        }
+
+        const filial = mapFilial(item.cr4a1_zb6_filial);
+        const cliente = String(item.cr4a1_cliente_nome ?? "").trim();
+        const equipamento = String(item.cr4a1_eq_descricao ?? item.cr4a1_zb6_equipa ?? "").trim();
+        const carcaca = String(item.cr4a1_eq_carcaca ?? "").trim();
+        const tensao = String(item.cr4a1_eq_tensao ?? "").trim();
+
+        // Potência
+        const cvRaw = String(item.cr4a1_eq_potencia_cv ?? "").trim();
+        const cv = cvRaw ? cvRaw.replace(/cv/gi, "").trim() : "";
+
+        const kwRaw = String(item.cr4a1_zb6_kw ?? "").trim();
+        const kw = kwRaw ? kwRaw.replace(/kw/gi, "").trim() : "";
+
+        // Datas
+        const dtRecebimento = formatDataProtheus(item.cr4a1_data_rec);
+        const dtAutoriza = formatDataProtheus(item.cr4a1_zb6_dtauto);
+        const dtEntregEq = formatDataProtheus(item.cr4a1_zb6_dtentr);
+
+        // Prazo
+        const prazo = String(item.cr4a1_zb6_prazc ?? item.cr4a1_zb6_prazo ?? "").trim();
+
+        rawRows.push({
+          "OS Kairos": os,
+          Filial: filial,
+          "Nome Cliente": cliente,
+          Equipamento: equipamento,
+          Carcaca: carcaca,
+          Tensao: tensao,
+          CV: cv,
+          KW: kw,
+          "Dt Recebimento": dtRecebimento,
+          "DT Autoriza": dtAutoriza,
+          "Prazo Contra": prazo,
+          "Dt Entreg Eq": dtEntregEq,
+          "Desc Servico": descServico,
+          "TAG Kairos": tagKairos,
+        });
+      }
+
+      cachedFarolData = { data: rawRows, ts: Date.now() };
+      return rawRows;
+    } finally {
+      inFlightPromise = null;
+    }
+  })();
+
+  return inFlightPromise;
 }

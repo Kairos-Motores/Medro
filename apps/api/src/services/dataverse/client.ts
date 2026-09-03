@@ -117,6 +117,47 @@ export const dataverse = {
     };
   },
 
+  /**
+   * GET coleção completa percorrendo todas as páginas via @odata.nextLink.
+   * Utiliza maxPageSize=5000 por padrão para acelerar o carregamento.
+   */
+  async listAll<T = Record<string, unknown>>(
+    entitySet: string,
+    query: DataverseQuery = {},
+    maxRecords?: number,
+  ): Promise<T[]> {
+    let results: T[] = [];
+    const maxPageSize = query.maxPageSize || 5000;
+    const prefer: string[] = [`odata.maxpagesize=${maxPageSize}`];
+
+    let currentPath = `/${entitySet}${qs(query)}`;
+
+    while (currentPath) {
+      if (currentPath.startsWith("http")) {
+        const url = new URL(currentPath);
+        currentPath =
+          url.pathname.replace(new RegExp(`^/api/data/v${config.DATAVERSE_API_VERSION}`), "") + url.search;
+      }
+
+      const { data } = await request<{
+        value: T[];
+        "@odata.nextLink"?: string;
+      }>("GET", currentPath, { prefer });
+
+      if (data.value && data.value.length > 0) {
+        results = results.concat(data.value);
+      }
+
+      if (maxRecords && results.length >= maxRecords) {
+        return results.slice(0, maxRecords);
+      }
+
+      currentPath = data["@odata.nextLink"] || "";
+    }
+
+    return results;
+  },
+
   /** GET por id. */
   async get<T = Record<string, unknown>>(
     entitySet: string,

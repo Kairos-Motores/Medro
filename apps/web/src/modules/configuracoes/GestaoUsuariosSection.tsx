@@ -284,11 +284,23 @@ export function GestaoUsuariosSection() {
         });
       }
 
-      return { previousData };
+      const targetUser = previousData?.usuarios.find((u) => u.id === id);
+      const isLoggedUser =
+        currentUser?.credencialId === id ||
+        (targetUser && targetUser.login.toLowerCase() === currentUser?.login?.toLowerCase());
+
+      if (isLoggedUser) {
+        useAuth.getState().updateAcessoMod(permissoes.join(", "));
+      }
+
+      return { previousData, isLoggedUser };
     },
     onError: (_err, _variables, context) => {
       if (context?.previousData) {
         qc.setQueryData(["usuarios", filialFiltro, busca], context.previousData);
+      }
+      if (context?.isLoggedUser && currentUser) {
+        useAuth.getState().updateAcessoMod(currentUser.acessoMod);
       }
       alert("Erro ao salvar permissões no Dataverse.");
     },
@@ -355,7 +367,16 @@ export function GestaoUsuariosSection() {
   // Alterna uma permissão de um usuário
   const togglePermissao = (u: UserAccessRow, permId: string) => {
     const exists = u.permissoes.includes(permId);
-    const next = exists ? u.permissoes.filter((p) => p !== permId) : [...u.permissoes, permId];
+    let next: string[];
+    if (exists) {
+      next = u.permissoes.filter((p) => p !== permId);
+      if (permId === "OS") next = next.filter((p) => p !== "OS_NEW");
+      if (permId === "SSMA") next = next.filter((p) => p !== "ROT");
+    } else {
+      next = [...u.permissoes, permId];
+      if (permId === "OS") next.push("OS_NEW");
+      if (permId === "SSMA") next.push("ROT");
+    }
     updatePermissoesMutation.mutate({ id: u.id, permissoes: next });
   };
 

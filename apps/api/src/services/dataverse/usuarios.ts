@@ -41,12 +41,10 @@ export interface UsuarioDTO {
   status: string;
 }
 
+import { parseAccessTokens } from "@medro/shared";
+
 export function parsePermissoes(acessoMod: string | null | undefined): string[] {
-  if (!acessoMod) return [];
-  return acessoMod
-    .split(/[,;\s]+/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  return Array.from(parseAccessTokens(acessoMod));
 }
 
 export function formatAcessoMod(permissoes: string[]): string {

@@ -19,6 +19,8 @@ import { TaskView } from "./TaskView";
 import { WindowFrame } from "./WindowFrame";
 import { WallpaperBackground } from "./WallpaperBackground";
 import { FloatingDockTrigger } from "./FloatingDockTrigger";
+import { api } from "@/lib/api";
+import type { UserSession } from "@medro/shared";
 
 /** Ambiente de janelas macOS com papel de parede adaptativo, dock dinâmico e auto-ocultação inteligente. */
 export function Desktop() {
@@ -29,6 +31,20 @@ export function Desktop() {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState<WinRect>({ x: 0, y: 0, w: 1200, h: 700 });
   const [dockManualShow, setDockManualShow] = useState(false);
+
+  // Sincroniza sessão do usuário com o Dataverse no carregamento
+  useEffect(() => {
+    api<{ user: UserSession }>("/auth/me")
+      .then((res) => {
+        if (res.user) {
+          const currentToken = useAuth.getState().token;
+          if (currentToken) {
+            useAuth.getState().setSession(currentToken, res.user);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useLayoutEffect(() => {
     const el = surfaceRef.current;

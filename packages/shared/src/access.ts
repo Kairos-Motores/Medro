@@ -55,9 +55,42 @@ export type ActionToken = keyof typeof ACTION_TOKENS;
 
 export type AccessToken = ModuleToken | ActionToken;
 
-/** Réplica de `"TOKEN" in acesso_mod` do Power Fx (substring, case-sensitive). */
+/**
+ * Decompõe a string `acesso_mod` em tokens individuais, normalizando aliases
+ * legados do PowerApps (ex: OS_NEW <-> OS, ROT <-> SSMA).
+ */
+export function parseAccessTokens(acessoMod: string | null | undefined): Set<string> {
+  if (!acessoMod) return new Set();
+  const raw = acessoMod
+    .split(/[,;\s]+/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  const tokens = new Set<string>();
+  for (const t of raw) {
+    tokens.add(t);
+    // Aliases operacionais e legados do PowerApps:
+    if (t === "OS_NEW" || t === "OS") {
+      tokens.add("OS");
+      tokens.add("OS_NEW");
+    }
+    if (t === "ROT" || t === "SSMA") {
+      tokens.add("ROT");
+      tokens.add("SSMA");
+    }
+  }
+  return tokens;
+}
+
+/**
+ * Valida se o usuário possui acesso ao token especificado.
+ * Utiliza matching exato de tokens para evitar falsos positivos onde sub-ações
+ * (ex: `_OS_EDOS`) liberavam indevidamente o módulo macro `OS`.
+ */
 export function hasAccess(acessoMod: string | null | undefined, token: AccessToken): boolean {
-  return !!acessoMod && acessoMod.includes(token);
+  if (!acessoMod) return false;
+  const tokens = parseAccessTokens(acessoMod);
+  return tokens.has(token);
 }
 
 /** Sessão do usuário autenticado (deriva de `Credenciaiss`). */

@@ -7,6 +7,7 @@ interface AuthState {
   token: string | null;
   user: UserSession | null;
   setSession: (token: string, user: UserSession) => void;
+  updateAcessoMod: (acessoMod: string) => void;
   clear: () => void;
   can: (...tokens: AccessToken[]) => boolean;
 }
@@ -17,6 +18,12 @@ export const useAuth = create<AuthState>()(
       token: null,
       user: null,
       setSession: (token, user) => set({ token, user }),
+      updateAcessoMod: (acessoMod) => {
+        const u = get().user;
+        if (u) {
+          set({ user: { ...u, acessoMod } });
+        }
+      },
       clear: () => set({ token: null, user: null }),
       can: (...tokens) => {
         const mod = get().user?.acessoMod ?? "";

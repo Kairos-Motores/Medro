@@ -102,20 +102,6 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
     setError("");
 
     try {
-      // 1. Carrega parâmetros de carcaças e grupos do localStorage
-      let carcacasList: CarcacaEquiv[] = [];
-      try {
-        const stored = localStorage.getItem("medro_carcacas");
-        if (stored) carcacasList = JSON.parse(stored);
-      } catch {}
-
-      const carcacasMap = new Map<string, string>();
-      carcacasList.forEach((c) => {
-        if (c.original && c.equivalente) {
-          carcacasMap.set(c.original.toUpperCase().trim(), c.equivalente.toUpperCase().trim());
-        }
-      });
-
       let gruposList: GrupoPorte[] = [];
       try {
         const stored = localStorage.getItem("medro_grupos_porte");
@@ -128,10 +114,22 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
         if (stored) farolConfig = JSON.parse(stored);
       } catch {}
 
-      // 2. Busca dados da API do Medro Pro (Extraídos do Dataverse cr4a1_zb6_relatorios)
+      // Busca simultânea da base do Farol (ZB6) e do De-Para de Carcaças do Dataverse
       const endpoint = force ? "/medro-pro/bases/farol-os?refresh=true" : "/medro-pro/bases/farol-os";
-      const res = await api<{ status: string; data: RawOSRow[] }>(endpoint);
-      const rawRows = res?.data || [];
+      const [resFarol, resCarc] = await Promise.all([
+        api<{ status: string; data: RawOSRow[] }>(endpoint),
+        api<{ status: string; data: Array<{ cr4a1_name: string; cr4a1_carcaca_equivalente: string }> }>("/medro-pro/carcacas").catch(() => null),
+      ]);
+
+      const rawRows = resFarol?.data || [];
+      const carcacasMap = new Map<string, string>();
+      if (resCarc?.data) {
+        resCarc.data.forEach((c) => {
+          if (c.cr4a1_name && c.cr4a1_carcaca_equivalente) {
+            carcacasMap.set(c.cr4a1_name.toUpperCase().trim(), c.cr4a1_carcaca_equivalente.toUpperCase().trim());
+          }
+        });
+      }
 
       // 3. Enriquece com regras de negócio e cálculo de Farol
       const hoje = new Date();
@@ -139,34 +137,33 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
 
       const enriched: EnrichedOSRow[] = rawRows.map((row) => {
         const carcacaOrig = String(row["Carcaca"] || "").toUpperCase().trim();
-        const equiv = carcacaOrig && carcacaOrig !== "-" ? (carcacasMap.get(carcacaOrig) || carcacaOrig) : "-";
+        const mappedEquiv = carcacaOrig && carcacaOrig !== "-" ? carcacasMap.get(carcacaOrig) : undefined;
+        const equiv = mappedEquiv || "-";
 
-        // Classificação de porte
+        // Classificação de porte baseada na carcaça equivalente oficial
         let classe = "-";
-        const tensaoStr = String(row["Tensao"] || "").toUpperCase();
-        const numTensao = parseInt(tensaoStr.replace(/\D/g, ""), 10);
-        const isAT = tensaoStr.includes("KV") || (numTensao && numTensao > 1000);
+        if (mappedEquiv) {
+          const tensaoStr = String(row["Tensao"] || "").toUpperCase();
+          const numTensao = parseInt(tensaoStr.replace(/\D/g, ""), 10);
+          const isAT = tensaoStr.includes("KV") || (numTensao && numTensao > 1000);
 
-        const matchNum = equiv.match(/\d+/);
-        if (matchNum) {
-          const valNum = parseInt(matchNum[0]!, 10);
-          for (const g of gruposList) {
-            const rangeMatch = g.faixaCarcaca?.match(/(\d+)\s*-\s*(\d+)/);
-            if (rangeMatch) {
-              const min = parseInt(rangeMatch[1]!, 10);
-              const max = parseInt(rangeMatch[2]!, 10);
-              if (valNum >= min && valNum <= max) {
-                if ((isAT && g.tensao === "AT") || (!isAT && g.tensao === "BT")) {
-                  classe = g.nome;
-                  break;
+          const matchNum = mappedEquiv.match(/\d+/);
+          if (matchNum) {
+            const valNum = parseInt(matchNum[0]!, 10);
+            for (const g of gruposList) {
+              const rangeMatch = g.faixaCarcaca?.match(/(\d+)\s*-\s*(\d+)/);
+              if (rangeMatch) {
+                const min = parseInt(rangeMatch[1]!, 10);
+                const max = parseInt(rangeMatch[2]!, 10);
+                if (valNum >= min && valNum <= max) {
+                  if ((isAT && g.tensao === "AT") || (!isAT && g.tensao === "BT")) {
+                    classe = g.nome;
+                    break;
+                  }
                 }
               }
             }
           }
-        }
-        if (classe === "-") {
-          // Fallback padrão se não houver match no grupo configurado
-          classe = isAT ? "AT Média/Alta" : "BT Médio";
         }
 
         // Cálculo do Farol Projetado

@@ -33,6 +33,14 @@ export async function authRoutes(app: FastifyInstance) {
   });
 
   app.get("/auth/me", { preHandler: [app.authenticate] }, async (req) => {
+    try {
+      if (req.user?.login) {
+        const fresh = await sessionByUsuario(req.user.login);
+        if (fresh) return { user: fresh };
+      }
+    } catch {
+      // fallback
+    }
     return { user: req.user };
   });
 
