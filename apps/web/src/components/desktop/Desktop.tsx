@@ -9,7 +9,7 @@ import { WindowFrame } from "./WindowFrame";
 import { WallpaperBackground } from "./WallpaperBackground";
 import { FloatingDockTrigger } from "./FloatingDockTrigger";
 
-/** Ambiente de janelas macOS com papel de parede adaptativo e auto-ocultação inteligente do Dock. */
+/** Ambiente de janelas macOS com papel de parede adaptativo, dock dinâmico e auto-ocultação inteligente. */
 export function Desktop() {
   const isDesktop = useIsDesktop();
   const { windows, activeId, close } = useWM();
@@ -38,9 +38,9 @@ export function Desktop() {
   // Identifica se há aplicativo em tela cheia (maximizada) ou preenchendo a área inferior do dock
   const isCoveringDock = !isDesktop
     ? !!active
-    : openWindows.some((w) => w.maximized || (w.rect.y + w.rect.h >= bounds.h - 65));
+    : openWindows.some((w) => w.maximized || w.rect.y + w.rect.h >= bounds.h - 65);
 
-  // Quando nenhuma janela estiver cobrindo a área da barra, desativa o modo manual para voltar ao padrão
+  // Quando nenhuma janela estiver cobrindo a área da barra, reseta o estado manual
   useEffect(() => {
     if (!isCoveringDock) {
       setDockManualShow(false);
