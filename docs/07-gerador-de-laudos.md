@@ -1,9 +1,9 @@
 # 07 — Gerador de Laudos (módulo `laudos-gen`)
 
 > **Handoff para o próximo chat.** Documento vivo. Última atualização: 2026-09-03
-> (17 editores + prévia tempo real só-leitura + navegação + IA do diagnóstico
-> FUNCIONANDO + seletor de fotos do SharePoint + primitivos de UI Medro:
-> Select/Combobox/DatePicker/Checkbox/Popover — §4.4).
+> (17 editores + prévia tempo real + IA do diagnóstico FUNCIONANDO + fotos do
+> SharePoint corrigidas §7.1 + primitivos de UI Medro + shell: menu de contexto,
+> status do dispositivo, atalhos/pasta de rascunhos — §5).
 > Contexto: incorporar o app **standalone `Gerador_relatorios`** (gerador de laudo técnico
 > de OS, saída PDF A4 padrão Kairós) ao Medro como **módulo próprio `laudos-gen`,
 > acessível SOMENTE ao Departamento Técnico** (`access: ["DPT"]`).
@@ -271,22 +271,18 @@ Assim o bundle refaz as leituras já autenticado como DPT.
 
 ## 5. Estado do repositório
 
-Branch `main`. Commitado e enviado (`origin/main`):
-- `e3fb06a` — `feat(desktop): controles de janela à direita, tile, TaskView`
-- `0d3848f` — `feat(laudos-gen): módulo base (leitura, rascunho, emissão de PDF)`
-- `083981b` — `feat(laudos-gen): 17 editores Medro, prévia em tempo real, IA e fotos do SharePoint`
+Branch `main`. Tudo commitado e enviado (`origin/main`):
+- `e3fb06a` — desktop: controles à direita, tile, TaskView
+- `0d3848f` — laudos-gen: módulo base
+- `083981b` — laudos-gen: 17 editores, prévia tempo real, IA e fotos (1ª versão)
+- `d3e2ea4` — ui: primitivos Medro (select/combobox/date-picker/checkbox/popover) + IA ligada
+- `98035a4` — fix: `listFotos` por Graph search (ver §7.1)
+- `e1e9326` — desktop: menu de contexto (botão direito)
+- `52ac9b4` — desktop: status do dispositivo na barra do topo
+- `e8b249c` — desktop: atalhos na área de trabalho + pasta de rascunhos (DPT)
 
-**Sem commit** (config de IA + primitivos de UI Medro):
-- Novos: `apps/web/src/components/ui/{select,combobox,date-picker,checkbox,popover}.tsx`
-- Modificados:
-  - `apps/api/src/services/laudosGen/ia.ts` (modelos Gemini atuais; fallback também em 404)
-  - `apps/web/src/modules/laudos-gen/{LaudosGenApp.tsx,editors.tsx,fields.tsx}` (adotam
-    Combobox/Select/DatePicker/Checkbox)
-  - `apps/web/package.json` + `pnpm-lock.yaml` (`@radix-ui/react-select`, `-checkbox`,
-    `-popover`, `react-day-picker`)
-  - este doc
-- Local (gitignored): `apps/api/.env` — `GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY`
-  copiadas de `Gerador_relatorios/backend/.env`.
+Local (gitignored): `apps/api/.env` — `GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY`
+copiadas de `Gerador_relatorios/backend/.env`.
 
 ---
 
@@ -330,8 +326,13 @@ pnpm --filter @medro/web dev
   arquivamento **fire-and-forget** (nunca segura o PDF); `GET /render/status/:osId` + poll no front +
   mensagens honestas ("Não foi possível arquivar no SharePoint").
 - **Ação para o próximo chat:** validar `uploadReportPdf` num deploy Render (ou outra rede) antes de
-  considerar o arquivamento "pronto". `listFotos` retornou listas vazias — confirmar se é convenção
-  de caminho ou pasta sem arquivos.
+  considerar o arquivamento "pronto".
+- ✅ **`listFotos` resolvido** (commit `98035a4`): não era env nem permissão. As fotos de peritagem
+  desta tenant ficam em **`/Peritagens/…/{osId}/`** (não em `/Fotos Peritagens/…/{categoria}/` —
+  esse ramo só tem o PDF, em `Relatorio Inicial/`), com o nome no padrão `{osId}_{item}_{hash}.jpg`,
+  e a pasta de cliente nem sempre bate com `cr4a1_cliente_nome` ("PORTO" vs "VALE PORTO"). `listFotos`
+  agora usa **Graph drive search `q='{osId}'`** (path fixo é só fallback) e agrupa por item.
+  OS com fotos p/ testar: **`1515-PO`** (15 fotos) / `1516-PO`. `11539-AL` não tem fotos.
 
 ### 7.2 Segurança / go-live (constraints do usuário, ainda válidas)
 - `DATAVERSE_CLIENT_SECRET` foi colado no chat uma vez → **rotacionar antes do go-live**.
@@ -439,6 +440,16 @@ apps/web/src/components/ui/             primitivos reutilizáveis (fora do módu
   date-picker.tsx  (novo)               react-day-picker + date-fns pt-BR
   checkbox.tsx     (novo)               Radix Checkbox + CheckboxField
   popover.tsx      (novo)               Radix Popover no estilo do dropdown-menu
+  context-menu.tsx (novo)               Radix ContextMenu (botão direito)
+
+apps/web/src/components/desktop/ + lib/  (shell — não é do laudos-gen, mas o toca)
+  DesktopIcons.tsx / lib/desktopShortcuts.ts   atalhos na área de trabalho +
+      pasta "Rascunhos DPT" (abre o laudos-gen); botão direito num rascunho →
+      "Fixar na área de trabalho"
+  DeviceStatus.tsx / lib/useDeviceInfo.ts       filial · rede · bateria · cidade na MenuBar
+  Desktop.tsx / WindowFrame.tsx (mod)           menu de contexto (área de trabalho + janela)
+  lib/wm.ts (mod)                               open(moduleId, title, params?) → params na janela;
+      ModuleHost repassa; LaudosGenApp aceita initialOsId/openNonce e auto-carrega
 
 apps/web/.env.example (mod)             VITE_REPORT_PRINT_URL
 render.yaml                             medro-api + medro-pdf-worker + medro-report-print
