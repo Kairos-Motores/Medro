@@ -5,6 +5,7 @@ import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/cn";
 import { NotificationsButton } from "@/components/layout/NotificationsButton";
 import { UserMenu } from "@/components/layout/UserMenu";
+import { DeviceStatus } from "./DeviceStatus";
 
 export function MenuBar() {
   const { windows, activeId, setLaunchpad, setTaskView, tile } = useWM();
@@ -69,6 +70,7 @@ export function MenuBar() {
           )}
         </button>
 
+        <DeviceStatus />
         <NotificationsButton />
         <span className="hidden tabular-nums text-foreground-secondary xs:inline">
           <span className="capitalize">{weekday}</span> {dateShort} · {time}
