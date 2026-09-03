@@ -280,6 +280,13 @@ Branch `main`. Tudo commitado e enviado (`origin/main`):
 - `e1e9326` — desktop: menu de contexto (botão direito)
 - `52ac9b4` — desktop: status do dispositivo na barra do topo
 - `e8b249c` — desktop: atalhos na área de trabalho + pasta de rascunhos (DPT)
+- `2f0c2b5` — fix: fotos quebravam (não gravar a downloadUrl expirável no rascunho —
+  agora `{id,nome}` + `GET /laudos-gen/foto/:id` redireciona p/ URL fresca)
+- `a818dec` — desktop: menu de contexto no Dock + trava de acesso por módulo (`ModuleHost`
+  respeita `MODULES[].access`; laudo = DPT-only em qualquer via de abertura)
+- `088b618` — laudos-gen: janela "Laudos em andamento" (`RascunhosFolder`, pseudo-módulo
+  `rascunhos-folder`, DPT) + `DELETE /laudos-gen/rascunho/:osId` + menu "Salvar como modelo"
+- `d01bb3f` — desktop: pastas de apps no Launchpad (`lib/launchpadLayout.ts`), por navegador
 
 Local (gitignored): `apps/api/.env` — `GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY`
 copiadas de `Gerador_relatorios/backend/.env`.
