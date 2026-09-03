@@ -3,18 +3,22 @@ import { graph, graphEnabled } from "../graph/client.js";
 
 /**
  * SharePoint do Gerador de Laudos — arquivar o PDF gerado e listar fotos da OS.
- * Mesmo drive já usado pelo Medro ("Doc Técnicos"): guarda laudos e a pasta
- * "Fotos Peritagens".
+ * Mesmo drive já usado pelo Medro ("Doc Técnicos").
  *
- * PDF em  /Fotos Peritagens/{unidade}/{cliente}/{osId}/Relatorio Inicial/Relatorio_{osId}.pdf
- * fotos em /Fotos Peritagens/{unidade}/{cliente}/{osId}/{servico}/
+ * PDF do laudo:  /Fotos Peritagens/{unidade}/{cliente}/{osId}/Relatorio Inicial/Relatorio_{osId}.pdf
+ * Fotos da OS:   nesta tenant elas ficam em  /Peritagens/…/{osId}/  (às vezes
+ *   nivelado por OS, às vezes /Peritagens/{unidade}/{cliente}/{osId}/), com o
+ *   nome no padrão  {osId}_{item}_{hash}.jpg . O nome da pasta de cliente NEM
+ *   sempre bate com cr4a1_cliente_nome (ex.: "PORTO" vs "VALE PORTO"), então a
+ *   busca principal é por NOME de arquivo/pasta via Graph search — path fixo é
+ *   só fallback.
  *
  * O upload usa `undici.request` (não o global `fetch` do Node 24, que trava
  * com corpos grandes de PUT para o SharePoint).
  */
 
 const DRIVE_ID = "b!FtUeR6-xYEutseM1MLQP0luN9WQa7dVAm7IrWRchyFnVHstz2SkdR6IH4JOZ3kJr";
-const FOTOS_CATEGORIAS = ["Peritagem", "Teste", "Montagem", "Qualidade"] as const;
+const IMG_RE = /\.(jpe?g|png|webp|gif|bmp)$/i;
 
 function enc(rel: string): string {
   return rel
@@ -27,42 +31,103 @@ function enc(rel: string): string {
 
 export type FotoItem = { id: string; nome: string; url: string };
 
+type GItem = {
+  id: string;
+  name: string;
+  file?: unknown;
+  folder?: unknown;
+  "@microsoft.graph.downloadUrl"?: string;
+};
+
+/** {osId}_{item}_{hash}.jpg → "item" (categoria de exibição); senão "Peritagem". */
+function categoriaDoNome(nome: string, osId: string): string {
+  const semExt = nome.replace(IMG_RE, "");
+  const semOs = semExt.replace(new RegExp(`^${osId}[\\s_-]+`, "i"), "");
+  const partes = semOs.split("_");
+  const meio = partes.length > 1 ? partes.slice(0, -1).join("_") : partes[0];
+  const t = (meio || "").trim();
+  return t && !/^\d+$/.test(t) ? t : "Peritagem";
+}
+
+function toFoto(f: GItem): FotoItem {
+  return { id: f.id, nome: f.name, url: f["@microsoft.graph.downloadUrl"] ?? "" };
+}
+
+async function children(idOrPath: { id?: string; path?: string }): Promise<GItem[]> {
+  // sem $select → o Graph devolve @microsoft.graph.downloadUrl para arquivos
+  const url = idOrPath.id
+    ? `/drives/${DRIVE_ID}/items/${idOrPath.id}/children?$top=999`
+    : `/drives/${DRIVE_ID}/root:/${enc(idOrPath.path!)}:/children?$top=999`;
+  const { value } = await graph<{ value: GItem[] }>(url, { signal: AbortSignal.timeout(15_000) });
+  return value;
+}
+
+/**
+ * Fotos da OS agrupadas por "categoria" (o item extraído do nome do arquivo).
+ * 1) Graph search por `{osId}`: pega imagens cujo nome começa com o osId e,
+ *    para pastas com o nome do osId, lista os filhos.
+ * 2) Fallback: caminhos fixos conhecidos.
+ */
 export async function listFotos(
   osId: string,
   unidade: string,
   cliente: string,
 ): Promise<Record<string, FotoItem[]>> {
   if (!graphEnabled()) return {};
-  const out: Record<string, FotoItem[]> = {};
-  for (const servico of FOTOS_CATEGORIAS) {
-    try {
-      const rel = `Fotos Peritagens/${unidade}/${cliente}/${osId}/${servico}`;
-      const { value } = await graph<{
-        value: {
-          id: string;
-          name: string;
-          file?: unknown;
-          "@microsoft.graph.downloadUrl"?: string;
-        }[];
-      }>(
-        `/drives/${DRIVE_ID}/root:/${enc(rel)}:/children?$select=id,name,file,@microsoft.graph.downloadUrl&$top=200`,
-        { signal: AbortSignal.timeout(15_000) },
-      );
-      out[servico] = value
-        .filter((f) => f.file)
-        .map((f) => ({ id: f.id, nome: f.name, url: f["@microsoft.graph.downloadUrl"] ?? "" }));
-    } catch (err) {
-      // 404 = pasta sem fotos (normal); outros erros são de path/permissão.
-      const msg = (err as Error).message ?? String(err);
-      if (!/\b404\b/.test(msg)) {
-        console.warn(
-          `[laudos-gen] listFotos ${osId}/${servico}: ${msg.slice(0, 200)} ` +
-            `(path: Fotos Peritagens/${unidade}/${cliente}/${osId}/${servico})`,
-        );
+
+  const byId = new Map<string, FotoItem>();
+  const add = (f: GItem) => {
+    if (f.file && IMG_RE.test(f.name) && !byId.has(f.id)) byId.set(f.id, toFoto(f));
+  };
+
+  // 1) busca por nome
+  try {
+    const { value } = await graph<{ value: GItem[] }>(
+      `/drives/${DRIVE_ID}/root/search(q='${osId.replace(/'/g, "''")}')?$top=200`,
+      { signal: AbortSignal.timeout(15_000) },
+    );
+    const osLc = osId.toLowerCase();
+    for (const it of value) {
+      if (it.file && it.name.toLowerCase().startsWith(osLc)) add(it);
+      if (it.folder && it.name.toLowerCase() === osLc) {
+        try {
+          for (const c of await children({ id: it.id })) add(c);
+        } catch {
+          /* ignora pasta inacessível */
+        }
       }
-      out[servico] = [];
+    }
+  } catch (err) {
+    console.warn(`[laudos-gen] listFotos search ${osId}: ${(err as Error).message?.slice(0, 200)}`);
+  }
+
+  // 2) fallback: caminhos fixos (a 1ª que existir já resolve)
+  if (byId.size === 0) {
+    const paths = [
+      `Peritagens/${osId}`,
+      `Peritagens/${unidade}/${cliente}/${osId}`,
+      `Fotos Peritagens/${unidade}/${cliente}/${osId}`,
+      `Fotos Peritagens/${unidade}/${cliente}/${osId}/Peritagem`,
+    ];
+    for (const p of paths) {
+      try {
+        for (const c of await children({ path: p })) add(c);
+        if (byId.size) break;
+      } catch (err) {
+        if (!/\b404\b/.test((err as Error).message ?? "")) {
+          console.warn(`[laudos-gen] listFotos path "${p}": ${(err as Error).message?.slice(0, 160)}`);
+        }
+      }
     }
   }
+
+  // agrupa por categoria derivada do nome do arquivo
+  const out: Record<string, FotoItem[]> = {};
+  for (const foto of byId.values()) {
+    const cat = categoriaDoNome(foto.nome, osId);
+    (out[cat] ??= []).push(foto);
+  }
+  for (const k of Object.keys(out)) out[k]!.sort((a, b) => a.nome.localeCompare(b.nome));
   return out;
 }
 
