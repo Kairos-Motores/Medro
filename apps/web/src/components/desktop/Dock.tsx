@@ -250,21 +250,34 @@ export function Dock({ hidden = false }: { hidden?: boolean }) {
           {/* Container animado da caixa de busca */}
           <div
             className={cn(
-              "relative flex items-center overflow-hidden rounded-xl border border-black/5 dark:border-white/10 bg-surface/90 backdrop-blur-md transition-all duration-300 ease-in-out",
-              isSearchExpanded ? "w-52 sm:w-64 h-11 px-3 shadow-xs" : "w-11 h-11 justify-center hover:-translate-y-1 hover:shadow-md cursor-pointer",
+              "relative flex items-center overflow-hidden rounded-xl border border-black/5 dark:border-white/10 bg-surface/90 backdrop-blur-md transition-all duration-300 ease-in-out cursor-pointer",
+              isSearchExpanded ? "w-52 sm:w-64 h-11 px-3 shadow-xs cursor-text" : "w-11 h-11 justify-center hover:-translate-y-1 hover:shadow-md",
             )}
             onClick={() => {
               if (!isSearchExpanded) {
                 setManualExpand(true);
               }
+              inputRef.current?.focus();
             }}
           >
-            <Search
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isSearchExpanded) {
+                  setManualExpand(true);
+                }
+                inputRef.current?.focus();
+              }}
               className={cn(
-                "size-4 shrink-0 transition-colors duration-200",
+                "flex items-center justify-center p-0.5 bg-transparent border-0 focus:outline-none cursor-pointer",
                 isSearchExpanded ? "text-muted-foreground mr-2" : "text-foreground hover:text-primary",
               )}
-            />
+              title={isSearchExpanded ? "Buscar aplicativo" : "Pesquisar aplicativos"}
+            >
+              <Search className="size-4 shrink-0 transition-colors duration-200" />
+            </button>
 
             {/* Input de texto visível apenas quando expandido */}
             <input
