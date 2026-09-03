@@ -1,9 +1,11 @@
 # 07 — Gerador de Laudos (módulo `laudos-gen`)
 
 > **Handoff para o próximo chat.** Documento vivo. Última atualização: 2026-09-03
-> (17 editores + prévia tempo real + IA do diagnóstico FUNCIONANDO + fotos do
-> SharePoint corrigidas §7.1 + primitivos de UI Medro + shell: menu de contexto,
-> status do dispositivo, atalhos/pasta de rascunhos — §5).
+> (17 editores + prévia tempo real + IA FUNCIONANDO + fotos SharePoint corrigidas §7.1
+> + primitivos de UI Medro + shell: menu de contexto, status do dispositivo,
+> atalhos/pastas — §5).
+> **➡️ PRÓXIMO PASSO combinado com o usuário: §11 — construtor visual de modelos
+> de laudo + app de gerência de modelos (Fases A → B → C).**
 > Contexto: incorporar o app **standalone `Gerador_relatorios`** (gerador de laudo técnico
 > de OS, saída PDF A4 padrão Kairós) ao Medro como **módulo próprio `laudos-gen`,
 > acessível SOMENTE ao Departamento Técnico** (`access: ["DPT"]`).
@@ -286,7 +288,17 @@ Branch `main`. Tudo commitado e enviado (`origin/main`):
   respeita `MODULES[].access`; laudo = DPT-only em qualquer via de abertura)
 - `088b618` — laudos-gen: janela "Laudos em andamento" (`RascunhosFolder`, pseudo-módulo
   `rascunhos-folder`, DPT) + `DELETE /laudos-gen/rascunho/:osId` + menu "Salvar como modelo"
+  (só nome — `SaveModeloDialog` no `LaudosGenApp`, grava `modeloConfigFromDoc` inline)
 - `d01bb3f` — desktop: pastas de apps no Launchpad (`lib/launchpadLayout.ts`), por navegador
+- `bfeba72` — docs
+- `f636d62` — **commit de outro dev** (medro-pro farol + módulo Usinagem/Caldeiraria +
+  gestão de usuários). Fast-forward limpo (ele puxou meu trabalho antes). Tocou
+  `ModuleHost.tsx` (branch `caldeiraria`) e `registry.ts` (token `SSMA`, label Caldeiraria)
+  **sem conflito** com o meu `rascunhos-folder`.
+
+⚠️ **Gotcha de build:** `pnpm --filter @medro/web build` acusa `"SSMA" not assignable to
+AccessToken` se o `packages/shared/dist` estiver velho. Rodar `pnpm --filter @medro/shared
+build` primeiro (o `pnpm dev` já faz). Depois disso web + api compilam limpos.
 
 Local (gitignored): `apps/api/.env` — `GEMINI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY`
 copiadas de `Gerador_relatorios/backend/.env`.
@@ -372,17 +384,16 @@ pnpm --filter @medro/web dev
 2. ✅ **IA do diagnóstico FUNCIONANDO** — rotas + `services/laudosGen/ia.ts`, botões no
    `DiagnosisEditor`, chaves no `apps/api/.env`, modelos Gemini atuais. Testado: 200 OK.
    O modelo precisa de `cr4a1_ia_provider` preenchido (UI de config ainda pendente — item 5).
-3. **Fotos** — seletor "Escolher do SharePoint" já religado (`PhotoField`). Falta:
-   (a) `listFotos` retornou vazio p/ 11539-AL — ver §7.1 (agora loga o erro do Graph);
-   (b) portar **upload local** (`/api/upload-temp/:categoria`) e **upload de capa**
-   (`/api/upload-capa` + `/api/capas/:id`); (c) auto-import da peritagem
-   (`/api/os/:id/peritagem-fotos` + `aplicarFotosAutomaticas`).
+3. ✅ **Fotos** — `PhotoField` religado; `listFotos` corrigido (§7.1); rascunho grava só
+   `{id,nome}` e `GET /laudos-gen/foto/:itemId` (aceita `?t=`) redireciona p/ URL fresca
+   (commit `2f0c2b5`). Falta: **upload local** (`/api/upload-temp/:categoria`) e **auto-import
+   da peritagem** (`/api/os/:id/peritagem-fotos` + `aplicarFotosAutomaticas`).
 4. **Confirmar upload SharePoint no Render** (§7.1).
-5. **UI Medro para config de IA do modelo** (prompt + provider) — hoje só via app antigo.
+5. ➡️ **Construtor + gerenciador de modelos de laudo — ver §11** (inclui a UI de config de
+   IA por modelo e o upload de capa própria).
 
 ### Depois
-6. **Commitar** o porte + esta rodada (§5).
-7. **Apagar `Gerador_relatorios/`** quando o módulo estiver completo (plano do usuário).
+6. **Apagar `Gerador_relatorios/`** quando o módulo estiver completo (plano do usuário).
 
 ---
 
@@ -460,4 +471,171 @@ apps/web/src/components/desktop/ + lib/  (shell — não é do laudos-gen, mas o
 
 apps/web/.env.example (mod)             VITE_REPORT_PRINT_URL
 render.yaml                             medro-api + medro-pdf-worker + medro-report-print
+
+apps/web/src/modules/laudos-gen/  (rodadas seguintes)
+  RascunhosFolder.tsx (novo)            janela "Laudos em andamento" (pseudo-módulo rascunhos-folder)
+apps/web/src/components/desktop/
+  DesktopIcons.tsx / Dock.tsx (mod)     menu de contexto no Dock + ícone → open("rascunhos-folder")
+  Launchpad.tsx (mod) / lib/launchpadLayout.ts (novo)   pastas de apps no Launchpad
+apps/web/src/modules/ModuleHost.tsx (mod)   trava por MODULES[].access + branch rascunhos-folder
 ```
+
+---
+
+## 11. PRÓXIMA GRANDE ENTREGA — Construtor visual + gerenciador de modelos de laudo
+
+**Combinado com o usuário.** Montar/editar modelos de laudo de forma visual (**sem escrever
+código por modelo**) e um app próprio para gerenciá-los. Faseamento: **A → B → C**.
+
+### 11.1 O que é um modelo (formato — recap)
+
+Linha em `cr4a1_modelos_relatorioses`:
+- `cr4a1_nome_modelo` — nome
+- `cr4a1_configuracao_json` — a **estrutura do laudo**:
+  ```
+  { modelConfig: { capaAtiva, customCoverUrl, layout: [ {id, type, title, keys?} ] },
+    textBlocks, imageBlocks,
+    customTableRows, tableHeaders, tableColumns, tableSubColumns,
+    freePageBlocks, diagVisibility }
+  ```
+- `cr4a1_ia_prompt` / `cr4a1_ia_provider` — IA do modelo (chave no `.env`; ver `getModeloIa`/`setModeloIaConfig`).
+
+**`layout[].type` = qualquer um dos ~20 tipos já renderizados** pelo `apps/report-print` (lista
+canônica = `state.ts` DEFAULT_LAYOUT + `editors.tsx` const `EDITORS` + o `switch` do
+`report-print/src/App.jsx`): `PageCover`, `PageBackCover`, `PageOurServices`, `PageSummary`,
+`PageProcessData`, `PageDiagnosisAndHistory` (IA), `PageMotorElectric` (relatório fotográfico,
+usa `keys: [b1,b2]` → `motorSections`), `PageMechanicalEvaluation`, `PageBearingEvaluation`,
+`PageComponentsEvaluation`, `PageResistanceTests`, `PageNormativeReferences`,
+`PageStaticTestsDescription`, `PageCustomTable`, `PageBalanceamento`, `PageFinal`, e as
+**customizadas**: `PageEditableText` (texto fixo → `textBlocks[id]`), `PageImageBlock` (imagem
+fixa → `imageBlocks[id]`), `PageCustomTable` (tabela livre → `customTableRows[id]`+headers),
+`PageBuilder` (página livre com blocos texto/imagem/tabela → `freePageBlocks[id]`).
+
+Adicionar página = `push`/`splice` em `layout` + inicializar a chave de conteúdo do `id`.
+O **sumário é auto-gerado do `layout`** (filtra `cover`/`back_cover`); título de cada entrada
+editável no `SummaryEditor` — já pronto. Só criar um `page.type` **inédito** (fora dos ~20)
+exigiria um renderer novo no report-print + editor novo — não é o caso aqui.
+
+### 11.2 FASE A — Backend + hooks + app "Modelos de Laudo" (gerência)
+
+**Backend** `apps/api/src/services/laudosGen/dataverse.ts` (MODELOS_SET = `cr4a1_modelos_relatorioses`):
+- `getModelo(id)` → `dataverse.get(MODELOS_SET, id, {select:["cr4a1_nome_modelo","cr4a1_configuracao_json","cr4a1_ia_prompt","cr4a1_ia_provider"]})`
+- `atualizarModelo(id, {nome?, configJson?})` → `dataverse.update(MODELOS_SET, id, {cr4a1_nome_modelo?, cr4a1_configuracao_json?})`
+- `excluirModelo(id)` → `dataverse.remove(MODELOS_SET, id)` *(igual ao `excluirRascunho`)*
+- `criarModelo` já existe (retorna void; se quiser o id novo p/ chamar ia-config na sequência,
+  trocar p/ `Prefer: return=representation` ou ler o header `OData-EntityId` no `dataverse.create`)
+
+`apps/api/src/routes/laudosGen.ts` (o `onRequest` que promove `?t=` e o `requireAccess("DPT")` já cobrem):
+- `GET /laudos-gen/modelos/:id` → `getModelo`
+- `PUT /laudos-gen/modelos/:id` — body zod `{ nome?: string, configuracaoJson?: string }` → `atualizarModelo`
+- `DELETE /laudos-gen/modelos/:id` → `excluirModelo`
+- *(opcional)* `POST /laudos-gen/modelos/:id/duplicar` — lê + cria cópia; ou o front faz GET+POST.
+- `GET/PUT /laudos-gen/modelos/:id/ia-config` — **já existem** (`getModeloIaConfig` devolve
+  `{prompt, provider, apiKeyPreview}`; `setModeloIaConfig` grava prompt/provider — a chave
+  vem do `.env`, então o campo apiKey pode sumir da UI).
+
+**Hooks** `apps/web/src/modules/laudos-gen/api.ts` (padrão dos existentes):
+`useModelo(id)`, `useAtualizarModelo()`, `useExcluirModelo()`, `useDuplicarModelo()`,
+`useIaConfig(id)`, `useSetIaConfig()`. Invalidar `keys.modelos` + `["laudos-gen","modelo",id]`.
+
+**`state.ts`** — extrair de `SaveModeloDialog` (hoje inline no `LaudosGenApp.tsx`) a função
+`modeloConfigFromDoc(doc): string` (`JSON.stringify` de `{modelConfig, customTableRows,
+tableHeaders, tableColumns, tableSubColumns, textBlocks, imageBlocks, freePageBlocks,
+diagVisibility}`). O inverso `applyModelo(draft, json, id)` **já existe**.
+
+**App** — pseudo-módulo `"modelos-folder"` (igual `rascunhos-folder`):
+- `registry.ts` — `"modelos-folder"` no union `ModuleId` (⚠️ o outro dev já mexeu nesse union — rebase cuidadoso).
+- `ModuleHost.tsx` — `if (moduleId === "modelos-folder") return gate("DPT") ?? <ModelosManager/>;`
+- `modules/laudos-gen/ModelosManager.tsx` (novo):
+  - Lista `useModelos()` — card: nome · nº de páginas (`JSON.parse(cfg).modelConfig.layout.length`) ·
+    "IA: {provider}" ou "sem IA" · atualizado em.
+  - Ações por card: **Editar** → `open("modelo-builder", `Modelo: ${nome}`, { modeloId })`;
+    **Duplicar** (`useDuplicarModelo`); **Renomear** (dialog `Sheet side=center`);
+    **Excluir** (confirm, `useExcluirModelo`); **Config IA** (dialog: `SelectField` provider
+    [gemini/groq/openrouter] + `AreaField` prompt → `useSetIaConfig`).
+  - Botão **"+ Novo modelo"** → `open("modelo-builder", "Novo modelo", { modeloId: null })`.
+- Ponto de entrada: um item no menu "⋯" ao lado do seletor de Modelo no `LaudosGenApp`
+  ("Gerenciar modelos…") + opcionalmente um atalho na área de trabalho (`desktopShortcuts`
+  kind novo) / entrada no `registry` MODULES com `access:["DPT"]`.
+
+### 11.3 FASE B — Construtor de modelo (`ModeloBuilder.tsx`)
+
+Pseudo-módulo `"modelo-builder"` (`ModuleHost` branch + id no union). Componente dedicado que
+**reutiliza `editors.tsx` / `renderEditor` / `fields.tsx` / a prévia** do módulo.
+
+- **`useModeloDoc(modeloId | null)`** — análogo a `useLaudoDoc` mas SEM OS:
+  - `modeloId` → `useModelo(id)` → `mergeRascunho({})` + `applyModelo(draft, cfg, id)`;
+  - `modeloId === null` → `emptyLaudoState()` com `osData: null`;
+  - expõe `doc`, `patch`, `dirty`, `nome`/`setNome`, `save()` (POST se novo / PUT se editando,
+    body `{ nome, configuracaoJson: modeloConfigFromDoc(doc) }`).
+- **3 colunas:**
+  - **Esquerda — páginas** (`doc.modelConfig.layout`):
+    - reordenar: ↑/↓ simples (sem dep) **ou** `@hello-pangea/dnd` (adicionar no `apps/web`;
+      já está no `report-print`).
+    - remover página (decidir se `cover`/`final` são fixos — perguntar ao usuário).
+    - **"+ Adicionar página"** — `DropdownMenu`/`ContextMenu` com `PAGE_TYPES` agrupados
+      (Estruturais / De dados / Customizadas). Ao escolher:
+      ```
+      patch(d => {
+        const id = `p_${Date.now().toString(36)}_${rand}`;
+        const page = { id, type, title: LABEL[type] };
+        if (type === "PageMotorElectric") page.keys = [`${id}_b1`, `${id}_b2`];
+        d.modelConfig.layout.splice(posDepoisDaSelecionada, 0, page);
+        if (type === "PageEditableText") d.textBlocks[id] = { title: "", content: "" };
+        if (type === "PageImageBlock")   d.imageBlocks[id] = "";
+        if (type === "PageCustomTable")  { d.customTableRows[id] = {title:"",rows:[["",""]]}; d.tableHeaders[id] = ["Coluna 1","Coluna 2"]; }
+        if (type === "PageBuilder")      d.freePageBlocks[id] = [];
+      })
+      ```
+  - **Centro — editor da página**: `renderEditor({ page, doc, patch })` — o MESMO. Capa =
+    `SelectField` capaAtiva + campo `customCoverUrl` (upload = Fase C). Diagnóstico = campos +
+    (opcional) painel "IA deste modelo" que grava via `useSetIaConfig` (ou deixar só no
+    gerenciador).
+  - **Direita — prévia**: iframe `report-print` `?print=true&embed=1`. Como não há OS, empurrar
+    por `postMessage` um `state` com `osData` fake mínimo
+    (`{cr4a1_novacoluna:"MODELO", cr4a1_cliente_nome:"—", unidade_nome:"—", cr4a1_zb6_filial:"0102"}`)
+    + o resto do `doc`. O embed já hidrata de `postMessage` (§7.3) — não precisa de OS real.
+- **Salvar**: botão "Salvar" (dirty) → `save()`.
+
+### 11.4 FASE C — Extras
+
+- **Bloco "texto com IA" em página livre** (`PageBuilder`/`freePageBlocks`):
+  - shape: `freePageBlocks[pageId].push({ id, type: "ai-text", data: { titulo, prompt, texto } })`
+  - `FreePageEditor` (`editors.tsx`): renderizar `type === "ai-text"` com campo `prompt` +
+    botão "Gerar" (`useIaGerar` — passa `data.prompt` como `resumo` e `data.titulo` como
+    `campoLabel`; precisa de um `modeloId` com IA — o do modelo sendo montado) + textarea do
+    `texto`.
+  - `report-print` — **único toque em página**: `PageBuilder.jsx` / `BuilderContent.jsx` →
+    `block.type === 'ai-text'` renderiza `block.data.texto` como parágrafo (ou título + parágrafo).
+- **Upload de capa própria**: portar `POST /api/upload-capa` (+ `/capas/:id`) de
+  `Gerador_relatorios/backend/server.js`. Onde gravar a imagem: SharePoint numa pasta "Capas"
+  (reusar Graph) ou anexo no Dataverse. `modelConfig.customCoverUrl` recebe a URL final.
+  `CoverEditor` ganha um `<input type=file>`.
+- **Tabela livre "avançada"**: o `CustomTableEditor` portado só cobre 2 colunas + toggle de
+  subcolunas. O `report-print/PageCustomTable.jsx` já suporta colunas/subcolunas arbitrárias
+  (`tableColumns[id]`). Se o usuário quiser um designer de tabela completo, é estender esse
+  editor (não o report-print).
+
+### 11.5 Ordem de execução sugerida
+
+1. **Fase A** — backend `GET/PUT/DELETE /modelos/:id` + hooks + `state.modeloConfigFromDoc` +
+   `ModelosManager` (listar/duplicar/renomear/excluir/config-IA). Já entrega "gerenciar modelos".
+2. **Fase B** — `ModeloBuilder` + `useModeloDoc` + menu "+ Adicionar página" + reorder/remover +
+   prévia com OS fake. Já entrega "montar modelo de forma detalhada".
+3. **Fase C** — bloco `ai-text` + upload de capa + (se pedirem) designer de tabela.
+
+### 11.6 Arquivos a criar / tocar
+
+| Onde | O quê |
+|---|---|
+| `apps/api/src/services/laudosGen/dataverse.ts` | `getModelo`, `atualizarModelo`, `excluirModelo` |
+| `apps/api/src/routes/laudosGen.ts` | `GET/PUT/DELETE /laudos-gen/modelos/:id` (+ `/duplicar` opc.) |
+| `apps/web/src/modules/laudos-gen/api.ts` | `useModelo`, `useAtualizarModelo`, `useExcluirModelo`, `useDuplicarModelo`, `useIaConfig`, `useSetIaConfig` |
+| `apps/web/src/modules/laudos-gen/state.ts` | `modeloConfigFromDoc(doc)` (extrair do `SaveModeloDialog`) |
+| `apps/web/src/modules/laudos-gen/ModelosManager.tsx` | **novo** — app de gerência (Fase A) |
+| `apps/web/src/modules/laudos-gen/ModeloBuilder.tsx` + `useModeloDoc.ts` | **novos** — construtor (Fase B) |
+| `apps/web/src/modules/ModuleHost.tsx` | branches `modelos-folder` e `modelo-builder` |
+| `apps/web/src/modules/registry.ts` | 2 ids no union `ModuleId` (⚠️ rebase — o outro dev mexeu aqui) |
+| `apps/web/src/modules/laudos-gen/editors.tsx` | bloco `ai-text` no `FreePageEditor` (Fase C) |
+| `apps/report-print/src/features/report-builder/pages/PageBuilder.jsx` (+ `BuilderContent.jsx`) | render `ai-text` (Fase C) |
+| deps | `@hello-pangea/dnd` no `apps/web` **se** for usar drag pra reordenar (senão ↑/↓ sem dep) |
