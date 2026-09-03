@@ -103,6 +103,16 @@ export async function listarRascunhos(top = 50): Promise<RascunhoResumo[]> {
   }));
 }
 
+/** Remove o rascunho de uma OS (a "pasta" de laudos em andamento). */
+export async function excluirRascunho(osId: string, tipo = "padrao"): Promise<void> {
+  const { value } = await dataverse.list<{ cr4a1_rascunhorelatorioid: string }>(RASCUNHO_SET, {
+    filter: `cr4a1_osid eq '${esc(osId)}' and cr4a1_tipo eq '${esc(tipo)}'`,
+    select: ["cr4a1_rascunhorelatorioid"],
+    top: 1,
+  });
+  if (value[0]) await dataverse.remove(RASCUNHO_SET, value[0].cr4a1_rascunhorelatorioid);
+}
+
 export async function salvarRascunho(osId: string, state: unknown, tipo = "padrao"): Promise<void> {
   const conteudo = JSON.stringify(state);
   const { value } = await dataverse.list<{ cr4a1_rascunhorelatorioid: string }>(RASCUNHO_SET, {

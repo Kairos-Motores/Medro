@@ -36,6 +36,15 @@ export function useRascunhos() {
   });
 }
 
+export function useExcluirRascunho() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (osId: string) =>
+      api<{ success: true }>(`/laudos-gen/rascunho/${encodeURIComponent(osId)}`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.rascunhos }),
+  });
+}
+
 export function useOs(osId: string | null) {
   return useQuery({
     queryKey: keys.os(osId ?? ""),

@@ -50,6 +50,7 @@ export type ModuleId =
   | "relatorio-fotografico"
   | "dpt-laudos"
   | "laudos-gen"
+  | "rascunhos-folder"
   | "cipa"
   | "tarefas";
 

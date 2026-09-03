@@ -5,6 +5,7 @@ import {
   buscarOs,
   getRascunho,
   salvarRascunho,
+  excluirRascunho,
   listarRascunhos,
   listarModelos,
   criarModelo,
@@ -79,6 +80,13 @@ export async function laudosGenRoutes(app: FastifyInstance) {
     const parsed = RascunhoBody.safeParse(req.body);
     if (!parsed.success) return reply.code(400).send({ error: "bad_request", issues: parsed.error.issues });
     await salvarRascunho(parsed.data.osId, parsed.data.state, parsed.data.tipo || "padrao");
+    return { success: true };
+  });
+
+  app.delete("/laudos-gen/rascunho/:osId", async (req) => {
+    const { osId } = req.params as { osId: string };
+    const tipo = (req.query as { tipo?: string }).tipo || "padrao";
+    await excluirRascunho(osId, tipo);
     return { success: true };
   });
 

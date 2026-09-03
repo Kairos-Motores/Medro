@@ -12,6 +12,7 @@ import { PlanejamentoApp } from "./planejamento/PlanejamentoApp";
 import { AlmoxarifadoApp } from "./almoxarifado/AlmoxarifadoApp";
 import { FerramentariaApp } from "./ferramentaria/FerramentariaApp";
 import { LaudosGenApp } from "./laudos-gen/LaudosGenApp";
+import { RascunhosFolder } from "./laudos-gen/RascunhosFolder";
 
 /** Roteia o conteúdo de uma janela para o app do módulo. */
 export function ModuleHost({
@@ -23,9 +24,15 @@ export function ModuleHost({
   params?: WinParams;
   paramsNonce?: number;
 }) {
-  const m = moduleById(moduleId);
   const can = useAuth((s) => s.can);
   const authed = useAuth((s) => !!s.user);
+  const gate = (...tokens: Parameters<typeof can>) =>
+    !(authed && can(...tokens)) ? <AccessDenied label="Gerador de Laudos" /> : null;
+
+  // "pasta" de rascunhos de laudos — DPT-only, não está em MODULES
+  if (moduleId === "rascunhos-folder") return gate("DPT") ?? <RascunhosFolder />;
+
+  const m = moduleById(moduleId);
   // acesso: respeita MODULES[].access — laudo é DPT-only (o registry já esconde
   // do Dock/Launchpad; isto barra aberturas por atalho/janela persistida).
   if (m.access?.length && !(authed && can(...m.access))) return <AccessDenied label={m.label} />;

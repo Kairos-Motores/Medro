@@ -16,6 +16,8 @@ import {
   History,
   FolderOpen,
   MonitorUp,
+  MoreHorizontal,
+  BookmarkPlus,
 } from "lucide-react";
 import { Skeleton } from "reshaped";
 import { cn } from "@/lib/cn";
@@ -32,9 +34,17 @@ import {
   ContextMenuItem,
 } from "@/components/ui/context-menu";
 import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
   useGerarPdf,
   useArquivoStatus,
   useModelos,
+  useCriarModelo,
   useRascunhos,
   useHistoricoPdf,
 } from "./api";
@@ -68,6 +78,7 @@ export function LaudosGenApp({
   const [acompanharArquivo, setAcompanharArquivo] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [previewReload, setPreviewReload] = useState(0);
+  const [salvarModelo, setSalvarModelo] = useState(false);
 
   const token = useAuth((s) => s.token);
   const L = useLaudoDoc(osId);
@@ -192,19 +203,36 @@ export function LaudosGenApp({
               <Building2 className="size-3.5" /> {unidade}
             </span>
 
-            <div className="ml-2 hidden w-48 lg:block">
-              <Combobox
-                size="sm"
-                value={L.doc.activeTemplateId}
-                onChange={trocarModelo}
-                allowClear
-                placeholder="— sem modelo —"
-                emptyText="Nenhum modelo."
-                options={(modelos.data ?? []).map((m) => ({
-                  value: m.cr4a1_modelos_relatoriosid,
-                  label: m.cr4a1_nome_modelo,
-                }))}
-              />
+            <div className="ml-2 hidden items-center gap-1 lg:flex">
+              <div className="w-48">
+                <Combobox
+                  size="sm"
+                  value={L.doc.activeTemplateId}
+                  onChange={trocarModelo}
+                  allowClear
+                  placeholder="— sem modelo —"
+                  emptyText="Nenhum modelo."
+                  options={(modelos.data ?? []).map((m) => ({
+                    value: m.cr4a1_modelos_relatoriosid,
+                    label: m.cr4a1_nome_modelo,
+                  }))}
+                />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="flex size-[26px] items-center justify-center rounded-md border border-border bg-surface text-muted-foreground hover:bg-surface-2"
+                    title="Modelos"
+                  >
+                    <MoreHorizontal className="size-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={() => setSalvarModelo(true)}>
+                    <BookmarkPlus className="size-3.5" /> Salvar laudo atual como modelo…
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="ml-auto flex items-center gap-2">
@@ -263,6 +291,8 @@ export function LaudosGenApp({
           )}
         </div>
       )}
+
+      <SaveModeloDialog open={salvarModelo} onOpenChange={setSalvarModelo} doc={L.doc} />
 
       {/* corpo */}
       {!osId ? (
@@ -529,4 +559,78 @@ function fmtData(iso: string | null | undefined): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
+}
+
+/** Diálogo: salva a estrutura do laudo atual (layout/tabelas/blocos) como um modelo. */
+function SaveModeloDialog({
+  open,
+  onOpenChange,
+  doc,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  doc: LaudoState;
+}) {
+  const [nome, setNome] = useState("");
+  const [erro, setErro] = useState<string | null>(null);
+  const criar = useCriarModelo();
+
+  async function salvar() {
+    if (!nome.trim()) return;
+    setErro(null);
+    const config = {
+      modelConfig: doc.modelConfig,
+      customTableRows: doc.customTableRows,
+      tableHeaders: doc.tableHeaders,
+      tableColumns: doc.tableColumns,
+      tableSubColumns: doc.tableSubColumns,
+      textBlocks: doc.textBlocks,
+      imageBlocks: doc.imageBlocks,
+      freePageBlocks: doc.freePageBlocks,
+      diagVisibility: doc.diagVisibility,
+    };
+    try {
+      await criar.mutateAsync({
+        cr4a1_nome_modelo: nome.trim(),
+        cr4a1_configuracao_json: JSON.stringify(config),
+      });
+      setNome("");
+      onOpenChange(false);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Falha ao salvar o modelo.");
+    }
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="center" className="max-w-sm gap-3">
+        <SheetTitle>Salvar como modelo</SheetTitle>
+        <SheetDescription>
+          Guarda a <strong>estrutura</strong> deste laudo (ordem das páginas, tabelas livres,
+          textos e blocos fixos, visibilidade do diagnóstico) para reaproveitar em outras OS. Os
+          dados da OS atual não vão para o modelo.
+        </SheetDescription>
+        <label className="mt-1 block space-y-1">
+          <span className="text-[12px] font-medium text-foreground-secondary">Nome do modelo</span>
+          <Input
+            autoFocus
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && salvar()}
+            placeholder="Ex.: Motor CA — padrão DPT"
+          />
+        </label>
+        {erro && <p className="text-[12px] text-danger">{erro}</p>}
+        <div className="mt-1 flex justify-end gap-2">
+          <Button variant="neutral" size="sm" onClick={() => onOpenChange(false)}>
+            Cancelar
+          </Button>
+          <Button size="sm" onClick={salvar} disabled={!nome.trim() || criar.isPending}>
+            {criar.isPending ? <Loader2 className="size-4 animate-spin" /> : <BookmarkPlus className="size-4" />}
+            Salvar modelo
+          </Button>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
 }

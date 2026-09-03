@@ -36,7 +36,7 @@ export function DesktopIcons() {
     if (sc.kind === "laudo" && sc.osId) {
       open("laudos-gen", `Laudo ${sc.osId}`, { osId: sc.osId });
     } else if (sc.kind === "rascunhos") {
-      open("laudos-gen", "Rascunhos");
+      open("rascunhos-folder", "Laudos em andamento");
     } else {
       open(sc.moduleId, moduleById(sc.moduleId).label);
     }
