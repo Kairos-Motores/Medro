@@ -1,0 +1,82 @@
+.process-data-block {
+  .page-title {
+    font-size: 20pt;
+    font-weight: 700;
+    color: #1a1a1a;
+    border-left: 10px solid #d32f2f;
+    padding-left: 15px;
+    margin-bottom: 5px;
+  }
+
+  .os-label {
+    font-size: 12pt;
+    margin-bottom: 25px;
+    strong { color: #d32f2f; }
+  }
+
+  .tables-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10mm;
+    margin-bottom: 20px;
+  }
+
+  .table-header {
+    background: #1a1a1a;
+    color: white;
+    font-size: 11pt;
+    padding: 8px 12px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    tr {
+      border-bottom: 1px solid #ddd;
+    }
+    td {
+      padding: 6px 10px;
+      font-size: 8.5pt;
+      &.td-label {
+        background: #f4f4f4;
+        font-weight: 700;
+        color: #555;
+        width: 40%;
+      }
+      &.td-value {
+        font-weight: 600;
+        color: #000;
+      }
+    }
+  }
+
+  .technical-footer-text {
+    margin-top: 30px;
+    padding: 15px;
+    border-left: 4px solid #d32f2f;
+    background: #f0f2f5;
+    p {
+      font-size: 11px;
+      line-height: 1.5;
+      color: #333;
+      margin: 0;
+      text-align: justify;
+    }
+  }
+}
+.editable-field {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 9pt;
+  font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
+  &:focus {
+    outline: none;
+    border-color: $m3-primary;
+    box-shadow: 0 0 0 2px rgba($m3-primary, 0.2);
+  }
+}

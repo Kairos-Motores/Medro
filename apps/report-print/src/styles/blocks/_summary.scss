@@ -1,0 +1,40 @@
+.summary-block {
+  width: 80%;
+  margin: 0 auto;
+  
+  .summary-title {
+    font-size: 24pt;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 20mm;
+    text-align: left;
+    border-left: 8px solid #d32f2f;
+    padding-left: 15px;
+  }
+
+  .summary-list {
+    .summary-item {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 12px;
+      font-size: 12pt;
+
+      .label {
+        font-weight: 600;
+        color: #333;
+        text-transform: uppercase;
+      }
+
+      .dots {
+        flex: 1;
+        border-bottom: 2px dotted #ccc;
+        margin: 0 10px;
+      }
+
+      .page-num {
+        font-weight: 700;
+        color: #d32f2f;
+      }
+    }
+  }
+}

@@ -1,0 +1,103 @@
+.sp-picker-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 10010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sp-picker-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sp-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+  h3 { margin: 0; }
+  button { background: none; border: none; font-size: 20px; cursor: pointer; }
+}
+
+.sp-picker-body {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.sp-breadcrumb span {
+  cursor: pointer;
+  color: $m3-primary;
+  &:hover { text-decoration: underline; }
+}
+
+.sp-lista-pastas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.sp-pasta-item {
+  background: rgba($m3-primary, 0.1);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  &:hover { background: rgba($m3-primary, 0.2); }
+}
+
+.sp-lista-imagens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.sp-imagem-item {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 4px;
+  cursor: pointer;
+  text-align: center;
+  img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  span {
+    font-size: 11px;
+    display: block;
+    margin-top: 4px;
+  }
+  &.selecionada {
+    border-color: $m3-primary;
+    background: rgba($m3-primary, 0.05);
+  }
+}
+
+.sp-importar-btn {
+  background: $m3-primary;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  &:disabled { opacity: 0.5; }
+}
+
+.sp-loading {
+  text-align: center;
+  padding: 20px;
+}

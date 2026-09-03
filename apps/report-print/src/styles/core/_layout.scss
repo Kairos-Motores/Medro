@@ -1,0 +1,95 @@
+// Estrutura Base da Página A4
+.page.a4-page {
+  width: 210mm;
+  height: 297mm;
+  padding: 10mm 15mm; // Margem padrão da folha (Topo/Baixo, Esquerda/Direita)
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  background: #fff;
+  position: relative;
+  page-break-after: always;
+}
+
+// HEADER COMPACTO
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1.5px solid #d32f2f; // Linha fina da Kairós
+  padding-bottom: 1.5mm;
+  margin-bottom: 3mm; // Reduzido de 8mm para 3mm (ganhamos 5mm aqui)
+  height: 12mm; // Altura máxima rígida
+  box-sizing: border-box;
+
+  .header-logo {
+    height: 100%; // Força o logo a respeitar os 12mm
+    width: auto;
+    object-fit: contain;
+  }
+
+  .header-title-container {
+    text-align: right;
+    
+    h1 {
+      font-size: 11pt; // Reduzido de 14pt
+      font-weight: 800;
+      margin: 0;
+      color: #000;
+    }
+    
+    span {
+      font-size: 7.5pt;
+      color: #666;
+      text-transform: uppercase;
+    }
+  }
+}
+
+// CORPO DA PÁGINA (Ganha todo o espaço livre)
+.page-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-bottom: 2mm; // Espaço de respiro antes do footer
+}
+
+// FOOTER COMPACTO
+.report-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #ccc;
+  padding-top: 1.5mm;
+  margin-top: auto;
+  height: 8mm; // Altura máxima rígida (ganhamos muito espaço aqui)
+  box-sizing: border-box;
+
+  .footer-info {
+    font-size: 7.5pt;
+    color: #555;
+    font-weight: 600;
+  }
+
+  .footer-page-number {
+    font-size: 8.5pt;
+    font-weight: 800;
+    color: #d32f2f;
+    background: #f0f2f5;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+}
+
+// Forçar o comportamento exato no PDF
+@media print {
+  .page.a4-page {
+    padding: 10mm 15mm !important;
+    -webkit-print-color-adjust: exact;
+  }
+  .report-header { border-bottom: 1.5px solid #d32f2f !important; }
+  .report-footer .footer-page-number { background-color: #f0f2f5 !important; }
+}

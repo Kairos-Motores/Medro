@@ -1,0 +1,22 @@
+// No seu arquivo de estilos
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .report-container {
+    padding: 0;
+    margin: 0;
+  }
+
+  .page {
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    page-break-after: always; // Garante que cada .page seja uma página no PDF
+  }
+}

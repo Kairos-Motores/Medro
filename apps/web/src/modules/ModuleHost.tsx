@@ -9,11 +9,13 @@ import { ConfiguracoesApp } from "./configuracoes/ConfiguracoesApp";
 import { PlanejamentoApp } from "./planejamento/PlanejamentoApp";
 import { AlmoxarifadoApp } from "./almoxarifado/AlmoxarifadoApp";
 import { FerramentariaApp } from "./ferramentaria/FerramentariaApp";
+import { LaudosGenApp } from "./laudos-gen/LaudosGenApp";
 
 /** Roteia o conteúdo de uma janela para o app do módulo. */
 export function ModuleHost({ moduleId }: { moduleId: ModuleId }) {
   if (moduleId === "configuracoes" || moduleId === "pcp") return <ConfiguracoesApp />;
   if (moduleId === "dpt-laudos") return <DptApp />;
+  if (moduleId === "laudos-gen") return <LaudosGenApp />;
   if (moduleId === "medro-pro") return <MedroProApp />;
   if (moduleId === "central-bobinagem") return <CentralBobinagemApp />;
   if (moduleId === "inspecao-qualidade") return <InspecaoQualidadeApp />;

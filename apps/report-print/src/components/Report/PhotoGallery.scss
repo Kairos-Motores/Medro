@@ -1,0 +1,92 @@
+@import '../../styles/variables';
+
+.photo-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 290mm; // Altura aproximada do A4
+  background: white;
+
+  .gallery-container {
+    flex: 1;
+    padding: 10mm 5mm;
+  }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 10mm;
+    
+    .photo-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 60mm; // Altura mínima para o card não colapsar
+
+      .image-wrapper {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        border: 1px solid #ddd;
+        background: #fdfdfd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      // ESTILO DO BOTÃO DE ADICIONAR (O QUE ESTÁ SUMIDO)
+      &.add-card {
+        cursor: pointer;
+        
+        .image-wrapper {
+          border: 3px dashed #0078d4 !important; // Azul vibrante e tracejado
+          background: #f0f7ff !important;
+          flex-direction: column;
+
+          .plus-icon {
+            font-size: 50px;
+            color: #0078d4;
+            font-weight: bold;
+            line-height: 1;
+          }
+
+          .add-text {
+            font-size: 10pt;
+            color: #0078d4;
+            margin-top: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+        }
+
+        &:hover .image-wrapper {
+          background: #e1f0ff !important;
+          border-color: #005a9e !important;
+        }
+      }
+
+      .photo-caption {
+        font-size: 9pt;
+        text-align: center;
+        margin-top: 5mm;
+        color: #333;
+      }
+    }
+  }
+}
+
+// Garante que o botão não suma por causa da classe no-print enquanto testa
+.no-print {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+@media print {
+  .no-print, .add-card {
+    display: none !important;
+  }
+}

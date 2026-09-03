@@ -21,6 +21,7 @@ import {
   Settings,
   BarChart3,
   Boxes,
+  FilePlus2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -48,6 +49,7 @@ export type ModuleId =
   | "rds"
   | "relatorio-fotografico"
   | "dpt-laudos"
+  | "laudos-gen"
   | "cipa"
   | "tarefas";
 
@@ -123,6 +125,7 @@ export const MODULES: ModuleDef[] = [
   { id: "configuracoes", label: "Configurações", short: "Config", desc: "Aparência, perfil, filiais, notificações e preferências", icon: Settings, path: "/configuracoes", accent: "slate", ready: true },
   { id: "peritagem", label: "Ensaios", short: "Ensaios", desc: "Ensaios elétricos, testes de isolamento, resistência ôhmica, Surge Test e vibração", icon: Gauge, path: "/ensaios", access: ["AVA"], accent: "cyan", ready: true },
   { id: "dpt-laudos", label: "Dep. Técnico", short: "DPT", desc: "Laudos técnicos, links e QR codes", icon: FileText, path: "/dpt", access: ["DPT"], accent: "teal", ready: true },
+  { id: "laudos-gen", label: "Gerador de Laudos", short: "Laudos", desc: "Montagem e emissão do laudo técnico da OS (PDF)", icon: FilePlus2, path: "/laudos-gen", access: ["DPT"], accent: "teal", ready: true },
   { id: "caldeiraria", label: "Caldeiraria", short: "Caldeiraria", desc: "Recuperação e fabricação de peças", icon: Flame, path: "/caldeiraria", access: ["CAL"], accent: "amber" },
   { id: "balanceamento", label: "Balanceamento", short: "Balanc.", desc: "Balanceamento dinâmico de rotores", icon: Orbit, path: "/balanceamento", accent: "slate" },
   { id: "ferramentaria", label: "Ferramentaria", short: "Ferram.", desc: "Gestão global de ferramentas, cautelas, calibrações RBC e rastreamento multiunidades", icon: Hammer, path: "/ferramentaria", accent: "slate", ready: true },

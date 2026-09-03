@@ -1,0 +1,103 @@
+.p14-static-desc-layout {
+  // Ajuste crucial: 25mm de padding-bottom atua como um escudo protetor contra o rodapé absoluto
+  padding: 0 12mm 25mm 12mm; 
+  box-sizing: border-box;
+
+  .text-block-section {
+    width: 100%;
+  }
+
+  .main-topic-title {
+    font-size: 11pt; // Reduzido ligeiramente para otimização de espaço
+    font-weight: 800;
+    color: #000;
+    margin: 0 0 2.5mm 0;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    border-left: 3.5px solid #d32f2f; 
+    padding-left: 3mm;
+  }
+
+  .narrative-paragraph {
+    font-size: 9pt; // Reduzido de 9.5pt para garantir o encaixe perfeito e elegante no A4
+    text-align: justify;
+    line-height: 1.20; // Ajustado para evitar o estiramento vertical excessivo do bloco
+    color: #222;
+    margin: 0 0 2.5mm 0;
+    text-indent: 8mm; // Recuo clássico de parágrafo técnico
+
+    strong {
+      color: #000;
+      font-weight: 700;
+    }
+  }
+
+  // Lista de Balanço Técnico
+  .technical-bullet-list {
+    margin: 1.5mm 0 3mm 12mm;
+    padding: 0;
+    list-style-type: square;
+
+    li {
+      font-size: 9pt;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 1mm;
+      line-height: 1.35;
+    }
+  }
+
+  // Divisor de Seções
+  .section-divider-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #bbb, transparent);
+    margin: 4mm 0;
+  }
+
+  // Bloco de Destaque da Fórmula
+  .formula-display-card {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 2.5mm 4mm;
+    margin: 3mm auto;
+    width: 90%;
+    box-sizing: border-box;
+    text-align: center;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+
+    .formula-title {
+      font-size: 7pt;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1.5mm;
+    }
+
+    .formula-body {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 9.5pt;
+      font-weight: 700;
+      color: #000;
+
+      span {
+        border-bottom: 1px solid #000;
+        padding-bottom: 1px;
+      }
+    }
+  }
+}
+
+// Garante que o Puppeteer respeite a barreira mecânica durante a geração do PDF
+@media print {
+  .p14-static-desc-layout {
+    padding-bottom: 25mm !important; 
+    
+    .formula-display-card {
+      background: #fafafa !important;
+      -webkit-print-color-adjust: exact;
+    }
+  }
+}

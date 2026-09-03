@@ -1,0 +1,27 @@
+{
+  "name": "@medro/report-print",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Bundle isolado de impressão do laudo (renderizado pelo pdf-worker). Páginas do relatório mantidas como no app original — versões próprias, não compartilha runtime com o app do Medro.",
+  "scripts": {
+    "dev": "vite --port 5180",
+    "build": "vite build",
+    "preview": "vite preview --port 5180"
+  },
+  "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "axios": "^1.16.1",
+    "framer-motion": "^12.40.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.9.4",
+    "recharts": "^3.2.1",
+    "sass": "^1.99.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "vite": "^7.1.9"
+  }
+}

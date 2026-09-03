@@ -4,4 +4,6 @@ packages:
   - "tooling/*"
 
 allowBuilds:
+  "@parcel/watcher": true
   esbuild: true
+  puppeteer: true

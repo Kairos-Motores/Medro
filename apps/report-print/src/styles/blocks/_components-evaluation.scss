@@ -1,0 +1,152 @@
+.p11-rigid-layout {
+  padding: 0 10mm;
+
+  .main-title {
+    font-size: 13pt;
+    font-weight: 800;
+    margin-bottom: 2mm;
+    color: #000;
+  }
+
+  .description-text {
+    font-size: 8.5pt;
+    text-align: justify;
+    line-height: 1.35;
+    margin-bottom: 4mm;
+    color: #333;
+  }
+
+  // Organização dos Wrappers
+  .section-p11-top {
+    margin-bottom: 8mm;
+  }
+
+  .section-p11-bottom {
+    margin-top: 4mm;
+    border-top: 1px solid #ddd;
+    padding-top: 4mm;
+  }
+
+  .table-wrapper-top {
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  // Centraliza com folga
+  .table-wrapper-bottom {
+    width: 100%;
+    margin-top: 5mm;
+  }
+
+  // Ocupa toda a base
+
+  .table-grid-2cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10mm;
+  }
+
+  // --- O COMPONENTE DE TABELA PURA ---
+  .comp-table-isolated {
+    width: 100%;
+  }
+
+  .pure-component-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 1px solid #000;
+    background: #fff;
+
+    th,
+    td {
+      border: 1px solid #000;
+      height: 24px;
+      font-size: 8pt;
+      text-align: center;
+      vertical-align: middle;
+      padding: 0;
+    }
+
+    .table-main-title {
+      background: #e0e0e0;
+      font-weight: 800;
+      font-size: 9pt;
+    }
+
+    .table-sub-headers th {
+      background: #fff;
+      font-weight: 700;
+      font-size: 7.5pt;
+
+      &.no-bottom-border {
+        border-bottom: none;
+      }
+    }
+
+    input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      text-align: center;
+      background: transparent;
+      font-size: 8pt;
+      outline: none;
+    }
+
+    p {
+      margin: 0;
+      font-weight: normal;
+    }
+
+    .phi-cell {
+
+      .input-red,
+      .red-text-bold {
+        color: #d32f2f;
+        font-weight: 800;
+      }
+    }
+
+    .action-btn {
+      font-weight: 900;
+      font-size: 8.5pt;
+      cursor: pointer;
+      color: #000;
+
+      &.active-sim {
+        background: #00a859 !important;
+        color: #fff !important;
+      }
+
+      &.active-nao {
+        background: #d32f2f !important;
+        color: #fff !important;
+      }
+    }
+
+    .print-only {
+      display: none;
+    }
+  }
+}
+
+@media print {
+  .p11-rigid-layout {
+    .no-print {
+      display: none !important;
+    }
+
+    .print-only {
+      display: block !important;
+    }
+
+    .pure-component-table {
+      -webkit-print-color-adjust: exact;
+
+      .table-main-title {
+        background-color: #e0e0e0 !important;
+      }
+    }
+  }
+}

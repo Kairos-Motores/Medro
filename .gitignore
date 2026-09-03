@@ -36,3 +36,7 @@ coverage/
 Ref_MedroPro/
 Referência/
 EchoeRef/
+Gerador_relatorios/
+
+# PDFs de teste locais
+*.pdf

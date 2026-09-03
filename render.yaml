@@ -1,5 +1,7 @@
-# Render — API Medro (Node/Fastify). Web vai no Vercel (apps/web/vercel.json).
+# Render — API Medro + worker de PDF + bundle de impressão do laudo.
+# Web (apps/web) vai no Vercel (apps/web/vercel.json).
 services:
+  # ── API Medro (Node/Fastify) ──────────────────────────────────────────────
   - type: web
     name: medro-api
     runtime: node
@@ -36,6 +38,53 @@ services:
       - key: DATAVERSE_API_VERSION
         value: "9.2"
       - key: GRAPH_ENABLED
-        value: "false"
+        value: "true"
       - key: PROTHEUS_ENABLED
         value: "false"
+      # Gerador de Laudos
+      - key: REPORT_PRINT_URL
+        fromService: { type: web, name: medro-report-print, property: hostport }
+      - key: PDF_WORKER_URL
+        fromService: { type: pserv, name: medro-pdf-worker, property: hostport }
+      - key: PDF_WORKER_TOKEN
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+
+  # ── Worker de PDF (Puppeteer + Chromium slim) — serviço privado ───────────
+  - type: pserv
+    name: medro-pdf-worker
+    runtime: node
+    plan: standard # Chromium precisa de RAM
+    region: oregon
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    startCommand: node apps/pdf-worker/src/server.js
+    autoDeploy: false
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: PDF_WORKER_TOKEN
+        fromService: { type: web, name: medro-api, property: env, envVarKey: PDF_WORKER_TOKEN }
+      - key: PUPPETEER_LOCAL
+        value: "false"
+
+  # ── Bundle de impressão do laudo (estático) ──────────────────────────────
+  - type: web
+    name: medro-report-print
+    runtime: static
+    rootDir: apps/report-print
+    buildCommand: cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @medro/report-print build
+    staticPublishPath: apps/report-print/dist
+    autoDeploy: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService: { type: web, name: medro-api, property: hostport }

@@ -1,0 +1,85 @@
+.p13-references-layout {
+  padding: 0 10mm;
+
+  .main-title { font-size: 13pt; font-weight: 800; margin-bottom: 1.5mm; color: #000; }
+  .description-text { font-size: 8.5pt; text-align: justify; line-height: 1.35; margin-bottom: 4mm; color: #333; }
+
+  .normative-row {
+    display: grid;
+    grid-template-columns: 105px 1fr 165px;
+    gap: 4mm;
+    margin-bottom: 3.5mm;
+    align-items: center;
+    background: #fff;
+  }
+
+  .input-chart-panel {
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 2mm;
+    box-sizing: border-box;
+
+    .panel-title {
+      font-size: 7.5pt; font-weight: 800; color: #495057; text-transform: uppercase;
+      text-align: center; border-bottom: 1px solid #dee2e6; padding-bottom: 1mm; margin-bottom: 2mm;
+    }
+
+    .input-group {
+      display: flex; flex-direction: column; margin-bottom: 1.5mm;
+      label { font-size: 6.5pt; font-weight: 700; color: #495057; margin-bottom: 0.5mm; }
+      input {
+        width: 100%; height: 20px; border: 1px solid #ced4da; border-radius: 3px;
+        font-size: 8pt; text-align: center; font-weight: bold;
+        &:focus { border-color: #d32f2f; outline: none; }
+      }
+    }
+
+    .calc-result {
+      font-size: 7pt; text-align: center; margin-top: 2mm; padding-top: 1.5mm;
+      border-top: 1px dashed #ced4da; color: #212529;
+    }
+  }
+
+  .chart-wrapper {
+    width: 100%;
+    
+    .chart-label {
+      display: block; font-size: 8pt; font-weight: 700; color: #111;
+      margin-bottom: 1mm; text-transform: uppercase; letter-spacing: 0.2px;
+    }
+  }
+
+  .svg-normative-chart {
+    width: 100%; height: auto; display: block;
+    background: #fff; border: 1.5px solid #000;
+
+    text { font-family: 'Montserrat', sans-serif; fill: #000; }
+    rect { opacity: 1 !important; } // Força a cor máxima saturada (mar de cores vivas)
+  }
+
+  .legend-wrapper {
+    width: 100%; display: flex; justify-content: center;
+    
+    img {
+      max-width: 100%;
+      height: 40mm;
+      object-fit: contain;
+    }
+  }
+}
+
+@media print {
+  .p13-references-layout {
+    .normative-row {
+      grid-template-columns: 1fr 165px !important;
+      gap: 5mm !important;
+    }
+    
+    .input-chart-panel { display: none !important; }
+
+    .svg-normative-chart {
+      rect { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+  }
+}

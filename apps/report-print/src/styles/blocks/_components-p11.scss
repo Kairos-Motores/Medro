@@ -1,0 +1,140 @@
+.p11-final-layout {
+  padding: 0 10mm;
+
+  .blue-bar-separator-2 {
+    background: #f0f2f5;
+    color: #d32f2f;
+    padding: 4px 12px;
+    font-size: 10pt;
+    font-weight: 700;
+    border-radius: 4px;
+    margin-bottom: 5mm;
+    border-left: 4px solid #d32f2f; // Detalhe lateral do documento original
+  }
+
+  // Tabela de Instrumentos
+  .instruments-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8mm;
+    border: 1px solid #000;
+
+    th {
+      background: #f2f2f2;
+      font-weight: 800;
+      font-size: 9pt;
+      border: 1px solid #000;
+      height: 25px;
+    }
+
+    td {
+      border: 1px solid #000;
+      height: 22px;
+    }
+
+    input {
+      width: 100%;
+      border: none;
+      text-align: center;
+      font-size: 8.5pt;
+      background: transparent;
+    }
+  }
+
+  .section-33 {
+    margin-bottom: 5mm;
+
+    .title-33 {
+      font-size: 13pt;
+      font-weight: 800;
+      margin-bottom: 2mm;
+    }
+
+    .text-33 {
+      font-size: 8.5pt;
+      text-align: justify;
+      line-height: 1.4;
+    }
+  }
+
+  // Blocos de Componentes
+  .comp-block {
+    margin-bottom: 6mm;
+
+    .comp-header {
+      background: #e0e0e0;
+      border: 1px solid #000;
+      border-bottom: none;
+      padding: 4px 10px;
+      font-weight: 800;
+      font-size: 9.5pt;
+    }
+
+    .comp-sub-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000;
+
+      th {
+        border: 1px solid #000;
+        font-size: 8pt;
+        font-weight: 700;
+        height: 20px;
+        text-align: center;
+      }
+
+      td {
+        border: 1px solid #000;
+        vertical-align: middle;
+      }
+
+      textarea {
+        width: 100%;
+        border: none;
+        resize: none;
+        font-size: 8pt;
+        padding: 5px;
+        min-height: 40px;
+        font-family: inherit;
+      }
+
+      input {
+        width: 100%;
+        border: none;
+        text-align: center;
+        font-size: 8.5pt;
+      }
+
+      // Botão de Troca (SIM/NÃO)
+      .btn-toggle {
+        width: 45px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 7pt;
+        font-weight: 800;
+
+        .mark {
+          height: 12px;
+          font-size: 9pt;
+          font-weight: 900;
+        }
+
+        span {
+          display: block;
+          border-top: 1px solid #000;
+          padding: 2px 0;
+        }
+
+        &.active-sim {
+          background: #00a859;
+          color: #fff;
+        }
+
+        &.active-nao {
+          background: #d32f2f;
+          color: #fff;
+        }
+      }
+    }
+  }
+}

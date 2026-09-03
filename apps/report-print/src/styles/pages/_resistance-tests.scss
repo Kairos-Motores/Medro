@@ -1,0 +1,237 @@
+.p12-resistance-layout {
+    padding: 0 10mm;
+
+    .main-title {
+        font-size: 13pt;
+        font-weight: 800;
+        margin-bottom: 1.5mm;
+        color: #000;
+    }
+
+    .description-text {
+        font-size: 8.5pt;
+        text-align: justify;
+        line-height: 1.35;
+        margin-bottom: 3mm;
+        color: #333;
+    }
+
+    .sub-test-section {
+        width: 100%;
+        margin-bottom: 2mm;
+
+        .sub-section-header {
+            display: flex;
+            align-items: center;
+            gap: 5mm;
+            margin-bottom: 2mm;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1px;
+
+            h3 {
+                font-size: 10pt;
+                font-weight: 800;
+                color: #000;
+                margin: 0;
+                text-transform: uppercase;
+            }
+
+            .norma-tag {
+                font-size: 7.5pt;
+                font-style: italic;
+                font-weight: 600;
+                color: #555;
+            }
+
+            .param-tag {
+                font-size: 7.5pt;
+                font-weight: 700;
+                color: #d32f2f;
+                background: #f0f2f5;
+                padding: 1px 6px;
+                border-radius: 4px;
+            }
+        }
+    }
+
+    .tables-side-by-side-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8mm;
+        margin-bottom: 1.5mm;
+    }
+
+    .resistance-pure-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        border: 1px solid #000;
+        background: #fff;
+
+        th,
+        td {
+            border: 1px solid #000;
+            height: 22px;
+            font-size: 8.5pt;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+
+        th {
+            background: #e0e0e0;
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+
+        .fixed-gray-label {
+            background: #f5f5f5;
+            font-weight: 700;
+            color: #444;
+        }
+
+        input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            background: transparent;
+            font-size: 8.5pt;
+            font-weight: 600;
+            outline: none;
+        }
+
+        p {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .empty-align-cell {
+            background: #fafafa;
+            border: 1px solid #000;
+        }
+
+        .status-cell-toggle {
+            padding: 2px;
+
+            .toggle-buttons {
+                display: flex;
+                gap: 2px;
+                justify-content: center;
+
+                .btn-mini {
+                    font-size: 6.5pt;
+                    font-weight: 800;
+                    border: 1px solid #999;
+                    border-radius: 3px;
+                    cursor: pointer;
+                    background: #fff;
+                    padding: 2px 4px;
+
+                    &.sim.active {
+                        background: #00a859 !important;
+                        color: #fff !important;
+                        border-color: #00a859;
+                    }
+
+                    &.nao.active {
+                        background: #d32f2f !important;
+                        color: #fff !important;
+                        border-color: #d32f2f;
+                    }
+                }
+            }
+
+            .status-text {
+                font-weight: 900;
+                font-size: 8.5pt;
+
+                &.green {
+                    color: #00a859;
+                }
+
+                &.red {
+                    color: #d32f2f;
+                }
+            }
+        }
+    }
+
+    .ohmica-full-table {
+        th {
+            font-size: 7.5pt;
+            padding: 0 4px;
+        }
+
+        .acceptance-formula-placeholder-cell {
+            background: #fdfdfd;
+            text-align: center;
+            color: #aaa;
+            font-size: 7.5pt;
+            font-style: italic;
+        }
+    }
+
+    .note-text {
+        font-size: 7.5pt;
+        text-align: justify;
+        line-height: 1.35;
+        color: #444;
+        margin: 1.5mm 0 0 0;
+
+        strong {
+            color: #000;
+            font-weight: 700;
+        }
+    }
+
+    // --- ARRANJO DAS DUAS EQUAÇÕES CORRIGIDO (FLUXO NATURAL) ---
+    .equations-bottom-box {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10mm;
+        width: 100%;
+
+        // Removido o 'auto' para não empurrar para o rodapé.
+        // Agora fica fixo e próximo à tabela/texto anterior.
+        margin-top: 6mm;
+        margin-bottom: 0;
+
+        padding-top: 4mm;
+        border-top: 1px dashed #ddd; // Linha pontilhada sutil para separar do texto anterior
+
+        .equation-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 16mm; // Altura controlada para manter a proporção perfeita
+            background: #fff;
+
+            img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+        }
+    }
+}
+
+@media print {
+    .p12-resistance-layout {
+        .no-print {
+            display: none !important;
+        }
+
+        .print-only {
+            display: block !important;
+        }
+
+        .resistance-pure-table th {
+            background-color: #e0e0e0 !important;
+        }
+
+        .equations-bottom-box {
+            border-top: none !important;
+        }
+    }
+}

@@ -36,6 +36,15 @@ const Schema = z.object({
   PROTHEUS_SQL_USER: z.string().optional(),
   PROTHEUS_SQL_PASSWORD: z.string().optional(),
   PROTHEUS_SQL_ENCRYPT: bool.default("false"),
+
+  // ── Gerador de Laudos: bundle de impressão + worker de PDF ──
+  REPORT_PRINT_URL: z.string().url().default("http://localhost:5180"),
+  PDF_WORKER_URL: z.string().url().default("http://localhost:8100"),
+  PDF_WORKER_TOKEN: z.string().default(""),
+  // provedores de IA do diagnóstico (opcionais nesta fase)
+  GEMINI_API_KEY: z.string().optional(),
+  GROQ_API_KEY: z.string().optional(),
+  OPENROUTER_API_KEY: z.string().optional(),
 });
 
 const parsed = Schema.safeParse(process.env);

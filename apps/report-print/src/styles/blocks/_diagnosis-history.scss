@@ -1,0 +1,168 @@
+.diagnosis-history-block {
+  .item-title {
+    font-size: 12pt; // ligeiramente menor
+    font-weight: 800;
+    border-bottom: 1px solid #000;
+    margin-bottom: 2mm;
+  }
+
+  .diag-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8pt;
+    border-bottom: 1px solid #000;
+    margin-bottom: 2mm;
+
+    .item-title {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+  }
+
+  .ia-generate-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 6px 14px;
+    margin-bottom: 2mm;
+    border-radius: 14px;
+    border: none;
+    background: $m3-primary;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba($m3-primary, 0.3);
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background: darken($m3-primary, 8%);
+      box-shadow: 0 3px 10px rgba($m3-primary, 0.4);
+    }
+    &:active:not(:disabled) { transform: scale(0.96); }
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+  }
+
+  .compact-grid {
+    display: grid;
+    grid-template-columns: 1fr; // uma coluna única
+    gap: 1.5mm 0; // espaço vertical reduzido
+    margin-bottom: 3mm;
+  }
+
+  .diag-field {
+    label {
+      font-size: 8pt;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 1px;
+    }
+
+    .diag-field-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+
+      label { margin-bottom: 0; flex: 1; }
+    }
+
+    .ia-generate-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba($m3-primary, 0.35);
+      background: rgba($m3-primary, 0.06);
+      color: $m3-primary;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+
+      &:hover:not(:disabled) {
+        background: $m3-primary;
+        color: #fff;
+      }
+      &:active:not(:disabled) { transform: scale(0.95); }
+      &:disabled {
+        opacity: 0.7;
+        cursor: default;
+        color: $m3-outline;
+        border-color: rgba($m3-outline, 0.35);
+        background: rgba($m3-outline, 0.08);
+      }
+    }
+
+    .field-visibility-toggle {
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: auto;
+      user-select: none;
+      opacity: 0.65;
+      transition: opacity 0.15s ease;
+      &:hover { opacity: 1; }
+    }
+
+    textarea {
+      width: 100%;
+      height: 28px; // altura reduzida para economizar espaço
+      font-size: 8pt;
+      border: 1px solid #ddd;
+      resize: vertical; // permite expandir se necessário (opcional)
+    }
+
+    p {
+      font-size: 8.5pt;
+      margin: 0;
+      line-height: 1.2;
+      text-align: justify;
+    }
+  }
+
+  .chart-area {
+    height: 180px; // gráfico um pouco mais baixo
+    display: flex;
+    justify-content: center;
+    border: 1px solid #f0f0f0;
+    margin-top: 2mm;
+
+    .no-data {
+      font-size: 10pt;
+      color: #999;
+      font-style: italic;
+      margin-top: 20px;
+    }
+  }
+}
+
+// Remova a media query de impressão que forçava 1fr (agora é padrão)
+// @media print { ... } pode ser apagada ou comentada
+
+@media print {
+  .compact-grid {
+    grid-template-columns: 1fr;
+    gap: 2mm;
+  }
+
+  // No PDF fica uma coluna só
+}
+// Garante que dentro do conteúdo paginado a fonte seja a correta
+.diagnosis-history-block {
+  font-size: 10pt;
+  font-family: 'Montserrat', sans-serif;
+  line-height: 1.4;
+}
