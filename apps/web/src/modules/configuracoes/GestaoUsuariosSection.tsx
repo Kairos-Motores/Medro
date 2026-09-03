@@ -1,8 +1,8 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Users,
   UserPlus,
-  Shield,
   ShieldCheck,
   Search,
   Check,
@@ -14,16 +14,16 @@ import {
   FlaskConical,
   Flame,
   Hammer,
-  Route,
   Sliders,
   Layers,
   Building2,
   X,
-  Sparkles,
   KeyRound,
-  Filter,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { api } from "@/lib/api";
 
 export interface UserAccessRow {
   id: string;
@@ -33,6 +33,7 @@ export interface UserAccessRow {
   cargo: string;
   matProtheus: string;
   permissoes: string[]; // tokens como ["OS", "DPT", "_OS_EDOS"]
+  status?: string;
 }
 
 // Colunas de Módulos (Macro-Acesso)
@@ -42,9 +43,9 @@ const MODULE_COLUMNS = [
   { id: "AVA", label: "Avaliação Final", short: "Avaliação", icon: Gauge, desc: "Peritagem e inspeções finais" },
   { id: "INS", label: "Inspeção", short: "Inspeção", icon: ClipboardCheck, desc: "Checklist de qualidade e conformidade" },
   { id: "TES", label: "Ensaios", short: "Ensaios", icon: FlaskConical, desc: "Ensaios elétricos, Surge Test e isolamento" },
-  { id: "CAL", label: "Caldeiraria", short: "Caldeiraria", icon: Flame, desc: "Ordens de recuperação de peças mecânicas" },
+  { id: "CAL", label: "Usinagem e Caldeiraria", short: "Usinagem & Cald.", icon: Flame, desc: "Ordens de recuperação e usinagem de peças mecânicas" },
   { id: "FER", label: "Ferramentaria", short: "Ferram.", icon: Hammer, desc: "Controle de ferramentas e almoxarifado" },
-  { id: "ROT", label: "Trajetos / SSMA", short: "Trajetos", icon: Route, desc: "Rotas de atendimento em campo e segurança" },
+  { id: "SSMA", label: "SSMA", short: "SSMA", icon: ShieldCheck, desc: "Saúde, Segurança e Meio Ambiente" },
   { id: "TER", label: "Terceirizados", short: "Terceir.", icon: Users, desc: "Gestão de serviços externos e fornecedores" },
   { id: "GER", label: "Configurações", short: "Config", icon: Sliders, desc: "Ajustes do sistema e gestão de acessos" },
   { id: "ESCOPO", label: "Escopo", short: "Escopo", icon: Layers, desc: "Definição de escopo de manutenção" },
@@ -57,12 +58,11 @@ const ACTIVITY_COLUMNS = [
   { id: "_OS_REMOVE", label: "Excluir OS", short: "Excl OS", desc: "Exclusão lógica de ordens de serviço" },
   { id: "_DTI_LINK", label: "Gerar Link Laudo", short: "Link Laudo", desc: "Criar links públicos externos de laudos técnicos" },
   { id: "_AVA_LIB", label: "Liberar Avaliação", short: "Lib Aval", desc: "Assinatura e liberação técnica de avaliação" },
-  { id: "_CAL_CAD", label: "Cadastrar Caldeiraria", short: "Cad Cald", desc: "Inserir novas demandas no setor de caldeiraria" },
-  { id: "_ROTA_MOT", label: "Motorista Rota", short: "Motorista", desc: "Apontamento de veículo e deslocamento de campo" },
+  { id: "_CAL_CAD", label: "Cadastrar Usinagem e Caldeiraria", short: "Cad Usin/Cald", desc: "Inserir novas demandas no setor de usinagem e caldeiraria" },
   { id: "_TER_CAD", label: "Cadastrar Terceirizado", short: "Cad Terceir", desc: "Envio de motor para fornecedor externo" },
 ];
 
-const INITIAL_USERS: UserAccessRow[] = [
+const FALLBACK_USERS: UserAccessRow[] = [
   {
     id: "usr-1",
     nome: "Rodrigo de Paula Nascimento",
@@ -70,7 +70,7 @@ const INITIAL_USERS: UserAccessRow[] = [
     filial: "São Luís",
     cargo: "Administrador / Sistema",
     matProtheus: "010245",
-    permissoes: ["OS", "DPT", "AVA", "INS", "TES", "CAL", "FER", "ROT", "TER", "GER", "ESCOPO", "_OS_EDOS", "_DTI_LINK", "_AVA_LIB"],
+    permissoes: ["OS", "DPT", "AVA", "INS", "TES", "CAL", "FER", "SSMA", "TER", "GER", "ESCOPO", "_OS_EDOS", "_DTI_LINK", "_AVA_LIB"],
   },
   {
     id: "usr-2",
@@ -104,7 +104,7 @@ const INITIAL_USERS: UserAccessRow[] = [
     nome: "Fabiana Soares Costa",
     login: "fabiana.costa",
     filial: "Barcarena",
-    cargo: "Supervisora Caldeiraria",
+    cargo: "Supervisora Usinagem e Caldeiraria",
     matProtheus: "040115",
     permissoes: ["OS", "CAL", "FER", "TER", "_CAL_CAD", "_TER_CAD"],
   },
@@ -133,7 +133,7 @@ const INITIAL_USERS: UserAccessRow[] = [
     filial: "São Luís",
     cargo: "Especialista em Bobinagem",
     matProtheus: "010411",
-    permissoes: ["OS", "TES", "INS"],
+    permissoes: ["OS", "INS", "TES"],
   },
   {
     id: "usr-9",
@@ -142,7 +142,7 @@ const INITIAL_USERS: UserAccessRow[] = [
     filial: "Aveiro",
     cargo: "Técnico Mecânico PT",
     matProtheus: "030104",
-    permissoes: ["OS", "FER", "CAL"],
+    permissoes: ["OS", "CAL", "FER"],
   },
   {
     id: "usr-10",
@@ -151,7 +151,7 @@ const INITIAL_USERS: UserAccessRow[] = [
     filial: "Parauapebas",
     cargo: "Coordenadora SSMA",
     matProtheus: "020556",
-    permissoes: ["ROT", "TER", "_ROTA_MOT"],
+    permissoes: ["SSMA", "TER"],
   },
   {
     id: "usr-11",
@@ -196,37 +196,13 @@ const INITIAL_USERS: UserAccessRow[] = [
     filial: "São Luís",
     cargo: "Técnico de Campo",
     matProtheus: "010643",
-    permissoes: ["ROT", "OS", "_ROTA_MOT"],
+    permissoes: ["SSMA", "OS"],
   },
 ];
 
-const STORAGE_KEY = "medro.access_matrix_v1";
-
 export function GestaoUsuariosSection() {
   const currentUser = useAuth((s) => s.user);
-
-  // Carrega ou inicializa a matriz de usuários
-  const [usuarios, setUsuarios] = useState<UserAccessRow[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_USERS.length) return parsed;
-      }
-    } catch {
-      // ignore
-    }
-    return INITIAL_USERS;
-  });
-
-  // Salva no localStorage sempre que houver alteração
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(usuarios));
-    } catch {
-      // ignore
-    }
-  }, [usuarios]);
+  const qc = useQueryClient();
 
   // Filtros
   const [busca, setBusca] = useState("");
@@ -241,6 +217,115 @@ export function GestaoUsuariosSection() {
   const [novaFilial, setNovaFilial] = useState("São Luís");
   const [novaMatricula, setNovaMatricula] = useState("");
   const [novasPermissoes, setNovasPermissoes] = useState<string[]>(["OS"]);
+
+  // Estado de salvamento em andamento
+  const [salvandoUserId, setSalvandoUserId] = useState<string | null>(null);
+
+  // Consulta de usuários conectada ao Dataverse cr4a1_credenciaises
+  const { data, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ["usuarios", filialFiltro, busca],
+    queryFn: async () => {
+      try {
+        const p = new URLSearchParams();
+        if (filialFiltro) p.set("filial", filialFiltro);
+        if (busca.trim()) p.set("search", busca.trim());
+        return await api<{ usuarios: UserAccessRow[]; fromDataverse: boolean }>(
+          `/usuarios?${p.toString()}`,
+        );
+      } catch {
+        // Fallback local caso o backend esteja offline
+        let items = [...FALLBACK_USERS];
+        if (filialFiltro) {
+          items = items.filter((u) => u.filial.toLowerCase() === filialFiltro.toLowerCase());
+        }
+        if (busca.trim()) {
+          const q = busca.toLowerCase().trim();
+          items = items.filter(
+            (u) =>
+              u.nome.toLowerCase().includes(q) ||
+              u.login.toLowerCase().includes(q) ||
+              u.cargo.toLowerCase().includes(q) ||
+              u.matProtheus.includes(q),
+          );
+        }
+        return { usuarios: items, fromDataverse: false };
+      }
+    },
+    staleTime: 30_000,
+  });
+
+  const usuarios = data?.usuarios || FALLBACK_USERS;
+  const fromDataverse = data?.fromDataverse ?? false;
+
+  // Mutação para atualizar permissões de um usuário no Dataverse (cr4a1_acesso_mod)
+  const updatePermissoesMutation = useMutation({
+    mutationFn: async ({ id, permissoes }: { id: string; permissoes: string[] }) => {
+      setSalvandoUserId(id);
+      return await api<{ id: string; permissoes: string[]; acessoMod: string }>(
+        `/usuarios/${id}/permissoes`,
+        {
+          method: "PATCH",
+          body: { permissoes },
+        },
+      );
+    },
+    onMutate: async ({ id, permissoes }) => {
+      await qc.cancelQueries({ queryKey: ["usuarios"] });
+      const previousData = qc.getQueryData<{ usuarios: UserAccessRow[]; fromDataverse: boolean }>([
+        "usuarios",
+        filialFiltro,
+        busca,
+      ]);
+
+      if (previousData) {
+        qc.setQueryData(["usuarios", filialFiltro, busca], {
+          ...previousData,
+          usuarios: previousData.usuarios.map((u) => (u.id === id ? { ...u, permissoes } : u)),
+        });
+      }
+
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        qc.setQueryData(["usuarios", filialFiltro, busca], context.previousData);
+      }
+      alert("Erro ao salvar permissões no Dataverse.");
+    },
+    onSettled: () => {
+      setSalvandoUserId(null);
+      qc.invalidateQueries({ queryKey: ["usuarios"] });
+    },
+  });
+
+  // Mutação para criar novo colaborador
+  const createUsuarioMutation = useMutation({
+    mutationFn: async (novoUsuario: {
+      nome: string;
+      login: string;
+      filial: string;
+      cargo: string;
+      matProtheus: string;
+      permissoes: string[];
+    }) => {
+      return await api<UserAccessRow>("/usuarios", {
+        method: "POST",
+        body: novoUsuario,
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["usuarios"] });
+      setModalNovoAberto(false);
+      setNovoNome("");
+      setNovoLogin("");
+      setNovoCargo("");
+      setNovaMatricula("");
+      setNovasPermissoes(["OS"]);
+    },
+    onError: () => {
+      alert("Erro ao cadastrar novo colaborador no Dataverse.");
+    },
+  });
 
   // Iniciais para avatar
   const getInitials = (name: string) => {
@@ -267,42 +352,17 @@ export function GestaoUsuariosSection() {
     return { modulos: MODULE_COLUMNS, atividades: ACTIVITY_COLUMNS };
   }, [visaoColunas]);
 
-  // Usuários filtrados
-  const usuariosFiltrados = useMemo(() => {
-    const q = busca.toLowerCase().trim();
-    return usuarios.filter((u) => {
-      const matchBusca =
-        !q ||
-        u.nome.toLowerCase().includes(q) ||
-        u.login.toLowerCase().includes(q) ||
-        u.matProtheus.includes(q) ||
-        u.cargo.toLowerCase().includes(q);
-
-      const matchFilial = !filialFiltro || u.filial === filialFiltro;
-      return matchBusca && matchFilial;
-    });
-  }, [usuarios, busca, filialFiltro]);
-
   // Alterna uma permissão de um usuário
-  const togglePermissao = (userId: string, permId: string) => {
-    setUsuarios((prev) =>
-      prev.map((u) => {
-        if (u.id !== userId) return u;
-        const exists = u.permissoes.includes(permId);
-        const next = exists
-          ? u.permissoes.filter((p) => p !== permId)
-          : [...u.permissoes, permId];
-        return { ...u, permissoes: next };
-      }),
-    );
+  const togglePermissao = (u: UserAccessRow, permId: string) => {
+    const exists = u.permissoes.includes(permId);
+    const next = exists ? u.permissoes.filter((p) => p !== permId) : [...u.permissoes, permId];
+    updatePermissoesMutation.mutate({ id: u.id, permissoes: next });
   };
 
   // Revoga todos os acessos de um usuário
-  const revogarTodos = (userId: string) => {
-    if (!confirm("Deseja realmente revogar todos os acessos deste colaborador?")) return;
-    setUsuarios((prev) =>
-      prev.map((u) => (u.id === userId ? { ...u, permissoes: [] } : u)),
-    );
+  const revogarTodos = (u: UserAccessRow) => {
+    if (!confirm(`Deseja realmente revogar todos os acessos de ${u.nome}?`)) return;
+    updatePermissoesMutation.mutate({ id: u.id, permissoes: [] });
   };
 
   // Salva novo usuário
@@ -310,23 +370,14 @@ export function GestaoUsuariosSection() {
     e.preventDefault();
     if (!novoNome.trim()) return;
 
-    const novo: UserAccessRow = {
-      id: `usr-${Date.now()}`,
+    createUsuarioMutation.mutate({
       nome: novoNome.trim(),
       login: novoLogin.trim() || novoNome.toLowerCase().replace(/\s+/g, "."),
-      cargo: novoCargo.trim() || "Operador",
+      cargo: novoCargo.trim() || "Colaborador",
       filial: novaFilial,
       matProtheus: novaMatricula.trim() || "010999",
       permissoes: novasPermissoes,
-    };
-
-    setUsuarios((prev) => [novo, ...prev]);
-    setModalNovoAberto(false);
-    setNovoNome("");
-    setNovoLogin("");
-    setNovoCargo("");
-    setNovaMatricula("");
-    setNovasPermissoes(["OS"]);
+    });
   };
 
   return (
@@ -343,20 +394,38 @@ export function GestaoUsuariosSection() {
               <span className="rounded-full bg-purple-500/10 px-2 py-0.5 text-[11px] font-semibold text-purple-600 dark:text-purple-400">
                 Matriz de Permissões
               </span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-bold border ${
+                  fromDataverse
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "border-border bg-surface-2 text-muted-foreground"
+                }`}
+              >
+                {fromDataverse ? "Dataverse Live (Credenciaiss)" : "Base Local"}
+              </span>
             </div>
             <p className="text-[12px] text-muted-foreground">
-              Configure o que cada colaborador pode acessar: módulos principais e atividades operacionais.
+              Configure o que cada colaborador pode acessar: módulos principais e atividades operacionais com sincronização Dataverse.
             </p>
           </div>
         </div>
 
-        <button
-          onClick={() => setModalNovoAberto(true)}
-          className="flex items-center justify-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-[12.5px] font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-95"
-        >
-          <UserPlus className="size-4" />
-          Novo Colaborador
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => refetch()}
+            title="Atualizar lista de credenciais"
+            className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-muted-foreground hover:bg-surface-2 hover:text-foreground transition"
+          >
+            <RefreshCw className={`size-4 ${isFetching ? "animate-spin text-primary" : ""}`} />
+          </button>
+          <button
+            onClick={() => setModalNovoAberto(true)}
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-[12.5px] font-semibold text-white shadow-xs transition hover:bg-primary-hover active:scale-95"
+          >
+            <UserPlus className="size-4" />
+            Novo Colaborador
+          </button>
+        </div>
       </div>
 
       {/* ── CARDS DE RESUMO OPERACIONAL COMPACTOS ── */}
@@ -409,7 +478,7 @@ export function GestaoUsuariosSection() {
           <Search className="absolute left-3 top-2 size-3.5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar por nome, login, cargo ou matrícula..."
+            placeholder="Buscar por nome, login, cargo ou matrícula no Dataverse..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             className="w-full rounded-lg border border-border/80 bg-surface-2/60 py-1.5 pl-8 pr-3 text-[12px] text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:bg-surface"
@@ -467,203 +536,219 @@ export function GestaoUsuariosSection() {
         </div>
       </div>
 
-      {/* ── GRADE / MATRIZ DE GESTÃO DE ACESSOS (ROLAGEM TOTAL E PREENCHIMENTO MÁXIMO) ── */}
+      {/* ── GRADE / MATRIZ DE GESTÃO DE ACESSOS ── */}
       <div className="w-full rounded-xl border border-border bg-surface shadow-xs overflow-hidden">
         {/* Barra superior de instrução */}
         <div className="border-b border-border/80 bg-surface-2/40 px-3.5 py-2 flex items-center justify-between text-[11.5px]">
-          <span className="text-muted-foreground">
-            Clique nas caixas de marcação para conceder ou revogar o acesso imediatamente.
+          <span className="text-muted-foreground flex items-center gap-1.5">
+            {salvandoUserId ? (
+              <span className="flex items-center gap-1 text-primary font-medium">
+                <Loader2 className="size-3 animate-spin" /> Salvando alteração no Dataverse...
+              </span>
+            ) : (
+              <span>Clique nas caixas de marcação para conceder ou revogar o acesso imediatamente.</span>
+            )}
           </span>
           <span className="font-semibold text-muted-foreground">
-            {usuariosFiltrados.length} colaboradores na grade
+            {usuarios.length} colaboradores na grade
           </span>
         </div>
 
         {/* Contêiner com rolagem VERTICAL e HORIZONTAL e cabeçalhos fixos */}
         <div className="overflow-auto max-h-[calc(100dvh-340px)] min-h-[420px]">
-          <table className="w-full border-collapse text-left text-[12px]">
-            <thead className="sticky top-0 z-30 bg-surface-2/95 backdrop-blur-md">
-              <tr className="border-b border-border/80 font-semibold text-foreground-secondary">
-                {/* Coluna Fixa do Usuário (Top-Left corner) */}
-                <th className="sticky top-0 left-0 z-40 min-w-[240px] bg-surface-2/95 px-3.5 py-2.5 shadow-[1px_0_0_0] shadow-border backdrop-blur-md">
-                  Colaborador
-                </th>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-24 text-muted-foreground gap-2">
+              <RefreshCw className="size-6 animate-spin text-primary" />
+              <p className="text-xs">Carregando usuários da tabela Credenciaiss no Dataverse...</p>
+            </div>
+          ) : (
+            <table className="w-full border-collapse text-left text-[12px]">
+              <thead className="sticky top-0 z-30 bg-surface-2/95 backdrop-blur-md">
+                <tr className="border-b border-border/80 font-semibold text-foreground-secondary">
+                  {/* Coluna Fixa do Usuário (Top-Left corner) */}
+                  <th className="sticky top-0 left-0 z-40 min-w-[240px] bg-surface-2/95 px-3.5 py-2.5 shadow-[1px_0_0_0] shadow-border backdrop-blur-md">
+                    Colaborador
+                  </th>
 
-                {/* Colunas de Módulos */}
-                {colunasExibidas.modulos.map((m) => {
-                  const Icon = m.icon;
-                  return (
+                  {/* Colunas de Módulos */}
+                  {colunasExibidas.modulos.map((m) => {
+                    const Icon = m.icon;
+                    return (
+                      <th
+                        key={m.id}
+                        title={`${m.label}: ${m.desc}`}
+                        className="min-w-[65px] px-1 py-2 text-center border-l border-border/40 hover:bg-surface-2"
+                      >
+                        <div className="flex flex-col items-center gap-0.5">
+                          <Icon className="size-3.5 text-muted-foreground" />
+                          <span className="truncate max-w-[60px] font-medium text-[11px]">
+                            {m.short}
+                          </span>
+                        </div>
+                      </th>
+                    );
+                  })}
+
+                  {/* Colunas de Atividades Operacionais */}
+                  {colunasExibidas.atividades.map((a) => (
                     <th
-                      key={m.id}
-                      title={`${m.label}: ${m.desc}`}
-                      className="min-w-[65px] px-1 py-2 text-center border-l border-border/40 hover:bg-surface-2"
+                      key={a.id}
+                      title={`${a.label}: ${a.desc}`}
+                      className="min-w-[72px] px-1 py-2 text-center border-l border-border/40 bg-amber-500/5 hover:bg-amber-500/10"
                     >
                       <div className="flex flex-col items-center gap-0.5">
-                        <Icon className="size-3.5 text-muted-foreground" />
-                        <span className="truncate max-w-[60px] font-medium text-[11px]">
-                          {m.short}
+                        <KeyRound className="size-3 text-amber-500" />
+                        <span className="truncate max-w-[68px] font-medium text-[10.5px] text-amber-600 dark:text-amber-400">
+                          {a.short}
                         </span>
                       </div>
                     </th>
-                  );
-                })}
+                  ))}
 
-                {/* Colunas de Atividades Operacionais */}
-                {colunasExibidas.atividades.map((a) => (
-                  <th
-                    key={a.id}
-                    title={`${a.label}: ${a.desc}`}
-                    className="min-w-[72px] px-1 py-2 text-center border-l border-border/40 bg-amber-500/5 hover:bg-amber-500/10"
-                  >
-                    <div className="flex flex-col items-center gap-0.5">
-                      <KeyRound className="size-3 text-amber-500" />
-                      <span className="truncate max-w-[68px] font-medium text-[10.5px] text-amber-600 dark:text-amber-400">
-                        {a.short}
-                      </span>
-                    </div>
+                  {/* Total */}
+                  <th className="min-w-[55px] border-l border-border/40 px-2 py-2 text-center font-bold">
+                    Total
                   </th>
-                ))}
 
-                {/* Total */}
-                <th className="min-w-[55px] border-l border-border/40 px-2 py-2 text-center font-bold">
-                  Total
-                </th>
-
-                {/* Ações */}
-                <th className="min-w-[40px] border-l border-border/40 px-1 py-2 text-center">
-                  <span className="sr-only">Ações</span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-border/60">
-              {usuariosFiltrados.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={
-                      1 +
-                      colunasExibidas.modulos.length +
-                      colunasExibidas.atividades.length +
-                      2
-                    }
-                    className="py-16 text-center text-muted-foreground"
-                  >
-                    Nenhum colaborador encontrado com os filtros informados.
-                  </td>
+                  {/* Ações */}
+                  <th className="min-w-[40px] border-l border-border/40 px-1 py-2 text-center">
+                    <span className="sr-only">Ações</span>
+                  </th>
                 </tr>
-              ) : (
-                usuariosFiltrados.map((u) => {
-                  const isLoggedUser = currentUser?.login === u.login;
-                  return (
-                    <tr
-                      key={u.id}
-                      className="group transition-colors hover:bg-surface-2/60"
+              </thead>
+
+              <tbody className="divide-y divide-border/60">
+                {usuarios.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={
+                        1 +
+                        colunasExibidas.modulos.length +
+                        colunasExibidas.atividades.length +
+                        2
+                      }
+                      className="py-16 text-center text-muted-foreground"
                     >
-                      {/* Célula Fixa: Usuário */}
-                      <td className="sticky left-0 z-20 bg-surface px-3.5 py-2 shadow-[1px_0_0_0] shadow-border group-hover:bg-surface-2/95 backdrop-blur-md">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
-                            {getInitials(u.nome)}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5">
-                              <p className="truncate font-semibold text-foreground text-[12.5px]">
-                                {u.nome}
+                      Nenhum colaborador encontrado com os filtros informados.
+                    </td>
+                  </tr>
+                ) : (
+                  usuarios.map((u) => {
+                    const isLoggedUser = currentUser?.login === u.login;
+                    const isSavingThis = salvandoUserId === u.id;
+                    return (
+                      <tr
+                        key={u.id}
+                        className={`group transition-colors hover:bg-surface-2/60 ${
+                          isSavingThis ? "opacity-75" : ""
+                        }`}
+                      >
+                        {/* Célula Fixa: Usuário */}
+                        <td className="sticky left-0 z-20 bg-surface px-3.5 py-2 shadow-[1px_0_0_0] shadow-border group-hover:bg-surface-2/95 backdrop-blur-md">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
+                              {getInitials(u.nome)}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <p className="truncate font-semibold text-foreground text-[12.5px]">
+                                  {u.nome}
+                                </p>
+                                {isLoggedUser && (
+                                  <span className="rounded bg-blue-500/10 px-1 py-0.2 text-[9px] font-semibold text-primary">
+                                    Você
+                                  </span>
+                                )}
+                              </div>
+                              <p className="truncate text-[10.5px] text-muted-foreground">
+                                <span className="font-semibold text-primary">
+                                  [{getFilialSigla(u.filial)}]
+                                </span>{" "}
+                                {u.cargo} • Mat. {u.matProtheus || "—"}
                               </p>
-                              {isLoggedUser && (
-                                <span className="rounded bg-blue-500/10 px-1 py-0.2 text-[9px] font-semibold text-primary">
-                                  Você
-                                </span>
-                              )}
                             </div>
-                            <p className="truncate text-[10.5px] text-muted-foreground">
-                              <span className="font-semibold text-primary">
-                                [{getFilialSigla(u.filial)}]
-                              </span>{" "}
-                              {u.cargo} • Mat. {u.matProtheus}
-                            </p>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Células de Módulos */}
-                      {colunasExibidas.modulos.map((m) => {
-                        const hasAccess = u.permissoes.includes(m.id);
-                        return (
-                          <td
-                            key={m.id}
-                            onClick={() => togglePermissao(u.id, m.id)}
-                            className="cursor-pointer border-l border-border/40 px-1 py-2 text-center transition-colors hover:bg-primary/10"
-                          >
-                            <div className="flex items-center justify-center">
-                              <div
-                                className={`flex size-5 items-center justify-center rounded-md border transition-all ${
-                                  hasAccess
-                                    ? "border-emerald-500 bg-emerald-500 text-white shadow-2xs"
-                                    : "border-border/80 bg-surface hover:border-primary/60"
-                                }`}
-                              >
-                                {hasAccess && <Check className="size-3.5 stroke-[3]" />}
+                        {/* Células de Módulos */}
+                        {colunasExibidas.modulos.map((m) => {
+                          const hasAccess = u.permissoes.includes(m.id);
+                          return (
+                            <td
+                              key={m.id}
+                              onClick={() => togglePermissao(u, m.id)}
+                              className="cursor-pointer border-l border-border/40 px-1 py-2 text-center transition-colors hover:bg-primary/10"
+                            >
+                              <div className="flex items-center justify-center">
+                                <div
+                                  className={`flex size-5 items-center justify-center rounded-md border transition-all ${
+                                    hasAccess
+                                      ? "border-emerald-500 bg-emerald-500 text-white shadow-2xs"
+                                      : "border-border/80 bg-surface hover:border-primary/60"
+                                  }`}
+                                >
+                                  {hasAccess && <Check className="size-3.5 stroke-[3]" />}
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                        );
-                      })}
+                            </td>
+                          );
+                        })}
 
-                      {/* Células de Atividades */}
-                      {colunasExibidas.atividades.map((a) => {
-                        const hasAccess = u.permissoes.includes(a.id);
-                        return (
-                          <td
-                            key={a.id}
-                            onClick={() => togglePermissao(u.id, a.id)}
-                            className="cursor-pointer border-l border-border/40 bg-amber-500/5 px-1 py-2 text-center transition-colors hover:bg-amber-500/20"
-                          >
-                            <div className="flex items-center justify-center">
-                              <div
-                                className={`flex size-5 items-center justify-center rounded-md border transition-all ${
-                                  hasAccess
-                                    ? "border-amber-500 bg-amber-500 text-white shadow-2xs"
-                                    : "border-amber-500/40 bg-surface hover:border-amber-500"
-                                }`}
-                              >
-                                {hasAccess && <Check className="size-3.5 stroke-[3]" />}
+                        {/* Células de Atividades */}
+                        {colunasExibidas.atividades.map((a) => {
+                          const hasAccess = u.permissoes.includes(a.id);
+                          return (
+                            <td
+                              key={a.id}
+                              onClick={() => togglePermissao(u, a.id)}
+                              className="cursor-pointer border-l border-border/40 bg-amber-500/5 px-1 py-2 text-center transition-colors hover:bg-amber-500/20"
+                            >
+                              <div className="flex items-center justify-center">
+                                <div
+                                  className={`flex size-5 items-center justify-center rounded-md border transition-all ${
+                                    hasAccess
+                                      ? "border-amber-500 bg-amber-500 text-white shadow-2xs"
+                                      : "border-amber-500/40 bg-surface hover:border-amber-500"
+                                  }`}
+                                >
+                                  {hasAccess && <Check className="size-3.5 stroke-[3]" />}
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                        );
-                      })}
+                            </td>
+                          );
+                        })}
 
-                      {/* Total */}
-                      <td className="border-l border-border/40 px-2 py-2 text-center">
-                        <span className="inline-flex rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-bold text-foreground tabular-nums">
-                          {u.permissoes.length}
-                        </span>
-                      </td>
+                        {/* Total */}
+                        <td className="border-l border-border/40 px-2 py-2 text-center">
+                          <span className="inline-flex rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-bold text-foreground tabular-nums">
+                            {u.permissoes.length}
+                          </span>
+                        </td>
 
-                      {/* Ação: Revogar */}
-                      <td className="border-l border-border/40 px-1 py-2 text-center">
-                        <button
-                          onClick={() => revogarTodos(u.id)}
-                          title="Revogar todos os acessos"
-                          className="rounded p-1 text-muted-foreground opacity-40 transition hover:bg-danger/10 hover:text-danger hover:opacity-100 group-hover:opacity-80"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                        {/* Ação: Revogar */}
+                        <td className="border-l border-border/40 px-1 py-2 text-center">
+                          <button
+                            onClick={() => revogarTodos(u)}
+                            title="Revogar todos os acessos"
+                            className="rounded p-1 text-muted-foreground opacity-40 transition hover:bg-danger/10 hover:text-danger hover:opacity-100 group-hover:opacity-80"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
       {/* ── MODAL: ADICIONAR NOVO COLABORADOR ── */}
       {modalNovoAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-5 shadow-2xl space-y-4">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-5 shadow-2xl space-y-4 text-foreground">
             <div className="flex items-center justify-between border-b border-border/70 pb-3">
               <div className="flex items-center gap-2">
                 <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-white">
@@ -681,7 +766,7 @@ export function GestaoUsuariosSection() {
 
             <form onSubmit={handleSalvarNovoUsuario} className="space-y-3.5">
               <div>
-                <label className="block text-[12px] font-medium text-foreground-secondary mb-1">
+                <label className="block text-[12px] font-medium text-foreground mb-1">
                   Nome Completo
                 </label>
                 <input
@@ -690,13 +775,13 @@ export function GestaoUsuariosSection() {
                   placeholder="Ex: Fernando Rocha"
                   value={novoNome}
                   onChange={(e) => setNovoNome(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none dark:bg-surface"
+                  className="w-full rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[12px] font-medium text-foreground-secondary mb-1">
+                  <label className="block text-[12px] font-medium text-foreground mb-1">
                     Login de Acesso
                   </label>
                   <input
@@ -704,12 +789,12 @@ export function GestaoUsuariosSection() {
                     placeholder="Ex: fernando.rocha"
                     value={novoLogin}
                     onChange={(e) => setNovoLogin(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none dark:bg-surface"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-medium text-foreground-secondary mb-1">
+                  <label className="block text-[12px] font-medium text-foreground mb-1">
                     Matrícula Protheus
                   </label>
                   <input
@@ -717,20 +802,20 @@ export function GestaoUsuariosSection() {
                     placeholder="Ex: 010884"
                     value={novaMatricula}
                     onChange={(e) => setNovaMatricula(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none dark:bg-surface"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[12px] font-medium text-foreground-secondary mb-1">
+                  <label className="block text-[12px] font-medium text-foreground mb-1">
                     Filial
                   </label>
                   <select
                     value={novaFilial}
                     onChange={(e) => setNovaFilial(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none dark:bg-surface"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none"
                   >
                     <option value="São Luís">São Luís (MA)</option>
                     <option value="Aveiro">Aveiro (PT)</option>
@@ -741,7 +826,7 @@ export function GestaoUsuariosSection() {
                 </div>
 
                 <div>
-                  <label className="block text-[12px] font-medium text-foreground-secondary mb-1">
+                  <label className="block text-[12px] font-medium text-foreground mb-1">
                     Cargo / Função
                   </label>
                   <input
@@ -749,14 +834,14 @@ export function GestaoUsuariosSection() {
                     placeholder="Ex: Inspetor Técnico"
                     value={novoCargo}
                     onChange={(e) => setNovoCargo(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-surface-2/60 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none dark:bg-surface"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Módulos Iniciais */}
               <div>
-                <label className="block text-[12px] font-medium text-foreground-secondary mb-1.5">
+                <label className="block text-[12px] font-medium text-foreground mb-1.5">
                   Módulos Iniciais Concedidos
                 </label>
                 <div className="grid grid-cols-3 gap-1.5 rounded-xl border border-border bg-surface-2/40 p-2 text-[11.5px]">
@@ -794,9 +879,10 @@ export function GestaoUsuariosSection() {
                 </button>
                 <button
                   type="submit"
+                  disabled={createUsuarioMutation.isPending}
                   className="rounded-xl bg-primary px-4 py-1.5 text-[12.5px] font-semibold text-white shadow-xs hover:bg-primary-hover active:scale-95"
                 >
-                  Salvar Colaborador
+                  {createUsuarioMutation.isPending ? "Cadastrando no Dataverse..." : "Salvar Colaborador"}
                 </button>
               </div>
             </form>

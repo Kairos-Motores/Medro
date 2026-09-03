@@ -18,13 +18,13 @@ export const MODULE_TOKENS = {
   OS: "Módulo OS Medro",
   GER: "Gerenciamento / PCP",
   AVA: "Avaliação Final",
-  CAL: "Caldeiraria",
+  CAL: "Usinagem e Caldeiraria",
   DPT: "Departamento Técnico",
   ESCOPO: "Escopo de Manutenção",
   FER: "Ferramentaria",
   INS: "Inspeção de Qualidade",
   QRL: "QR Code / Laudos",
-  ROT: "Rotas / Trajetos",
+  SSMA: "Saúde, Segurança e Meio Ambiente (SSMA)",
   SPO: "Serviços Externos Portugal",
   TER: "Terceirizados",
   TES: "Testes / Ensaio",
@@ -34,13 +34,12 @@ export type ModuleToken = keyof typeof MODULE_TOKENS;
 /** Tokens de ação fina (sub-permissões). */
 export const ACTION_TOKENS = {
   _AVA_LIB: "Avaliação: liberar",
-  _CAL_CAD: "Caldeiraria: cadastrar",
+  _CAL_CAD: "Usinagem e Caldeiraria: cadastrar",
   _DPT_REMOVE: "DPT: remover",
   _DTI_LINK: "DPT: gerar link",
   _G_CAD: "Gerência: cadastro",
   _G_LOG: "Gerência: log",
   _G_PCP: "Gerência: PCP",
-  _LOG_CHE: "Login checklist",
   _OS_EDOS: "OS: editar OS",
   _OS_EDIT_HIST: "OS: editar histórico",
   _OS_HG: "OS: histórico",
@@ -51,8 +50,6 @@ export const ACTION_TOKENS = {
   _PCP_RQ: "PCP: requisição",
   _QRL_ALL: "QR/Laudos: acesso total",
   _TER_CAD: "Terceirizados: cadastrar",
-  _ROTA_MOT: "Rota: motorista",
-  _ROTA_AUX: "Rota: auxiliar",
 } as const;
 export type ActionToken = keyof typeof ACTION_TOKENS;
 

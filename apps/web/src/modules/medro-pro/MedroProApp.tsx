@@ -8,6 +8,7 @@ import { SetoresModal } from "./components/SetoresModal";
 import { CarcacasModal } from "./components/CarcacasModal";
 import { GruposPorteModal } from "./components/GruposPorteModal";
 import { FarolOSModal } from "./components/FarolOSModal";
+import { FarolConfigModal } from "./components/FarolConfigModal";
 import { SyncStatusWidget } from "./components/SyncStatusWidget";
 
 export function MedroProApp() {
@@ -20,17 +21,19 @@ export function MedroProApp() {
     isCarcacasOpen,
     isGruposPorteOpen,
     isFarolOSOpen,
+    isFarolConfigOpen,
     setSetoresOpen,
     setCarcacasOpen,
     setGruposPorteOpen,
     setFarolOSOpen,
+    setFarolConfigOpen,
   } = useMedroProStore();
 
   const [menuGerenciamento, setMenuGerenciamento] = useState(false);
   const [menuBases, setMenuBases] = useState(false);
 
   return (
-    <div className="flex h-full w-full flex-col bg-bg text-foreground">
+    <div className="relative flex h-full w-full flex-col bg-bg text-foreground overflow-hidden">
       {/* Top Header Toolbar */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-surface/90 px-4 py-3 backdrop-blur-md">
         {/* Left: Breadcrumbs & Menus */}
@@ -66,7 +69,7 @@ export function MedroProApp() {
             )}
           </div>
 
-          <span className="hidden sm:inline-block h-4 w-px bg-border" />
+          <div className="h-4 w-px bg-border/60" />
 
           {/* Menu Gerenciamento */}
           <div className="relative">
@@ -104,6 +107,12 @@ export function MedroProApp() {
                   className="w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-foreground hover:bg-surface-2 transition-colors"
                 >
                   Carcaça Equivalente
+                </button>
+                <button
+                  onClick={() => setFarolConfigOpen(true)}
+                  className="w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-foreground hover:bg-surface-2 transition-colors border-t border-border/50 mt-1 pt-1.5"
+                >
+                  Configuração do Farol
                 </button>
               </div>
             )}
@@ -156,6 +165,7 @@ export function MedroProApp() {
       <SetoresModal isOpen={isSetoresOpen} onClose={() => setSetoresOpen(false)} />
       <CarcacasModal isOpen={isCarcacasOpen} onClose={() => setCarcacasOpen(false)} />
       <GruposPorteModal isOpen={isGruposPorteOpen} onClose={() => setGruposPorteOpen(false)} />
+      <FarolConfigModal isOpen={isFarolConfigOpen} onClose={() => setFarolConfigOpen(false)} />
       <FarolOSModal isOpen={isFarolOSOpen} onClose={() => setFarolOSOpen(false)} />
     </div>
   );

@@ -13,6 +13,7 @@ import { AlmoxarifadoApp } from "./almoxarifado/AlmoxarifadoApp";
 import { FerramentariaApp } from "./ferramentaria/FerramentariaApp";
 import { LaudosGenApp } from "./laudos-gen/LaudosGenApp";
 import { RascunhosFolder } from "./laudos-gen/RascunhosFolder";
+import { UsinagemCaldeirariaApp } from "./caldeiraria/UsinagemCaldeirariaApp";
 
 /** Roteia o conteúdo de uma janela para o app do módulo. */
 export function ModuleHost({
@@ -53,6 +54,7 @@ export function ModuleHost({
   if (moduleId === "planejamento") return <PlanejamentoApp />;
   if (moduleId === "almoxarifado") return <AlmoxarifadoApp />;
   if (moduleId === "ferramentaria") return <FerramentariaApp />;
+  if (moduleId === "caldeiraria") return <UsinagemCaldeirariaApp />;
   return <StubWindow moduleId={moduleId} />;
 }
 

@@ -7,14 +7,10 @@ import {
   Flame,
   Orbit,
   FileText,
-  Route,
-  Truck,
   Hammer,
   Users,
-  Camera,
   QrCode,
   ShieldCheck,
-  ListChecks,
   Activity,
   RotateCw,
   ClipboardCheck,
@@ -42,16 +38,13 @@ export type ModuleId =
   | "pcp"
   | "caldeiraria"
   | "balanceamento"
-  | "trajetos-ssma"
-  | "checklist-veicular"
   | "ferramentaria"
   | "terceirizados"
-  | "rds"
-  | "relatorio-fotografico"
   | "dpt-laudos"
   | "laudos-gen"
   | "rascunhos-folder"
   | "cipa"
+  | "ssma"
   | "tarefas";
 
 export type AccentKey =
@@ -127,16 +120,12 @@ export const MODULES: ModuleDef[] = [
   { id: "peritagem", label: "Ensaios", short: "Ensaios", desc: "Ensaios elétricos, testes de isolamento, resistência ôhmica, Surge Test e vibração", icon: Gauge, path: "/ensaios", access: ["AVA"], accent: "cyan", ready: true },
   { id: "dpt-laudos", label: "Dep. Técnico", short: "DPT", desc: "Laudos técnicos, links e QR codes", icon: FileText, path: "/dpt", access: ["DPT"], accent: "teal", ready: true },
   { id: "laudos-gen", label: "Gerador de Laudos", short: "Laudos", desc: "Montagem e emissão do laudo técnico da OS (PDF)", icon: FilePlus2, path: "/laudos-gen", access: ["DPT"], accent: "teal", ready: true },
-  { id: "caldeiraria", label: "Caldeiraria", short: "Caldeiraria", desc: "Recuperação e fabricação de peças", icon: Flame, path: "/caldeiraria", access: ["CAL"], accent: "amber" },
+  { id: "caldeiraria", label: "Usinagem e Caldeiraria", short: "Usinagem & Cald.", desc: "Controle, recuperação, usinagem e fabricação de peças mecânicas", icon: Flame, path: "/caldeiraria", access: ["CAL"], accent: "amber", ready: true },
   { id: "balanceamento", label: "Balanceamento", short: "Balanc.", desc: "Balanceamento dinâmico de rotores", icon: Orbit, path: "/balanceamento", accent: "slate" },
   { id: "ferramentaria", label: "Ferramentaria", short: "Ferram.", desc: "Gestão global de ferramentas, cautelas, calibrações RBC e rastreamento multiunidades", icon: Hammer, path: "/ferramentaria", accent: "slate", ready: true },
-  { id: "trajetos-ssma", label: "Trajetos / SSMA", short: "Trajetos", desc: "Deslocamento de equipes e segurança", icon: Route, path: "/trajetos", access: ["ROT"], accent: "teal" },
-  { id: "checklist-veicular", label: "Checklist Veicular", short: "Checklist", desc: "Inspeção e histórico de veículos", icon: ListChecks, path: "/checklist-veicular", accent: "cyan" },
   { id: "terceirizados", label: "Terceirizados", short: "Terceir.", desc: "Serviços externos e pendências", icon: Users, path: "/terceirizados", access: ["TER"], accent: "indigo" },
   { id: "tarefas", label: "Tarefas", short: "Tarefas", desc: "Tarefas operacionais e QR", icon: FlaskConical, path: "/tarefas", accent: "slate" },
-  { id: "rds", label: "RDS", short: "RDS", desc: "Requisição de saída / serviço", icon: Truck, path: "/rds", accent: "amber" },
-  { id: "relatorio-fotografico", label: "Relatório Fotográfico", short: "Rel. Foto", desc: "Fotos de peritagem e relatórios", icon: Camera, path: "/relatorio-foto", accent: "slate" },
-  { id: "cipa", label: "CIPA", short: "CIPA", desc: "Votação da comissão de segurança", icon: ShieldCheck, path: "/cipa", accent: "green" },
+  { id: "ssma", label: "SSMA", short: "SSMA", desc: "Saúde, Segurança e Meio Ambiente", icon: ShieldCheck, path: "/ssma", access: ["SSMA"], accent: "green" },
 ];
 
 /** classes utilitárias por acento */
@@ -193,17 +182,11 @@ export const SCREENS: ScreenDef[] = [
   { id: "EnsaioTemporizado", path: "/ensaio", title: "Ensaio Temporizado", module: "peritagem", powerApps: "EnsaioTemporizado", access: ["TES"] },
   { id: "LiberarEnsaio", path: "/ensaio/liberar", title: "Liberar Ensaio", module: "peritagem", powerApps: "LiberarEnsaio", access: ["TES"] },
   // Caldeiraria
-  { id: "Controle_Caldeiraria", path: "/caldeiraria", title: "Caldeiraria", module: "caldeiraria", powerApps: "Controle_Caldeiraria", access: ["CAL"] },
-  { id: "Caldeiraria_Novo", path: "/caldeiraria/novo", title: "Nova Peça", module: "caldeiraria", powerApps: "Caldeiraria_Novo", access: ["_CAL_CAD"] },
+  { id: "Controle_Caldeiraria", path: "/caldeiraria", title: "Usinagem e Caldeiraria", module: "caldeiraria", powerApps: "Controle_Caldeiraria", access: ["CAL"] },
+  { id: "Caldeiraria_Novo", path: "/caldeiraria/novo", title: "Nova Peça / Serviço", module: "caldeiraria", powerApps: "Caldeiraria_Novo", access: ["_CAL_CAD"] },
   { id: "Caldeiraria_Historico", path: "/caldeiraria/historico", title: "Histórico", module: "caldeiraria", powerApps: "Caldeiraria_Histórico", access: ["CAL"] },
   // Balanceamento
   { id: "Rel_Balanceamento", path: "/balanceamento", title: "Balanceamento", module: "balanceamento", powerApps: "Rel_Balanceamento" },
-  // Trajetos
-  { id: "SelecaoTrajeto", path: "/trajetos", title: "Trajetos", module: "trajetos-ssma", powerApps: "SelecaoTrajeto", access: ["ROT"] },
-  { id: "Seleção_trajeto_SSMA", path: "/ssma", title: "Trajetos SSMA", module: "trajetos-ssma", powerApps: "Seleção_trajeto_SSMA" },
-  // Checklist veicular
-  { id: "Checklist_veicular_slz", path: "/checklist-veicular", title: "Checklist Veicular", module: "checklist-veicular", powerApps: "Checklist_veicular_slz" },
-  { id: "Novo_CheckList_Veicular", path: "/checklist-veicular/novo", title: "Novo Checklist", module: "checklist-veicular", powerApps: "Novo_CheckList_Veicular" },
   // Ferramentaria
   { id: "T_Ferramentaria", path: "/ferramentaria", title: "Ferramentaria", module: "ferramentaria", powerApps: "T_Ferramentaria", access: ["FER"] },
   // Terceirizados
@@ -211,14 +194,8 @@ export const SCREENS: ScreenDef[] = [
   { id: "NovoRegistroTerceir", path: "/terceirizados/novo", title: "Novo Registro", module: "terceirizados", powerApps: "NovoRegistroTerceir", access: ["_TER_CAD"] },
   // Tarefas
   { id: "EntradaTarefa", path: "/tarefas", title: "Entrada de Tarefa", module: "tarefas", powerApps: "EntradaTarefa" },
-  // RDS
-  { id: "Req_RDS", path: "/rds", title: "RDS", module: "rds", powerApps: "Req_RDS" },
-  { id: "Historico_RDS", path: "/rds/historico", title: "Histórico RDS", module: "rds", powerApps: "Historico_RDS" },
-  // Relatório fotográfico
-  { id: "Rel_Foto_Escolha", path: "/relatorio-foto", title: "Relatório Fotográfico", module: "relatorio-fotografico", powerApps: "Rel_Foto_Escolha" },
-  { id: "Relatorio", path: "/relatorio/novo", title: "Novo Relatório", module: "relatorio-fotografico", powerApps: "Relatorio" },
-  // CIPA
-  { id: "VotaçãoCIPA", path: "/cipa", title: "Votação CIPA", module: "cipa", powerApps: "VotaçãoCIPA" },
+  // SSMA
+  { id: "GestaoSSMA", path: "/ssma", title: "SSMA", module: "ssma", powerApps: "VotaçãoCIPA", access: ["SSMA"] },
 ];
 
 export const byPath = (path: string) => SCREENS.find((s) => s.path === path);

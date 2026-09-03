@@ -10,6 +10,7 @@ interface MedroProState {
   isCarcacasOpen: boolean;
   isGruposPorteOpen: boolean;
   isFarolOSOpen: boolean;
+  isFarolConfigOpen: boolean;
 
   // Alerta de hora extra no kanban
   horaExtra: boolean;
@@ -25,6 +26,7 @@ interface MedroProState {
   setCarcacasOpen: (open: boolean) => void;
   setGruposPorteOpen: (open: boolean) => void;
   setFarolOSOpen: (open: boolean) => void;
+  setFarolConfigOpen: (open: boolean) => void;
   toggleHoraExtra: () => void;
 }
 
@@ -37,6 +39,7 @@ export const useMedroProStore = create<MedroProState>((set) => ({
   isCarcacasOpen: false,
   isGruposPorteOpen: false,
   isFarolOSOpen: false,
+  isFarolConfigOpen: false,
 
   horaExtra: false,
 
@@ -71,5 +74,6 @@ export const useMedroProStore = create<MedroProState>((set) => ({
   setCarcacasOpen: (open) => set({ isCarcacasOpen: open }),
   setGruposPorteOpen: (open) => set({ isGruposPorteOpen: open }),
   setFarolOSOpen: (open) => set({ isFarolOSOpen: open }),
+  setFarolConfigOpen: (open) => set({ isFarolConfigOpen: open }),
   toggleHoraExtra: () => set((s) => ({ horaExtra: !s.horaExtra })),
 }));

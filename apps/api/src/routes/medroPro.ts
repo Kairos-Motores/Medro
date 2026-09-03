@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { dataverse } from "../services/dataverse/client.js";
+import { fetchFarolOSFromDataverse, type RawOSRow } from "../services/dataverse/farolZb6.js";
 import {
   calculateFiliaisKpis,
   type FiliaisKPIsMap,
@@ -12,7 +12,7 @@ const CACHE_TTL_MS = 30_000;
 export async function medroProRoutes(app: FastifyInstance) {
   /**
    * KPIs agregados da Torre de Controle Macro.
-   * Filtra registros e calcula OS na filial, aprovadas, dentro e fora do prazo.
+   * Filtra registros e calcula OS na filial, aprovadas, dentro e fora do prazo a partir do Dataverse.
    */
   app.get("/medro-pro/kpis/torre-macro", async (_req, reply) => {
     const now = Date.now();
@@ -21,35 +21,20 @@ export async function medroProRoutes(app: FastifyInstance) {
     }
 
     try {
-      // Tenta consultar a tabela base no Dataverse (cr4a1_base_medros)
-      const query = {
-        select: [
-          "cr4a1_oscomp",
-          "cr4a1_cliente",
-          "cr4a1_unidade",
-          "cr4a1_setor",
-          "cr4a1_responsavel",
-          "cr4a1_fcadastro",
-          "cr4a1_data_inicial",
-          "cr4a1_data_final",
-        ],
-        top: 250,
-      };
-
-      let rawRecords: Array<Record<string, unknown>> = [];
+      // Obtém registros ativos do Dataverse (tabela cr4a1_zb6_relatorios)
+      let rawRecords: RawOSRow[] = [];
       try {
-        const res = await dataverse.list<Record<string, unknown>>("cr4a1_base_medros", query);
-        rawRecords = res.value;
+        rawRecords = await fetchFarolOSFromDataverse();
       } catch (dvErr) {
-        app.log.warn({ dvErr }, "cr4a1_base_medros não disponível no Dataverse, gerando dados operacionais consolidados");
+        app.log.warn({ dvErr }, "Erro ao consultar cr4a1_zb6_relatorios no Dataverse para Torre Macro");
       }
 
       let kpis: FiliaisKPIsMap = {};
 
       if (rawRecords.length > 0) {
-        kpis = calculateFiliaisKpis(rawRecords);
+        kpis = calculateFiliaisKpis(rawRecords as unknown as Record<string, unknown>[]);
       } else {
-        // Dados operacionais realistas de referência para as 4 unidades
+        // Fallback preventivo caso o Dataverse esteja temporariamente inacessível
         kpis = {
           "São Luís": {
             os_na_filial: 28,
@@ -104,4 +89,34 @@ export async function medroProRoutes(app: FastifyInstance) {
       total_lines: 1240,
     };
   });
+
+  /**
+   * Base do Farol de OS extraída diretamente do Dataverse (cr4a1_zb6_relatorios / ZB6010).
+   * Suporta query param ?refresh=true para forçar atualização em tempo real sem cache.
+   */
+  app.get<{ Querystring: { refresh?: string; top?: string } }>(
+    "/medro-pro/bases/farol-os",
+    async (req, reply) => {
+      try {
+        const forceRefresh = req.query?.refresh === "true";
+        const top = req.query?.top ? parseInt(req.query.top, 10) : 1000;
+
+        const baseRecords = await fetchFarolOSFromDataverse({ forceRefresh, top });
+
+        return {
+          status: "success",
+          data: baseRecords,
+          total: baseRecords.length,
+          source: "Dataverse (cr4a1_zb6_relatorios)",
+          timestamp: new Date().toISOString(),
+        };
+      } catch (err) {
+        app.log.error({ err }, "Erro ao consultar cr4a1_zb6_relatorios no Dataverse");
+        return reply.code(500).send({
+          status: "error",
+          message: (err as Error).message || "Erro ao consultar base do Dataverse",
+        });
+      }
+    },
+  );
 }
