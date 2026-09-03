@@ -15,7 +15,9 @@ import {
 /** Ícones/atalhos na área de trabalho (estilo macOS/Windows). */
 export function DesktopIcons() {
   const { shortcuts, remove, seedRascunhos } = useDesktopShortcuts();
-  const canDpt = useAuth((s) => (s.user ? s.can("DPT") : false));
+  const can = useAuth((s) => s.can);
+  const authed = useAuth((s) => !!s.user);
+  const canDpt = authed && can("DPT");
   const open = useWM((s) => s.open);
 
   // semeia a "pasta" de rascunhos uma vez para quem é do DPT
@@ -23,7 +25,11 @@ export function DesktopIcons() {
     if (canDpt) seedRascunhos();
   }, [canDpt, seedRascunhos]);
 
-  const visiveis = shortcuts.filter((sc) => sc.moduleId !== "laudos-gen" || canDpt);
+  // só mostra atalhos de módulos aos quais o usuário tem acesso
+  const visiveis = shortcuts.filter((sc) => {
+    const acc = moduleById(sc.moduleId).access;
+    return !acc?.length || (authed && can(...acc));
+  });
   if (visiveis.length === 0) return null;
 
   function abrir(sc: DesktopShortcut) {

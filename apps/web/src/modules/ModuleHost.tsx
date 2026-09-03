@@ -1,5 +1,6 @@
-import { Construction } from "lucide-react";
+import { Construction, Lock } from "lucide-react";
 import type { WinParams } from "@/lib/wm";
+import { useAuth } from "@/lib/auth";
 import { moduleById, type ModuleId } from "./registry";
 import { DptApp } from "./dpt/DptApp";
 import { MedroProApp } from "./medro-pro/MedroProApp";
@@ -22,6 +23,13 @@ export function ModuleHost({
   params?: WinParams;
   paramsNonce?: number;
 }) {
+  const m = moduleById(moduleId);
+  const can = useAuth((s) => s.can);
+  const authed = useAuth((s) => !!s.user);
+  // acesso: respeita MODULES[].access — laudo é DPT-only (o registry já esconde
+  // do Dock/Launchpad; isto barra aberturas por atalho/janela persistida).
+  if (m.access?.length && !(authed && can(...m.access))) return <AccessDenied label={m.label} />;
+
   if (moduleId === "configuracoes" || moduleId === "pcp") return <ConfiguracoesApp />;
   if (moduleId === "dpt-laudos") return <DptApp />;
   if (moduleId === "laudos-gen")
@@ -39,6 +47,22 @@ export function ModuleHost({
   if (moduleId === "almoxarifado") return <AlmoxarifadoApp />;
   if (moduleId === "ferramentaria") return <FerramentariaApp />;
   return <StubWindow moduleId={moduleId} />;
+}
+
+function AccessDenied({ label }: { label: string }) {
+  return (
+    <div className="mx-auto flex max-w-sm flex-col items-center gap-3 p-10 text-center">
+      <span className="flex size-14 items-center justify-center rounded-xl bg-surface-2 text-muted-foreground">
+        <Lock className="size-7" />
+      </span>
+      <div>
+        <p className="text-[14px] font-semibold text-foreground">{label}</p>
+        <p className="mt-1 text-[12px] text-muted-foreground">
+          Você não tem acesso a este módulo. Fale com o administrador se precisar.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function StubWindow({ moduleId }: { moduleId: ModuleId }) {

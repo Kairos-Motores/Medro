@@ -1,14 +1,24 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { LayoutGrid, Search, X, ArrowUpRight } from "lucide-react";
+import { LayoutGrid, Search, X, ArrowUpRight, SquareArrowOutUpRight, XCircle, MonitorUp } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useWM } from "@/lib/wm";
+import { useDesktopShortcuts } from "@/lib/desktopShortcuts";
 import { cn } from "@/lib/cn";
 import { MODULES, ACCENT, type ModuleDef } from "@/modules/registry";
 import { useRecentApps } from "@/lib/useRecentApps";
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+} from "@/components/ui/context-menu";
 
 export function Dock({ hidden = false }: { hidden?: boolean }) {
   const can = useAuth((s) => s.can);
-  const { windows, open, focus, setLaunchpad, activeId } = useWM();
+  const { windows, open, focus, close, minimize, setLaunchpad, activeId } = useWM();
+  const addShortcut = useDesktopShortcuts((s) => s.add);
   const { getRecentModules, recordAppOpen } = useRecentApps();
 
   // Verifica se há alguma janela aberta
@@ -151,32 +161,62 @@ export function Dock({ hidden = false }: { hidden?: boolean }) {
             const isActive = win && win.id === activeId && !win.minimized;
 
             return (
-              <button
-                key={m.id}
-                onClick={() => handleOpenApp(m)}
-                title={m.label}
-                className={cn(
-                  "group relative flex size-11 shrink-0 items-center justify-center rounded-xl border border-black/5 dark:border-white/10 bg-surface/90 backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:shadow-md",
-                  a.text,
-                )}
-              >
-                <Icon className="size-[22px]" strokeWidth={2} />
-
-                {/* Indicador de janela em execução / ativa */}
-                {running && (
-                  <span
+              <ContextMenu key={m.id}>
+                <ContextMenuTrigger asChild>
+                  <button
+                    onClick={() => handleOpenApp(m)}
+                    title={m.label}
                     className={cn(
-                      "absolute -bottom-1 size-1 rounded-full transition-all duration-200",
-                      isActive ? "bg-foreground w-2" : "bg-foreground/40",
+                      "group relative flex size-11 shrink-0 items-center justify-center rounded-xl border border-black/5 dark:border-white/10 bg-surface/90 backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:shadow-md",
+                      a.text,
                     )}
-                  />
-                )}
+                  >
+                    <Icon className="size-[22px]" strokeWidth={2} />
 
-                {/* Tooltip macOS */}
-                <span className="pointer-events-none absolute -top-9 whitespace-nowrap rounded-md bg-elevated-dark px-2 py-1 text-[11px] font-medium text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 shadow-sm">
-                  {m.label}
-                </span>
-              </button>
+                    {/* Indicador de janela em execução / ativa */}
+                    {running && (
+                      <span
+                        className={cn(
+                          "absolute -bottom-1 size-1 rounded-full transition-all duration-200",
+                          isActive ? "bg-foreground w-2" : "bg-foreground/40",
+                        )}
+                      />
+                    )}
+
+                    {/* Tooltip macOS */}
+                    <span className="pointer-events-none absolute -top-9 whitespace-nowrap rounded-md bg-elevated-dark px-2 py-1 text-[11px] font-medium text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 shadow-sm">
+                      {m.label}
+                    </span>
+                  </button>
+                </ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuLabel>{m.label}</ContextMenuLabel>
+                  {running ? (
+                    <>
+                      <ContextMenuItem onSelect={() => focus(win!.id)}>
+                        <SquareArrowOutUpRight className="size-3.5" />
+                        {win!.minimized || !isActive ? "Ir para a janela" : "Trazer para frente"}
+                      </ContextMenuItem>
+                      <ContextMenuItem onSelect={() => minimize(win!.id)} disabled={win!.minimized}>
+                        Minimizar
+                      </ContextMenuItem>
+                      <ContextMenuItem destructive onSelect={() => close(win!.id)}>
+                        <XCircle className="size-3.5" /> Fechar janela
+                      </ContextMenuItem>
+                    </>
+                  ) : (
+                    <ContextMenuItem onSelect={() => handleOpenApp(m)}>
+                      <SquareArrowOutUpRight className="size-3.5" /> Abrir
+                    </ContextMenuItem>
+                  )}
+                  <ContextMenuSeparator />
+                  <ContextMenuItem
+                    onSelect={() => addShortcut({ kind: "module", moduleId: m.id, label: m.label })}
+                  >
+                    <MonitorUp className="size-3.5" /> Adicionar à área de trabalho
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             );
           })}
         </div>
