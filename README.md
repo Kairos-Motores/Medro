@@ -43,7 +43,7 @@ páginas do laudo intocadas.
 
 | App | Runtime | Principais libs |
 |---|---|---|
-| `apps/web` | React 18.3 · Vite 5 · TS | Tailwind 3 (tokens CSS), Reshaped 3, `@tanstack/react-query` 5, **zustand 5** (todo o estado de UI), Radix (context-menu/popover/select/dialog/checkbox), `react-day-picker` 10, `lucide-react`, `react-router-dom` 6 (só **MemoryRouter por janela**), `date-fns` 4 |
+| `apps/web` | React 18.3 · Vite 5 · TS | Tailwind 3 (tokens CSS), Reshaped 3, `@tanstack/react-query` 5, **zustand 5** (todo o estado de UI), Radix (context-menu/popover/select/dialog/checkbox), `framer-motion` 12 (animação do shell — ver `lib/motion.ts`), `react-day-picker` 10, `lucide-react`, `react-router-dom` 6 (só **MemoryRouter por janela**), `date-fns` 4 |
 | `apps/api` | Node ≥20 · Fastify 5 · TS ESM | `@fastify/jwt` (RBAC), `@fastify/cors`, `@fastify/sensible`, `zod` (config + bodies), `undici` (upload grande p/ SharePoint), `pino` |
 | `apps/report-print` | React 19 · Vite 7 | `recharts` 3, `@hello-pangea/dnd`, `framer-motion`, `sass`, `axios` |
 | `apps/pdf-worker` | Node · Express 4 | `puppeteer-core` + `@sparticuz/chromium` (prod) / `puppeteer` (dev) |
@@ -89,6 +89,7 @@ apps/api  (Fastify BFF, RBAC por token de acesso)
 | **Área de trabalho** | `components/desktop/DesktopIcons.tsx` + `lib/desktopShortcuts.ts` | atalhos fixáveis (persistidos no navegador). |
 | **Boas-vindas** | `components/desktop/WelcomeOverlay.tsx` + `lib/startupChime.ts` | cortina 2 fases (assinatura "Medro" → saudação + nome) + som de abertura sintetizado (Web Audio). Só após login nesta aba (flag `welcome` não persistida). |
 | **Tema / wallpaper** | `lib/theme.ts` | claro/escuro (`data-theme` no `<html>` + tokens em `styles/tokens.css`), 2 wallpapers + custom. |
+| **Movimento** | `lib/motion.ts` + `framer-motion` | vocabulário de animação do shell (molas, `variants` de overlay/grade). `<MotionConfig reducedMotion="user">` em `app/App.tsx`. Janelas com pop/minimizar, dock com lupa macOS, launchpad/taskview com stagger, widgets/atalhos com enter-exit. Detalhe em `docs/07 §12.9`. |
 
 Estado de UI = **zustand + `persist` (localStorage)** em `lib/*`. React Query só para dados
 do servidor (`lib/api.ts` — `api<T>(path, opts)` injeta o Bearer, trata 401).

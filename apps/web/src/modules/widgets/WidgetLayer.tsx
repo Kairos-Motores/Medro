@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/cn";
+import { SPRING_SNAPPY } from "@/lib/motion";
 import { useAuth } from "@/lib/auth";
 import type { WinRect } from "@/lib/wm";
 import { useWidgets, cellsToPx, gridToPx, pxToGrid, PITCH, ORIGIN_X, ORIGIN_Y } from "@/lib/useWidgets";
@@ -132,18 +134,25 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
         if (e.target === e.currentTarget) setSelectedId(null);
       }}
     >
-      {drag.current && mode === "grid" && (
-        <div
-          className="absolute inset-0 opacity-60"
-          style={{
-            backgroundImage: "radial-gradient(rgb(var(--border)) 1px, transparent 1px)",
-            backgroundSize: `${PITCH}px ${PITCH}px`,
-            backgroundPosition: `${ORIGIN_X}px ${ORIGIN_Y}px`,
-          }}
-          aria-hidden
-        />
-      )}
+      <AnimatePresence>
+        {drag.current && mode === "grid" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.6 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage: "radial-gradient(rgb(var(--border)) 1px, transparent 1px)",
+              backgroundSize: `${PITCH}px ${PITCH}px`,
+              backgroundPosition: `${ORIGIN_X}px ${ORIGIN_Y}px`,
+            }}
+            aria-hidden
+          />
+        )}
+      </AnimatePresence>
 
+      <AnimatePresence initial={false}>
       {items.map((it) => {
         const def = widgetById(it.widgetId);
         if (!def || !canShow(def)) return null;
@@ -154,8 +163,12 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
         const busy = drag.current?.id === it.instanceId;
         const selected = selectedId === it.instanceId;
         return (
-          <div
+          <motion.div
             key={it.instanceId}
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: busy ? 1.03 : 1 }}
+            exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.14 } }}
+            transition={busy ? { duration: 0.12 } : SPRING_SNAPPY}
             className={cn(
               "group/wl absolute",
               busy
@@ -189,9 +202,10 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
                 <span className="size-2.5 rounded-[3px] border-b-2 border-r-2 border-muted-foreground/70" />
               </div>
             )}
-          </div>
+          </motion.div>
         );
       })}
+      </AnimatePresence>
     </div>
   );
 }
@@ -213,12 +227,21 @@ export function MobileWidgetStack() {
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      {items.map((it) => {
+      <AnimatePresence initial={false}>
+      {items.map((it, i) => {
         const def = widgetById(it.widgetId);
         if (!def || !canShow(def)) return null;
         const { h } = SIZE_CELLS[it.size];
         return (
-          <div key={it.instanceId} style={{ minHeight: cellsToPx(Math.min(h, 3)) }}>
+          <motion.div
+            key={it.instanceId}
+            layout
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.14 } }}
+            transition={{ ...SPRING_SNAPPY, delay: i * 0.03 }}
+            style={{ minHeight: cellsToPx(Math.min(h, 3)) }}
+          >
             <WidgetShell def={def} placed={it} selected>
               <def.Component
                 size={it.size}
@@ -226,9 +249,10 @@ export function MobileWidgetStack() {
                 setConfig={(patch) => setConfig(it.instanceId, patch)}
               />
             </WidgetShell>
-          </div>
+          </motion.div>
         );
       })}
+      </AnimatePresence>
     </div>
   );
 }

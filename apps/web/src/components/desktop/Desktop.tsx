@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   X,
   LayoutGrid,
@@ -127,18 +128,25 @@ export function Desktop() {
         <MenuBar />
         <div className="relative z-10 min-h-0 flex-1 overflow-auto pb-16 pt-7">
           {active ? (
-            <div className="flex min-h-full flex-col">
+            <motion.div
+              key={active.id}
+              className="flex min-h-full flex-col"
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 34 }}
+            >
               <div className="material-toolbar sticky top-0 z-10 flex h-10 items-center gap-2 border-b border-border pl-3 pr-1">
                 <span className="flex-1 truncate text-[13px] font-semibold text-foreground">
                   {active.title}
                 </span>
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => close(active.id)}
                   className="flex size-8 items-center justify-center rounded-md text-foreground-secondary transition hover:bg-danger hover:text-white"
                   aria-label="Fechar"
                 >
                   <X className="size-4" strokeWidth={2.5} />
-                </button>
+                </motion.button>
               </div>
               <ModuleHost
                 key={active.id}
@@ -146,7 +154,7 @@ export function Desktop() {
                 params={active.params}
                 paramsNonce={active.paramsNonce}
               />
-            </div>
+            </motion.div>
           ) : (
             <>
               <div className="flex items-center justify-between px-4 pt-2">
@@ -251,11 +259,13 @@ export function Desktop() {
             )}
           </ContextMenuContent>
         </ContextMenu>
-        {openWindows.map((w) => (
-          <WindowFrame key={w.id} win={w} bounds={bounds} focused={w.id === topId}>
-            <ModuleHost moduleId={w.moduleId} params={w.params} paramsNonce={w.paramsNonce} />
-          </WindowFrame>
-        ))}
+        <AnimatePresence>
+          {openWindows.map((w) => (
+            <WindowFrame key={w.id} win={w} bounds={bounds} focused={w.id === topId}>
+              <ModuleHost moduleId={w.moduleId} params={w.params} paramsNonce={w.paramsNonce} />
+            </WindowFrame>
+          ))}
+        </AnimatePresence>
       </div>
 
       <Dock hidden={isDockHidden} />

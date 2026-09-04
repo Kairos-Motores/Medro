@@ -1,6 +1,8 @@
 import { useRef, useState, type ReactNode } from "react";
+import { motion, type Variants } from "framer-motion";
 import { Minus, Square, Copy, X, LayoutGrid, AppWindow } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { SPRING, EASE_OUT } from "@/lib/motion";
 import { useWM, WIN_MIN, type MedroWindow, type WinRect } from "@/lib/wm";
 import {
   ContextMenu,
@@ -22,6 +24,16 @@ const HANDLES: { dir: Dir; cls: string }[] = [
   { dir: "se", cls: "bottom-0 right-0 size-2.5 cursor-nwse-resize" },
   { dir: "sw", cls: "bottom-0 left-0 size-2.5 cursor-nesw-resize" },
 ];
+
+/** abre com um "pop"; sai por fade+encolhe (fechar) ou suga pra baixo (minimizar). */
+const frameVariants: Variants = {
+  initial: { opacity: 0, scale: 0.92, y: 10 },
+  animate: { opacity: 1, scale: 1, y: 0, transition: SPRING },
+  exit: (minimized: boolean) =>
+    minimized
+      ? { opacity: 0, scale: 0.5, y: 140, transition: { duration: 0.24, ease: [0.4, 0, 1, 1] } }
+      : { opacity: 0, scale: 0.94, y: 8, transition: EASE_OUT },
+};
 
 export function WindowFrame({
   win,
@@ -103,18 +115,31 @@ export function WindowFrame({
   }
 
   return (
-    <div
+    <motion.div
+      layout={false}
+      custom={win.minimized}
+      variants={frameVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      style={{
+        left: win.rect.x,
+        top: win.rect.y,
+        width: win.rect.w,
+        height: win.rect.h,
+        zIndex: win.z,
+        transformOrigin: "50% 0%",
+      }}
       className={cn(
-        "absolute flex flex-col overflow-hidden border bg-surface",
+        "absolute flex flex-col overflow-hidden border bg-surface will-change-transform",
         win.maximized ? "rounded-none border-transparent shadow-none" : "rounded-lg",
         focused
           ? "border-border-strong shadow-mac-2 ring-1 ring-primary/20"
           : "border-border shadow-mac-1",
         isDragging
           ? "select-none transition-none"
-          : "transition-[left,top,width,height,box-shadow] duration-300 ease-out",
+          : "transition-[left,top,width,height,box-shadow,border-color] duration-300 ease-out",
       )}
-      style={{ left: win.rect.x, top: win.rect.y, width: win.rect.w, height: win.rect.h, zIndex: win.z }}
       onPointerDown={() => !focused && focus(win.id)}
     >
       {/* barra de título — controles à direita (estilo Windows/Linux) */}
@@ -122,7 +147,7 @@ export function WindowFrame({
       <ContextMenuTrigger asChild>
       <div
         className={cn(
-          "flex h-8 shrink-0 items-stretch border-b border-border",
+          "flex h-8 shrink-0 items-stretch border-b border-border transition-colors",
           focused ? "bg-surface-2" : "bg-surface",
         )}
         onPointerDown={onTitleDown}
@@ -135,30 +160,39 @@ export function WindowFrame({
           {win.title}
         </span>
         <div className="flex items-stretch">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.88 }}
+            transition={{ duration: 0.12 }}
             onClick={() => minimize(win.id)}
             className="flex w-10 items-center justify-center text-foreground-secondary transition-colors hover:bg-black/10 dark:hover:bg-white/10"
             aria-label="Minimizar"
             title="Minimizar"
           >
             <Minus className="size-3.5" strokeWidth={2.5} />
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.88 }}
+            transition={{ duration: 0.12 }}
             onClick={() => toggleMax(win.id, bounds)}
             className="flex w-10 items-center justify-center text-foreground-secondary transition-colors hover:bg-black/10 dark:hover:bg-white/10"
             aria-label={win.maximized ? "Restaurar" : "Maximizar"}
             title={win.maximized ? "Restaurar" : "Maximizar"}
           >
             {win.maximized ? <Copy className="size-3" strokeWidth={2.5} /> : <Square className="size-3" strokeWidth={2.5} />}
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.88 }}
+            transition={{ duration: 0.12 }}
             onClick={() => close(win.id)}
             className="flex w-10 items-center justify-center text-foreground-secondary transition-colors hover:bg-danger hover:text-white"
             aria-label="Fechar"
             title="Fechar"
           >
             <X className="size-3.5" strokeWidth={2.5} />
-          </button>
+          </motion.button>
         </div>
       </div>
       </ContextMenuTrigger>
@@ -198,6 +232,6 @@ export function WindowFrame({
             onPointerCancel={endDrag}
           />
         ))}
-    </div>
+    </motion.div>
   );
 }

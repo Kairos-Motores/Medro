@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MotionConfig } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { LoginPage } from "@/pages/LoginPage";
 import { Desktop } from "@/components/desktop/Desktop";
@@ -17,8 +18,10 @@ export function App() {
   const welcome = useAuth((s) => s.welcome);
   return (
     <QueryClientProvider client={queryClient}>
-      {token ? <Desktop /> : <LoginPage />}
-      {token && welcome && <WelcomeOverlay />}
+      <MotionConfig reducedMotion="user">
+        {token ? <Desktop /> : <LoginPage />}
+        {token && welcome && <WelcomeOverlay />}
+      </MotionConfig>
     </QueryClientProvider>
   );
 }

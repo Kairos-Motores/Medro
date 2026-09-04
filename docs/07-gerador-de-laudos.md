@@ -1,12 +1,14 @@
 # 07 — Gerador de Laudos (módulo `laudos-gen`)
 
-> **Handoff para o próximo chat.** Documento vivo. Última atualização: 2026-09-03
+> **Handoff para o próximo chat.** Documento vivo. Última atualização: 2026-09-04
 > (17 editores + prévia tempo real + IA FUNCIONANDO + fotos SharePoint corrigidas §7.1
 > + primitivos de UI Medro + shell — §5 **+ §11 Fases A, B e C do construtor de
 > modelos PRONTAS**: gerenciador `ModelosManager` (§11.7), construtor `ModeloBuilder`
 > (§11.7), bloco `ai-text` por IA + upload de capa própria (§11.8)
 > **+ §12: shell do sistema — MenuBar customizável, transição de boas-vindas + som,
-> e o sistema de Widgets (Fases 1 e 2 + widgets de mais módulos)**).
+> o sistema de Widgets (Fases 1 e 2 + widgets de mais módulos), e §12.9 passe de
+> animação "feel de SO" (framer-motion no shell: pop de janela, lupa do dock, stagger
+> do launchpad/taskview, widgets)**).
 > **➡️ Existe agora um `README.md` técnico na raiz descrevendo o app inteiro — ler primeiro.**
 > **➡️ PRÓXIMOS PASSOS abertos:** (laudos) validar num deploy Render — upload SharePoint §7.1
 > + `PUBLIC_API_URL` da capa §11.8; designer de tabela avançado §11.4-3 (se pedirem).
@@ -893,3 +895,54 @@ deseleciona; loja rola até o último grupo; menu de contexto do desktop e dos w
   adiado pelo usuário ("futuramente remodelaremos").
 - **MenuBar vertical + janelas** — testado, mas revisar `tile()` / bounds quando a barra está
   numa borda lateral com janelas abertas.
+
+### 12.9 Passe de animação — "feel de SO" (rodada 2026-09-04)
+
+Objetivo do usuário: *"quero que tudo no Medro seja fluido, como um SO mesmo"* — aberturas,
+fechamentos, drag & drop, hover. Abordagem **híbrida** (escolha do usuário): `framer-motion`
+(`^12`, já usado no `report-print`) só na **orquestração do shell**; o resto segue
+CSS/Tailwind + `tailwindcss-animate` (Radix já anima menus/sheets/popovers).
+
+- **`lib/motion.ts`** (novo) — vocabulário de movimento compartilhado: molas `SPRING` /
+  `SPRING_SNAPPY` / `SPRING_SOFT`, `EASE_OUT`, e `variants` prontos (`overlayFade`,
+  `overlayPanel`, `gridContainer`/`gridItem` p/ stagger, `itemPop`, `tapScale`). Use estes
+  em vez de números soltos — o shell inteiro precisa ter a mesma física.
+- **`app/App.tsx`** — árvore embrulhada em `<MotionConfig reducedMotion="user">`: respeita
+  `prefers-reduced-motion` globalmente (os keyframes CSS já respeitavam).
+- **`WindowFrame.tsx`** — raiz virou `motion.div`. Abre com "pop" (mola, `scale/opacity/y`,
+  `transformOrigin: 50% 0`); sai por fade+encolhe (fechar) **ou** "suga" pra baixo na direção
+  do dock (minimizar) — variante `exit` funcional via `custom={win.minimized}`.
+  `left/top/width/height` continuam em `style` + transição CSS (re-tiling) — framer só cuida
+  do enter/exit (transform+opacity), sem animar layout. Botões de título com `whileHover`/
+  `whileTap`.
+- **`Desktop.tsx`** — lista de janelas dentro de `<AnimatePresence>` (dispara o `exit`).
+  No mobile, o módulo ativo entra deslizando (`spring`).
+- **`Dock.tsx`** — **lupa estilo macOS**: `DockMagnet` (forwardRef, p/ o `ContextMenuTrigger
+  asChild`) mede o próprio centro e usa `useTransform`/`useSpring` sobre um `mouseX`
+  compartilhado → ícones crescem/sobem conforme o cursor se aproxima (`MAG_RANGE` 110px,
+  `MAG_SCALE` 1.42). ⚠️ gotcha: `getBoundingClientRect` mede o elemento **já transformado**,
+  então o pico da onda pode "escorregar" ~1 ícone — visualmente ok num dock. Barra de recentes
+  em `<AnimatePresence mode="popLayout">` + `layout` → ícones deslizam ao alternar 3↔6.
+  ⚠️ 2º gotcha: o `motion.button` do `DockMagnet` deve espalhar `{...rest}` **antes** de
+  `style` (o `Slot` do Radix injeta `style` e sobrescrevia o `scale`/`y`).
+  Esconder/mostrar o dock virou mola. Spotlight com stagger nos resultados.
+- **`Launchpad.tsx` / `TaskView.tsx`** — `if (!x) return null` → `<AnimatePresence>` +
+  `motion.div` (overlay faz fade/blur, some com `exit`). Grade com `gridContainer`/`gridItem`
+  (stagger na entrada). Tiles com `whileHover`/`whileTap` (removido o `group-hover:scale` CSS).
+  Pasta aberta do Launchpad cresce do centro (`overlayPanel`). Cards do TaskView com `layout`
+  (reflui no `tile()`/fechar) + `AnimatePresence mode="popLayout"`.
+- **`WidgetLayer.tsx`** — cada widget num `motion.div`: entra com "pop" (`SPRING_SNAPPY`),
+  sai encolhendo (`<AnimatePresence>`), `scale 1.03` enquanto arrastado. A grade pontilhada
+  do modo grade faz fade in/out. Lógica de pointer-drag **intacta** (só o wrapper mudou).
+  `MobileWidgetStack` idem, com `layout` + stagger.
+- **`DesktopIcons.tsx`** — atalhos entram escalonados (`motion.div` como filho direto do
+  `<AnimatePresence>`; o `motion.button` interno só faz hover/tap), `whileHover`/`whileTap`.
+- **`components/ui/button.tsx`** — `active:scale-[0.97]` no primitivo compartilhado (feedback
+  tátil global; `disabled:active:scale-100`).
+- **Bundle**: `pnpm --filter @medro/web build` de ~1,16 MB → ~1,44 MB (framer-motion, ~80 KB
+  gzip). Typecheck + build limpos. Verificado no browser: pop de janela, minimizar/restaurar,
+  fechar (exit), lupa do dock (medida via JS: 1.0 → 1.41 no centro, falloff nos vizinhos),
+  launchpad, drag de widget com snap.
+- **Ainda não animado** (de propósito, p/ conter risco): `WelcomeOverlay` (já é todo
+  keyframes CSS caprichados — deixado como está), `MenuBar` show/hide lateral, transições de
+  conteúdo **dentro** dos módulos (cada app cuida do seu; o shell não impõe).
