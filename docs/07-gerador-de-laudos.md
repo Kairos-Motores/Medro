@@ -8,7 +8,9 @@
 > **+ §12: shell do sistema — MenuBar customizável, transição de boas-vindas + som,
 > o sistema de Widgets (Fases 1 e 2 + widgets de mais módulos), e §12.9 passe de
 > animação "feel de SO" (framer-motion no shell: pop de janela, lupa do dock, stagger
-> do launchpad/taskview, widgets)**).
+> do launchpad/taskview, widgets)
+> + §13: módulo Terceirizados portado do PowerApps (serviços externos por OS —
+> pendentes de retorno / histórico / registrar retorno + KPIs + widget)**).
 > **➡️ Existe agora um `README.md` técnico na raiz descrevendo o app inteiro — ler primeiro.**
 > **➡️ PRÓXIMOS PASSOS abertos:** (laudos) validar num deploy Render — upload SharePoint §7.1
 > + `PUBLIC_API_URL` da capa §11.8; designer de tabela avançado §11.4-3 (se pedirem).
@@ -946,3 +948,78 @@ CSS/Tailwind + `tailwindcss-animate` (Radix já anima menus/sheets/popovers).
 - **Ainda não animado** (de propósito, p/ conter risco): `WelcomeOverlay` (já é todo
   keyframes CSS caprichados — deixado como está), `MenuBar` show/hide lateral, transições de
   conteúdo **dentro** dos módulos (cada app cuida do seu; o shell não impõe).
+
+---
+
+## 13. Módulo Terceirizados (`terceirizados`) — porte do PowerApps (rodada 2026-09-04)
+
+Porte do módulo **Serviços Externos / Terceirizados** do app original. Análise em
+`docs/00 §Serviços Externos`, `docs/01 §servicosterceirizados`, `docs/02 §ControleTerceirizado
+/ NovoRegistroTerceir / PendentesdeRetorno / AtualizacaoPendentes / HistoricoPendentes /
+HistoricoTerceir`, fonte `.pa.yaml` em `extracted/.../Src/`. Segue **o mesmo padrão da
+Caldeiraria** (service Dataverse + rota Fastify + hooks RQ + App + modais + fallback mock).
+
+### 13.1 Regra de negócio (do app original)
+- Um registro em `cr4a1_servicosterceirizados` = **uma peça enviada para serviço externo**
+  numa OS (usinagem, solda, jateamento, torneamento, retífica…).
+- **PENDENTE de retorno** = `IsBlank(Data_retorno) And IsBlank(xdataretorno)` — ainda não
+  voltou do fornecedor.
+- **HISTÓRICO** = já tem data de retorno.
+- Tudo filtrado por **`Unidade` = filial do usuário** (no PowerApps, `varfilial`); busca por
+  `N_OR` + `Título`; ordenação asc/desc por data de criação (o toggle `class`).
+- `NovoRegistroTerceir` cria; `AtualizacaoPendentes` edita e **registra o retorno** (data +
+  `ValorServ1..5` + `Total Valor` + `AvaliacaoRetorno/Descricao/Medida`); `Excluir` remove.
+
+### 13.2 Backend
+- **`services/dataverse/terceirizados.ts`** — `F_TERC` (map camelCase ⟷ coluna lógica),
+  `TerceirizadoDTO`, `listTerceirizados({filial,status,situacao,os,search,order,top})`,
+  `getTerceirizado`, `createTerceirizado`, `updateTerceirizado`, `removeTerceirizado`,
+  `getTerceirizadosKpis`. Option sets `Peça` (21) e `Situação` (Emergencial/Normal) mapeados
+  label↔int; `Empresa` é **texto** (`cr4a1_xempresa`, como o form original). Datas: lê a
+  coluna datetime `x…` com fallback pra coluna texto (`firstDate`). Fallback mock (offline).
+- **`routes/terceirizados.ts`** — `app.requireAccess("TER")` no router; `GET /terceirizados`,
+  `GET /terceirizados/kpis`, `GET /terceirizados/:id`, `POST /terceirizados`
+  (**gate extra `_TER_CAD`** só nessa rota), `PATCH /terceirizados/:id`, `DELETE …/:id`.
+- `server.ts` — `register(terceirizadosRoutes, { prefix: "/api" })`.
+
+### 13.3 Frontend (`apps/web/src/modules/terceirizados/`)
+- **`api.ts`** — tipos + hooks RQ (`useTerceirizados`, `useTerceirizadosKpis`,
+  `useCreateTerceirizado`, `useUpdateTerceirizado`, `useDeleteTerceirizado`) com fallback
+  local. Exporta `PECA_OPCOES` / `EMPRESA_SUGESTOES`.
+- **`TerceirizadosApp.tsx`** — cabeçalho (KPIs: pendentes / emergenciais / prazo vencido /
+  retornaram 7d + valor pendente), seletor de filial (auto = filial do usuário / Todas /
+  específica), abas **Pendentes de retorno** | **Histórico**, busca, toggle de ordem, lista de
+  cards animada (`AnimatePresence` + `SPRING_SNAPPY`). Card → `DetalheModal`.
+- **`components/NovoRegistroModal.tsx`** — form de criação (OS, N° OR, Peça, Situação,
+  Fornecedor c/ `datalist`, Unidade, Carcaça, Fabricante, Previsão de retorno, até 5 serviços,
+  Observação). Só aparece o botão "Novo registro" com `_TER_CAD`.
+- **`components/DetalheModal.tsx`** — edição + **"Registrar retorno"** (grava `dataRetorno =
+  agora` → sai de pendentes), valores por serviço + total (com "usar soma"), avaliação do
+  retorno, "Reabrir" (volta pra pendentes), "Excluir" (confirmação inline).
+- **`ModuleHost.tsx`** — `if (moduleId === "terceirizados") return <TerceirizadosApp />`
+  (a trava de `MODULES[].access` = `["TER"]` já é aplicada antes).
+- **`registry.ts`** — a entrada já existia; ganhou `ready: true` → aparece no Dock/Launchpad.
+- **Widget** `terceirizados-pendentes` (`widgets/widgets/TerceirizadosWidget.tsx` + id no
+  `types.ts` + `registry.tsx`): pendentes / emergenciais / prazo vencido / retorno-7d, com
+  `ConfigForm` de filial. `access: ["TER"]`.
+
+### 13.4 Verificado no browser (api + web rodando, Dataverse real)
+- `GET /api/terceirizados?status=pendentes&filial=Todas` → 200, **348 registros reais**
+  (Aveiro/PT incluído com `filial=Todas`; a filial do usuário filtra corretamente).
+- Módulo abre pelo Launchpad, filtra por "São Luís" (343 pendentes), abas Pendentes/Histórico
+  trocam a query (`not (semRetorno)`), cards mostram OS/OR/peça/serviço/fornecedor/datas
+  (previsão vencida em cor de alerta). `DetalheModal` abre com os dados reais pré-preenchidos.
+  Botão "Novo registro" oculto p/ `douglasnou` (tem `TER`, não tem `_TER_CAD`) — RBAC ok.
+- `pnpm --filter @medro/api build` e `@medro/web build` limpos.
+
+### 13.5 Pendências / notas
+1. **`AtualizacaoPendentes` do original tem `cr4a1_empresa` (choice)** além do `xempresa`
+   (texto); portei só o texto (é o que o `NovoRegistroTerceir` grava). Se precisarem do
+   choice, o `toDTO` já lê o `FormattedValue` de `cr4a1_empresa` como fallback.
+2. **Serviços Externos PT / Aveiro** (`ServiçosExternos`, `HIstóricoServAVR`,
+   `ServiçosExternosPortugal`, `ServiExternosAveiro`) **não** portados — é o fluxo AVR à parte
+   (o registry original só ligava `ControleTerceirizado` + `NovoRegistroTerceir`).
+3. KPI "prazo vencido" ≈ "pendentes" nos dados reais (backlog grande de serviços externos
+   antigos com previsão no passado) — é a realidade, não bug.
+4. Criar/editar não testado no browser (usuário dev sem `_TER_CAD`); lógica espelha a
+   Caldeiraria (testada) + fallback local exercitado.

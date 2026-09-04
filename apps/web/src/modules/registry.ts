@@ -140,7 +140,7 @@ export const MODULES: ModuleDef[] = [
   { id: "caldeiraria", label: "Usinagem e Caldeiraria", short: "Usinagem & Cald.", desc: "Controle, recuperação, usinagem e fabricação de peças mecânicas", icon: Flame, path: "/caldeiraria", access: ["CAL"], accent: "amber", ready: true },
   { id: "balanceamento", label: "Balanceamento", short: "Balanc.", desc: "Balanceamento dinâmico de rotores", icon: Orbit, path: "/balanceamento", accent: "slate" },
   { id: "ferramentaria", label: "Ferramentaria", short: "Ferram.", desc: "Gestão global de ferramentas, cautelas, calibrações RBC e rastreamento multiunidades", icon: Hammer, path: "/ferramentaria", access: ["FER"], accent: "slate", ready: true },
-  { id: "terceirizados", label: "Terceirizados", short: "Terceir.", desc: "Serviços externos e pendências", icon: Users, path: "/terceirizados", access: ["TER"], accent: "indigo" },
+  { id: "terceirizados", label: "Terceirizados", short: "Terceir.", desc: "Serviços externos por OS — envio, pendências de retorno e histórico", icon: Users, path: "/terceirizados", access: ["TER"], accent: "indigo", ready: true },
   { id: "tarefas", label: "Tarefas", short: "Tarefas", desc: "Tarefas operacionais e QR", icon: FlaskConical, path: "/tarefas", accent: "slate" },
   { id: "ssma", label: "SSMA", short: "SSMA", desc: "Saúde, Segurança e Meio Ambiente", icon: ShieldCheck, path: "/ssma", access: ["SSMA"], accent: "green" },
 ];

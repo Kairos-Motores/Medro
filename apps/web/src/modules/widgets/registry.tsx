@@ -8,6 +8,7 @@ import {
   Gauge,
   FileText,
   Flame,
+  Users,
 } from "lucide-react";
 import type { WidgetDef, WidgetId } from "./types";
 import { RelogioWidget } from "./widgets/RelogioWidget";
@@ -19,6 +20,7 @@ import { UltimosPdfsWidget } from "./widgets/UltimosPdfsWidget";
 import { LaudosResumoWidget } from "./widgets/LaudosResumoWidget";
 import { LaudosDptWidget } from "./widgets/LaudosDptWidget";
 import { CaldeirariaWidget, CaldeirariaConfig } from "./widgets/CaldeirariaWidget";
+import { TerceirizadosWidget, TerceirizadosConfig } from "./widgets/TerceirizadosWidget";
 
 export const WIDGETS: WidgetDef[] = [
   {
@@ -120,6 +122,18 @@ export const WIDGETS: WidgetDef[] = [
     defaultSize: "md",
     Component: CaldeirariaWidget,
     ConfigForm: CaldeirariaConfig,
+  },
+  {
+    id: "terceirizados-pendentes",
+    title: "Terceirizados",
+    desc: "Serviços externos aguardando retorno, emergenciais e prazo vencido.",
+    icon: Users,
+    module: "terceirizados",
+    access: ["TER"],
+    sizes: ["sm", "md", "wide"],
+    defaultSize: "md",
+    Component: TerceirizadosWidget,
+    ConfigForm: TerceirizadosConfig,
   },
 ];
 

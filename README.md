@@ -123,6 +123,7 @@ Registrados em `apps/web/src/modules/registry.ts`, roteados em `ModuleHost.tsx`.
 | **Gerador de Laudos** (`laudos-gen`) | ✅ 17 editores, prévia em tempo real, IA no diagnóstico, fotos SharePoint, PDF A4, **construtor visual de modelos** (§11 do doc 07) | `routes/laudosGen.ts`, `services/laudosGen/*`, + `report-print` + `pdf-worker` |
 | **Dep. Técnico** (`dpt-laudos`) | ✅ laudos técnicos, links, QR | `routes/laudos.ts`, `services/dataverse/laudos.ts`, `services/flows/dpt.ts` |
 | **Usinagem e Caldeiraria** | ✅ itens, peças, KPIs | `routes/caldeiraria.ts`, `services/dataverse/caldeiraria.ts` |
+| **Terceirizados** (`terceirizados`) | ✅ serviços externos por OS — pendentes de retorno / histórico, novo registro, registrar retorno + valores + avaliação, KPIs, widget | `routes/terceirizados.ts`, `services/dataverse/terceirizados.ts` (`cr4a1_servicosterceirizados`) |
 | **Migração** | ✅ painel de monitoramento (dados mock em memória) | `routes/migracao.ts` |
 | Ensaios · Qualidade · Ferramentaria · Almoxarifado · Bobinagem · Planejamento · … | stub / parcial | — |
 

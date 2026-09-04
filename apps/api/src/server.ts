@@ -10,6 +10,7 @@ import { laudosRoutes } from "./routes/laudos.js";
 import { laudosGenRoutes } from "./routes/laudosGen.js";
 import { medroProRoutes } from "./routes/medroPro.js";
 import { caldeirariaRoutes } from "./routes/caldeiraria.js";
+import { terceirizadosRoutes } from "./routes/terceirizados.js";
 import { usuariosRoutes } from "./routes/usuarios.js";
 import { migracaoRoutes } from "./routes/migracao.js";
 import { runnersRoutes } from "./routes/runners.js";
@@ -35,6 +36,7 @@ export function buildServer() {
   app.register(laudosGenRoutes, { prefix: "/api" });
   app.register(medroProRoutes, { prefix: "/api" });
   app.register(caldeirariaRoutes, { prefix: "/api" });
+  app.register(terceirizadosRoutes, { prefix: "/api" });
   app.register(usuariosRoutes, { prefix: "/api" });
   app.register(migracaoRoutes, { prefix: "/api" });
   app.register(runnersRoutes, { prefix: "/api" });

@@ -11,7 +11,8 @@ export type WidgetId =
   | "ultimos-pdfs"
   | "laudos-resumo"
   | "laudos-dpt"
-  | "caldeiraria-kpis";
+  | "caldeiraria-kpis"
+  | "terceirizados-pendentes";
 
 /** tamanhos em CÉLULAS da grade (ver GRID em WidgetLayer). */
 export type WidgetSize = "sm" | "md" | "lg" | "wide";

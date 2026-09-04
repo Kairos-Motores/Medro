@@ -16,6 +16,7 @@ import { RascunhosFolder } from "./laudos-gen/RascunhosFolder";
 import { ModelosManager } from "./laudos-gen/ModelosManager";
 import { ModeloBuilder } from "./laudos-gen/ModeloBuilder";
 import { UsinagemCaldeirariaApp } from "./caldeiraria/UsinagemCaldeirariaApp";
+import { TerceirizadosApp } from "./terceirizados/TerceirizadosApp";
 import { MigracaoApp } from "./migracao/MigracaoApp";
 
 /** Roteia o conteúdo de uma janela para o app do módulo. */
@@ -74,6 +75,7 @@ export function ModuleHost({
   if (moduleId === "almoxarifado") return <AlmoxarifadoApp />;
   if (moduleId === "ferramentaria") return <FerramentariaApp />;
   if (moduleId === "caldeiraria") return <UsinagemCaldeirariaApp />;
+  if (moduleId === "terceirizados") return <TerceirizadosApp />;
   return <StubWindow moduleId={moduleId} />;
 }
 
