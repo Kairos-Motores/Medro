@@ -1,9 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useClock } from "@/lib/useClock";
+import { playStartupChime } from "@/lib/startupChime";
 
-const HOLD_MS = 1500; // tempo visível antes de começar a sair
-const LEAVE_MS = 460; // deve casar com welcome-overlay-out no index.css
+/** duração de cada etapa (ms) */
+const T = {
+  brandOut: 2500, // a assinatura "Medro" começa a se dissolver
+  brandEnd: 3000, // troca para a saudação
+  welcomeHold: 2100, // saudação parada antes de sair
+};
+const LEAVE_MS = 560; // casa com welcome-overlay-out no index.css
 
 /** saudação por faixa do dia */
 function greeting(d: Date): string {
@@ -18,38 +24,53 @@ function firstName(nome: string | undefined | null): string {
   return n || "de volta";
 }
 
+const GLOW =
+  "radial-gradient(closest-side, rgb(var(--primary) / 0.55), rgb(var(--primary) / 0.14) 55%, transparent 72%)";
+
+type Phase = "brand" | "welcome" | "leaving";
+
 /**
- * Cortina de boas-vindas entre o login e a área de trabalho. Aparece só depois
- * de um login nesta aba (flag `welcome` em `useAuth`, não persistida) e se
- * dissolve sozinha. A `Desktop` já monta atrás — a cortina é só visual.
+ * Cortina entre o login e a área de trabalho, em duas etapas:
+ *  1. assinatura "Medro" (~3 s) — com o som de abertura do sistema;
+ *  2. saudação + nome do usuário — que então se dissolve.
+ * Aparece só após um login nesta aba (flag `welcome` em `useAuth`, não
+ * persistida). A `Desktop` já monta atrás; a cortina é só visual.
  */
 export function WelcomeOverlay() {
   const user = useAuth((s) => s.user);
   const dismiss = useAuth((s) => s.dismissWelcome);
   const { now } = useClock();
-  const [leaving, setLeaving] = useState(false);
+  const [phase, setPhase] = useState<Phase>("brand");
+  const [brandOut, setBrandOut] = useState(false);
   const startRef = useRef(Date.now());
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const hold = reduce ? 500 : HOLD_MS;
-    const leave = reduce ? 1 : LEAVE_MS;
-    const t1 = setTimeout(() => setLeaving(true), hold);
-    const t2 = setTimeout(dismiss, hold + leave);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
+    playStartupChime();
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    const at = (fn: () => void, ms: number) => timers.current.push(setTimeout(fn, ms));
+
+    if (reduce) {
+      at(() => setPhase("welcome"), 650);
+      at(() => setPhase("leaving"), 1450);
+      at(dismiss, 1500);
+    } else {
+      at(() => setBrandOut(true), T.brandOut);
+      at(() => setPhase("welcome"), T.brandEnd);
+      at(() => setPhase("leaving"), T.brandEnd + T.welcomeHold);
+      at(dismiss, T.brandEnd + T.welcomeHold + LEAVE_MS);
+    }
+    return () => timers.current.forEach(clearTimeout);
   }, [dismiss]);
 
-  // fecha na hora se o usuário clicar / apertar tecla
+  // pular tudo no clique / tecla (ignora o clique que veio do próprio login)
   useEffect(() => {
     const skip = () => {
-      if (Date.now() - startRef.current < 220) return; // ignora o clique que veio do login
-      setLeaving(true);
-      setTimeout(dismiss, LEAVE_MS);
+      if (Date.now() - startRef.current < 320) return;
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
+      setPhase("leaving");
+      timers.current.push(setTimeout(dismiss, LEAVE_MS));
     };
     window.addEventListener("keydown", skip);
     window.addEventListener("pointerdown", skip);
@@ -62,29 +83,55 @@ export function WelcomeOverlay() {
   return (
     <div
       className="welcome-overlay fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-elevated-dark text-white"
-      data-leaving={leaving}
+      data-leaving={phase === "leaving"}
       role="status"
       aria-live="polite"
     >
-      {/* brilho suave na paleta primária */}
-      <div
-        className="welcome-glow pointer-events-none absolute size-[52vmax] rounded-full"
-        style={{
-          background:
-            "radial-gradient(closest-side, rgb(var(--primary) / 0.55), rgb(var(--primary) / 0.14) 55%, transparent 72%)",
-        }}
-      />
-      <div className="relative flex flex-col items-center gap-2 px-6 text-center">
-        <p className="welcome-title text-[13px] font-medium uppercase tracking-[0.22em] text-white/55">
-          {greeting(now)}
-        </p>
-        <h1 className="welcome-name text-4xl font-semibold tracking-tight sm:text-5xl">
-          {firstName(user?.nome)}
-        </h1>
-        <p className="welcome-title mt-1 text-[12.5px] text-white/45">
-          {user?.filial ? `Medro · ${user.filial}` : "Medro"}
-        </p>
-      </div>
+      {phase === "brand" ? (
+        <>
+          <div
+            className="brand-glow pointer-events-none absolute size-[56vmax] rounded-full"
+            style={{ background: GLOW }}
+          />
+          <div className="relative flex flex-col items-center text-center">
+            <h1
+              className="brand-mark text-5xl font-semibold tracking-tight sm:text-6xl"
+              data-out={brandOut}
+            >
+              Medro
+            </h1>
+            <span
+              className="brand-rule mt-3 block h-px bg-white/30"
+              data-out={brandOut}
+              aria-hidden
+            />
+            <p
+              className="brand-sub mt-3 text-[11.5px] font-medium uppercase tracking-[0.28em] text-white/45"
+              data-out={brandOut}
+            >
+              Kairós Motores
+            </p>
+          </div>
+        </>
+      ) : (
+        <>
+          <div
+            className="welcome-glow pointer-events-none absolute size-[52vmax] rounded-full"
+            style={{ background: GLOW }}
+          />
+          <div className="relative flex flex-col items-center gap-2 px-6 text-center">
+            <p className="welcome-title text-[13px] font-medium uppercase tracking-[0.22em] text-white/55">
+              {greeting(now)}
+            </p>
+            <h1 className="welcome-name text-4xl font-semibold tracking-tight sm:text-5xl">
+              {firstName(user?.nome)}
+            </h1>
+            <p className="welcome-title mt-1 text-[12.5px] text-white/45">
+              {user?.filial ? `Medro · ${user.filial}` : "Medro"}
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }

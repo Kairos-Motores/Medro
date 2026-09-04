@@ -114,12 +114,77 @@
     }
   }
 
-  /* transição de boas-vindas (login → sistema) */
+  /* transição de boas-vindas (login → sistema) — 2 fases: marca "Medro" e saudação */
   .welcome-overlay {
-    animation: welcome-overlay-in 320ms var(--ease) both;
+    animation: welcome-overlay-in 360ms var(--ease) both;
   }
   .welcome-overlay[data-leaving="true"] {
-    animation: welcome-overlay-out 460ms var(--ease) forwards;
+    animation: welcome-overlay-out 560ms var(--ease) forwards;
+  }
+
+  /* fase 1 — assinatura "Medro" */
+  .brand-mark {
+    animation: brand-in 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .brand-mark[data-out="true"] {
+    animation: brand-out 520ms var(--ease) forwards;
+  }
+  .brand-sub {
+    animation: brand-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both;
+  }
+  .brand-sub[data-out="true"] {
+    animation: brand-out 460ms var(--ease) forwards;
+  }
+  .brand-rule {
+    animation: brand-rule 2200ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both;
+  }
+  .brand-rule[data-out="true"] {
+    animation: brand-out 420ms var(--ease) forwards;
+  }
+  .brand-glow {
+    animation: welcome-glow 3s ease-in-out both;
+  }
+  @keyframes brand-rule {
+    from {
+      width: 0;
+      opacity: 0;
+    }
+    30% {
+      opacity: 1;
+    }
+    to {
+      width: 168px;
+      opacity: 1;
+    }
+  }
+  @keyframes brand-in {
+    from {
+      opacity: 0;
+      letter-spacing: 0.5em;
+      filter: blur(14px);
+      transform: scale(0.94);
+    }
+    55% {
+      opacity: 1;
+    }
+    to {
+      opacity: 1;
+      letter-spacing: 0.02em;
+      filter: blur(0);
+      transform: scale(1);
+    }
+  }
+  @keyframes brand-out {
+    from {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      filter: blur(12px);
+      transform: scale(1.07);
+    }
   }
   .welcome-title {
     animation: welcome-rise 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -182,7 +247,14 @@
     .welcome-overlay[data-leaving="true"],
     .welcome-title,
     .welcome-name,
-    .welcome-glow {
+    .welcome-glow,
+    .brand-mark,
+    .brand-mark[data-out="true"],
+    .brand-sub,
+    .brand-sub[data-out="true"],
+    .brand-rule,
+    .brand-rule[data-out="true"],
+    .brand-glow {
       animation-duration: 1ms;
     }
   }
