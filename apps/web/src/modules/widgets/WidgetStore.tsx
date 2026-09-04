@@ -51,14 +51,14 @@ export function WidgetStore() {
 
   return (
     <div
-      className="fixed inset-0 z-[55] flex flex-col bg-black/45 backdrop-blur-md"
+      className="fixed inset-0 z-[55] flex flex-col items-center bg-black/45 px-6 py-10 backdrop-blur-md"
       onClick={() => setStoreOpen(false)}
     >
       <div
-        className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-10"
+        className="flex min-h-0 w-full max-w-3xl flex-1 flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-4 flex items-center gap-3">
+        <div className="mb-4 flex shrink-0 items-center gap-3">
           <h2 className="text-[17px] font-semibold text-white">Widgets</h2>
           <div className="ml-2 flex items-center gap-1 rounded-lg bg-white/10 p-0.5 text-[11px]">
             <button
@@ -97,7 +97,7 @@ export function WidgetStore() {
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto pr-1">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto pb-4 pr-1">
           {groups.length === 0 && (
             <p className="py-10 text-center text-[13px] text-white/60">Nenhum widget encontrado.</p>
           )}

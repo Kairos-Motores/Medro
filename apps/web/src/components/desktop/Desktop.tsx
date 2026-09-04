@@ -40,6 +40,7 @@ import { WidgetLayer, MobileWidgetStack } from "@/modules/widgets/WidgetLayer";
 import { WidgetStore } from "@/modules/widgets/WidgetStore";
 import { api } from "@/lib/api";
 import type { UserSession } from "@medro/shared";
+import type { WidgetId, WidgetSize } from "@/modules/widgets/types";
 
 /** Ambiente de janelas macOS com papel de parede adaptativo, dock dinâmico e auto-ocultação inteligente. */
 export function Desktop() {
@@ -47,14 +48,29 @@ export function Desktop() {
   const { windows, activeId, close, setBounds: setStoreBounds, open, tile, setTaskView, setLaunchpad } =
     useWM();
   const canDpt = useAuth((s) => s.can("DPT"));
+  const canCal = useAuth((s) => s.can("CAL"));
+  const hasUser = useAuth((s) => !!s.user);
   const barPosition = useMenuBarPrefs((s) => s.position);
   const barAutohide = useMenuBarPrefs((s) => s.autohide);
   const widgetMode = useWidgets((s) => s.mode);
   const setWidgetMode = useWidgets((s) => s.setMode);
   const setWidgetStore = useWidgets((s) => s.setStoreOpen);
+  const seedWidgets = useWidgets((s) => s.seedDefaults);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState<WinRect>({ x: 0, y: 0, w: 1200, h: 700 });
   const [dockManualShow, setDockManualShow] = useState(false);
+
+  // Tela inicial de widgets padrão — só na 1ª vez neste navegador e se vazia.
+  useEffect(() => {
+    if (!hasUser) return;
+    const picks: { widgetId: WidgetId; size: WidgetSize }[] = [
+      { widgetId: "relogio", size: "md" },
+      { widgetId: "farol-os", size: "md" },
+    ];
+    if (canDpt) picks.push({ widgetId: "laudos-andamento", size: "md" });
+    if (canCal) picks.push({ widgetId: "caldeiraria-kpis", size: "md" });
+    seedWidgets(picks);
+  }, [hasUser, canDpt, canCal, seedWidgets]);
 
   // Sincroniza sessão do usuário com o Dataverse no carregamento
   useEffect(() => {

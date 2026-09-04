@@ -30,6 +30,8 @@ interface WidgetsState {
   mode: WidgetLayoutMode;
   items: PlacedWidget[];
   storeOpen: boolean;
+  /** já semeou os widgets padrão neste navegador? */
+  seeded: boolean;
 
   setMode: (m: WidgetLayoutMode) => void;
   setStoreOpen: (v: boolean) => void;
@@ -40,6 +42,8 @@ interface WidgetsState {
   moveGrid: (instanceId: string, gx: number, gy: number) => void;
   moveFree: (instanceId: string, fx: number, fy: number) => void;
   setConfig: (instanceId: string, patch: Record<string, unknown>) => void;
+  /** semeia uma vez, só se a tela ainda estiver vazia */
+  seedDefaults: (picks: { widgetId: WidgetId; size: WidgetSize }[]) => void;
   reset: () => void;
 }
 
@@ -66,6 +70,7 @@ export const useWidgets = create<WidgetsState>()(
       mode: "grid",
       items: [],
       storeOpen: false,
+      seeded: false,
 
       // ao trocar de modo, converte as posições para não empilhar os widgets
       setMode: (mode) =>
@@ -135,6 +140,13 @@ export const useWidgets = create<WidgetsState>()(
             it.instanceId === instanceId ? { ...it, config: { ...it.config, ...patch } } : it,
           ),
         })),
+
+      seedDefaults: (picks) => {
+        if (get().seeded) return;
+        set({ seeded: true });
+        if (get().items.length > 0) return; // usuário já montou a tela
+        for (const p of picks) get().add(p.widgetId, p.size);
+      },
 
       reset: () => set({ items: [] }),
     }),
