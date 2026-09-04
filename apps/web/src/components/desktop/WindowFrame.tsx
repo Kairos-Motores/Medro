@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Minus, Square, Copy, X, LayoutGrid, AppWindow } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useWM, WIN_MIN, type MedroWindow, type WinRect } from "@/lib/wm";
@@ -36,6 +36,7 @@ export function WindowFrame({
 }) {
   const { focus, close, minimize, move, resize, toggleMax, tile, setTaskView, windows } = useWM();
   const drag = useRef<null | { px: number; py: number; r: WinRect; dir?: Dir }>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const canTile = windows.filter((w) => !w.minimized).length >= 2;
 
   function clampMove(x: number, y: number): [number, number] {
@@ -48,6 +49,7 @@ export function WindowFrame({
     focus(win.id);
     (e.target as Element).setPointerCapture(e.pointerId);
     drag.current = { px: e.clientX, py: e.clientY, r: { ...win.rect } };
+    setIsDragging(true);
   }
   function onTitleMove(e: React.PointerEvent) {
     if (!drag.current || drag.current.dir) return;
@@ -59,6 +61,7 @@ export function WindowFrame({
   function endDrag(e: React.PointerEvent) {
     if (drag.current) (e.target as Element).releasePointerCapture?.(e.pointerId);
     drag.current = null;
+    setIsDragging(false);
   }
 
   function onHandleDown(e: React.PointerEvent, dir: Dir) {
@@ -66,6 +69,7 @@ export function WindowFrame({
     focus(win.id);
     (e.target as Element).setPointerCapture(e.pointerId);
     drag.current = { px: e.clientX, py: e.clientY, r: { ...win.rect }, dir };
+    setIsDragging(true);
   }
   function onHandleMove(e: React.PointerEvent) {
     const d = drag.current;
@@ -101,11 +105,14 @@ export function WindowFrame({
   return (
     <div
       className={cn(
-        "absolute flex flex-col overflow-hidden rounded-lg border bg-surface",
+        "absolute flex flex-col overflow-hidden border bg-surface",
+        win.maximized ? "rounded-none border-transparent shadow-none" : "rounded-lg",
         focused
           ? "border-border-strong shadow-mac-2 ring-1 ring-primary/20"
           : "border-border shadow-mac-1",
-        drag.current ? "select-none" : "transition-[box-shadow] duration-150",
+        isDragging
+          ? "select-none transition-none"
+          : "transition-[left,top,width,height,box-shadow] duration-300 ease-out",
       )}
       style={{ left: win.rect.x, top: win.rect.y, width: win.rect.w, height: win.rect.h, zIndex: win.z }}
       onPointerDown={() => !focused && focus(win.id)}
@@ -121,6 +128,7 @@ export function WindowFrame({
         onPointerDown={onTitleDown}
         onPointerMove={onTitleMove}
         onPointerUp={endDrag}
+        onPointerCancel={endDrag}
         onDoubleClick={() => toggleMax(win.id, bounds)}
       >
         <span className="pointer-events-none flex flex-1 items-center truncate px-3 text-[12px] font-semibold text-foreground">
@@ -187,6 +195,7 @@ export function WindowFrame({
             onPointerDown={(e) => onHandleDown(e, h.dir)}
             onPointerMove={onHandleMove}
             onPointerUp={endDrag}
+            onPointerCancel={endDrag}
           />
         ))}
     </div>
