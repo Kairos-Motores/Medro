@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/lib/auth";
 import type { WinRect } from "@/lib/wm";
@@ -34,10 +34,11 @@ function useCanShow() {
   };
 }
 
-/** Tela inicial de widgets sobre a área útil do desktop. */
+/** Tela inicial de widgets — dentro de um container que rola na vertical. */
 export function WidgetLayer({ bounds }: { bounds: WinRect }) {
   const { mode, items, moveGrid, moveFree, resize } = useWidgets();
   const canShow = useCanShow();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const drag = useRef<null | {
     id: string;
@@ -53,30 +54,52 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
   const [movePv, setMovePv] = useState<{ id: string; x: number; y: number } | null>(null);
   const [sizePv, setSizePv] = useState<{ id: string; size: WidgetSize } | null>(null);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSelectedId(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   function baseXY(it: PlacedWidget) {
     return mode === "grid"
       ? { x: gridToPx(it.gx, "x"), y: gridToPx(it.gy, "y") }
       : { x: it.fx, y: it.fy };
   }
 
+  const posOf = (it: PlacedWidget) => (movePv?.id === it.instanceId ? movePv : baseXY(it));
+  const sizeOf = (it: PlacedWidget) => (sizePv?.id === it.instanceId ? sizePv.size : it.size);
+
+  // altura do conteúdo: cabe a área visível + o widget mais baixo (rola se passar)
+  const contentH = useMemo(() => {
+    let max = 0;
+    for (const it of items) {
+      const def = widgetById(it.widgetId);
+      if (!def || !canShow(def)) continue;
+      const { h } = sizePx(sizeOf(it));
+      max = Math.max(max, posOf(it).y + h);
+    }
+    return Math.max(bounds.h, max + 32);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, movePv, sizePv, mode, bounds.h]);
+
   function start(e: React.PointerEvent, it: PlacedWidget, def: WidgetDef, kind: "move" | "resize") {
     if (e.button !== 0) return;
     e.stopPropagation();
-    const cur = sizePv?.id === it.instanceId ? sizePv.size : it.size;
-    const { w, h } = sizePx(cur);
+    setSelectedId(it.instanceId);
+    const { w, h } = sizePx(sizeOf(it));
     const { x, y } = baseXY(it);
     (e.target as Element).setPointerCapture(e.pointerId);
     drag.current = { id: it.instanceId, kind, px: e.clientX, py: e.clientY, ox: x, oy: y, w, h, def };
     if (kind === "move") setMovePv({ id: it.instanceId, x, y });
-    else setSizePv({ id: it.instanceId, size: cur });
+    else setSizePv({ id: it.instanceId, size: it.size });
   }
 
   function onMove(e: React.PointerEvent) {
     const d = drag.current;
     if (!d) return;
     if (d.kind === "move") {
-      const nx = Math.max(0, Math.min(d.ox + (e.clientX - d.px), bounds.w - d.w));
-      const ny = Math.max(0, Math.min(d.oy + (e.clientY - d.py), bounds.h - d.h));
+      const nx = Math.max(0, Math.min(d.ox + (e.clientX - d.px), Math.max(0, bounds.w - d.w)));
+      const ny = Math.max(0, d.oy + (e.clientY - d.py));
       setMovePv({ id: d.id, x: nx, y: ny });
     } else {
       const tw = d.w + (e.clientX - d.px);
@@ -102,7 +125,13 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
   }
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[1]">
+    <div
+      className="relative w-full"
+      style={{ minHeight: contentH }}
+      onPointerDown={(e) => {
+        if (e.target === e.currentTarget) setSelectedId(null);
+      }}
+    >
       {drag.current && mode === "grid" && (
         <div
           className="absolute inset-0 opacity-60"
@@ -118,24 +147,28 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
       {items.map((it) => {
         const def = widgetById(it.widgetId);
         if (!def || !canShow(def)) return null;
-        const size = sizePv?.id === it.instanceId ? sizePv.size : it.size;
+        const size = sizeOf(it);
         const { w, h } = sizePx(size);
-        const pos = movePv?.id === it.instanceId ? movePv : baseXY(it);
+        const raw = posOf(it);
+        const left = Math.min(raw.x, Math.max(0, bounds.w - w));
         const busy = drag.current?.id === it.instanceId;
+        const selected = selectedId === it.instanceId;
         return (
           <div
             key={it.instanceId}
             className={cn(
-              "group/wl pointer-events-auto absolute",
+              "group/wl absolute",
               busy
-                ? "z-50 shadow-ios-2 transition-none"
+                ? "z-50 transition-none"
                 : "transition-[left,top,width,height] duration-150 ease-ios",
             )}
-            style={{ left: pos.x, top: pos.y, width: w, height: h }}
+            style={{ left, top: raw.y, width: w, height: h }}
+            onPointerDownCapture={() => setSelectedId(it.instanceId)}
           >
             <WidgetShell
               def={def}
               placed={{ ...it, size }}
+              selected={selected || busy}
               dragHandleProps={{
                 onPointerDown: (e) => start(e, it, def, "move"),
                 onPointerMove: onMove,
@@ -186,7 +219,7 @@ export function MobileWidgetStack() {
         const { h } = SIZE_CELLS[it.size];
         return (
           <div key={it.instanceId} style={{ minHeight: cellsToPx(Math.min(h, 3)) }}>
-            <WidgetShell def={def} placed={it}>
+            <WidgetShell def={def} placed={it} selected>
               <def.Component
                 size={it.size}
                 config={it.config}

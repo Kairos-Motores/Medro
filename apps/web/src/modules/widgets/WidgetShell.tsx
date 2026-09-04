@@ -44,11 +44,14 @@ export function WidgetShell({
   def,
   placed,
   dragHandleProps,
+  selected = false,
   children,
 }: {
   def: WidgetDef;
   placed: PlacedWidget;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  /** enquadra o widget (borda + fundo sólido); fora disso ele é transparente */
+  selected?: boolean;
   children: ReactNode;
 }) {
   const remove = useWidgets((s) => s.remove);
@@ -71,11 +74,20 @@ export function WidgetShell({
     >
       <ContextMenu>
         <ContextMenuTrigger asChild>
-          <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-ios-1">
+          <div
+            onContextMenu={(e) => e.stopPropagation()}
+            className={cn(
+              "flex h-full w-full flex-col overflow-hidden rounded-xl border transition-[background-color,border-color,box-shadow,backdrop-filter] duration-150",
+              selected
+                ? "border-border bg-surface shadow-ios-2"
+                : "border-transparent bg-transparent shadow-none backdrop-blur-[1px] [text-shadow:0_1px_2px_rgb(0_0_0/0.30)] hover:bg-surface/35 hover:backdrop-blur-sm",
+            )}
+          >
             <div
               {...dragHandleProps}
               className={cn(
-                "flex shrink-0 touch-none select-none items-center gap-1.5 border-b border-border/70 px-2.5 py-1.5",
+                "flex shrink-0 touch-none select-none items-center gap-1.5 border-b px-2.5 py-1.5 transition-colors",
+                selected ? "border-border/70" : "border-transparent",
                 dragHandleProps && "cursor-grab active:cursor-grabbing",
               )}
             >

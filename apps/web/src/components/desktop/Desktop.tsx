@@ -183,7 +183,9 @@ export function Desktop() {
         <DesktopIcons />
         <ContextMenu>
           <ContextMenuTrigger asChild>
-            <div className="absolute inset-0 z-0" aria-hidden />
+            <div className="absolute inset-0 z-0 overflow-x-hidden overflow-y-auto overscroll-contain">
+              <WidgetLayer bounds={bounds} />
+            </div>
           </ContextMenuTrigger>
           <ContextMenuContent>
             <ContextMenuItem onSelect={() => setLaunchpad(true)}>
@@ -233,7 +235,6 @@ export function Desktop() {
             )}
           </ContextMenuContent>
         </ContextMenu>
-        <WidgetLayer bounds={bounds} />
         {openWindows.map((w) => (
           <WindowFrame key={w.id} win={w} bounds={bounds} focused={w.id === topId}>
             <ModuleHost moduleId={w.moduleId} params={w.params} paramsNonce={w.paramsNonce} />
