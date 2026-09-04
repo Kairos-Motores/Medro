@@ -357,6 +357,13 @@ pnpm --filter @medro/web dev
   e a pasta de cliente nem sempre bate com `cr4a1_cliente_nome` ("PORTO" vs "VALE PORTO"). `listFotos`
   agora usa **Graph drive search `q='{osId}'`** (path fixo é só fallback) e agrupa por item.
   OS com fotos p/ testar: **`1515-PO`** (15 fotos) / `1516-PO`. `11539-AL` não tem fotos.
+- ✅ **Foto quebrada na prévia com rascunho antigo** (rodada 2026-09-04): rascunhos
+  salvos antes do commit `2f0c2b5` guardaram a `@microsoft.graph.downloadUrl` (expira
+  ~1 h) junto do `{id,nome}`. O lado Medro já ignora esse `url` e monta a `<img>` pelo
+  `id`; o `report-print` (`App.jsx` `fotoObj`) só regenerava quando **não** havia `url`,
+  então renderizava a URL morta. Agora `fotoObj` **sempre** reidrata pelo `id` (o `url`
+  salvo só serve de fallback quando não há `id`). ⚠️ a prévia serve o **build** do
+  `report-print` — rodar `pnpm --filter @medro/report-print build` para pegar o fix.
 
 ### 7.2 Segurança / go-live (constraints do usuário, ainda válidas)
 - `DATAVERSE_CLIENT_SECRET` foi colado no chat uma vez → **rotacionar antes do go-live**.

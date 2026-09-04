@@ -45,7 +45,11 @@ function fotoSrcFromId(id) {
 }
 function fotoObj(o) {
   if (!o || typeof o !== 'object') return o;
-  if (o.id && !o.url) return { ...o, url: fotoSrcFromId(o.id) };
+  // Sempre que houver `id`, reidrata a src pelo redirect do backend. Rascunhos
+  // antigos guardaram a downloadUrl do SharePoint (já expirada) junto do id — se
+  // confiássemos nesse `url` salvo, a <img> quebrava na prévia. O `url` salvo só
+  // vale como fallback quando não há `id` (ex.: upload local legado).
+  if (o.id) return { ...o, url: fotoSrcFromId(o.id) };
   return o;
 }
 function hydrateMotorSections(sections) {
