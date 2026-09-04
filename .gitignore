@@ -47,3 +47,6 @@ Peritagem/
 apps/api/data/
 .runners_state.json
 controle_carga_margens/
+
+# scratch local (sem efeito no build/deploy)
+.scratch/
