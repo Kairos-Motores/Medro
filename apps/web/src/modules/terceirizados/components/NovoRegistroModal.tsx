@@ -2,14 +2,10 @@ import { useState } from "react";
 import { X, Users, AlertCircle, Building2, Calendar, Wrench, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth";
 import { FILIAIS } from "@medro/shared";
-import {
-  useCreateTerceirizado,
-  PECA_OPCOES,
-  EMPRESA_SUGESTOES,
-  type CreateTerceirizadoInput,
-} from "../api";
+import { useCreateTerceirizado, PECA_OPCOES, type CreateTerceirizadoInput } from "../api";
 
 /** dd/MM/yyyy → ISO (meia-noite local). vazio → undefined. */
 function brToIso(s: string): string | undefined {
@@ -116,16 +112,13 @@ export function NovoRegistroModal({
               <Input value={nOr} onChange={(e) => setNOr(e.target.value)} placeholder="Ex.: OR-10233" className="h-9" />
             </Campo>
             <Campo label="Peça">
-              <select
-                value={peca}
-                onChange={(e) => setPeca(e.target.value)}
-                className="h-9 w-full rounded-md border border-border bg-surface-2 px-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent-indigo"
-              >
-                <option value="">Selecionar…</option>
+              <Select value={peca} onValueChange={setPeca} placeholder="Selecionar…" className="h-9">
                 {PECA_OPCOES.map((p) => (
-                  <option key={p} value={p} className="bg-surface">{p}</option>
+                  <SelectItem key={p} value={p}>
+                    {p}
+                  </SelectItem>
                 ))}
-              </select>
+              </Select>
             </Campo>
             <Campo label="Situação">
               <div className="grid grid-cols-2 gap-2">
@@ -149,28 +142,20 @@ export function NovoRegistroModal({
             </Campo>
             <Campo label="Fornecedor / empresa">
               <Input
-                list="terc-empresas"
                 value={empresa}
                 onChange={(e) => setEmpresa(e.target.value)}
                 placeholder="Ex.: Torneadora Ágape"
                 className="h-9"
               />
-              <datalist id="terc-empresas">
-                {EMPRESA_SUGESTOES.map((e) => (
-                  <option key={e} value={e} />
-                ))}
-              </datalist>
             </Campo>
             <Campo label={<span className="flex items-center gap-1"><Building2 className="size-3" /> Unidade</span>}>
-              <select
-                value={unidade}
-                onChange={(e) => setUnidade(e.target.value)}
-                className="h-9 w-full rounded-md border border-border bg-surface-2 px-2.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent-indigo"
-              >
+              <Select value={unidade} onValueChange={setUnidade} className="h-9" aria-label="Unidade">
                 {FILIAIS.map((f) => (
-                  <option key={f} value={f} className="bg-surface">{f}</option>
+                  <SelectItem key={f} value={f}>
+                    {f}
+                  </SelectItem>
                 ))}
-              </select>
+              </Select>
             </Campo>
             <Campo label="Carcaça">
               <Input value={carcaca} onChange={(e) => setCarcaca(e.target.value)} placeholder="Ex.: 355 M/L" className="h-9" />

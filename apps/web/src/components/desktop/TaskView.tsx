@@ -88,7 +88,7 @@ export function TaskView() {
                         layout
                         variants={gridItem}
                         exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.14 } }}
-                        whileHover={{ y: -4 }}
+                        whileHover={{ y: -2 }}
                         className={cn(
                           "group relative flex cursor-pointer flex-col overflow-hidden rounded-lg border bg-surface transition-colors",
                           w.minimized
@@ -112,7 +112,7 @@ export function TaskView() {
                           </div>
                           {!w.minimized && (
                             <motion.button
-                              whileTap={{ scale: 0.85 }}
+                              whileTap={{ scale: 0.92 }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 minimize(w.id);
@@ -124,7 +124,7 @@ export function TaskView() {
                             </motion.button>
                           )}
                           <motion.button
-                            whileTap={{ scale: 0.85 }}
+                            whileTap={{ scale: 0.92 }}
                             onClick={(e) => {
                               e.stopPropagation();
                               focus(w.id);
@@ -135,7 +135,7 @@ export function TaskView() {
                             <Maximize2 className="size-3.5" />
                           </motion.button>
                           <motion.button
-                            whileTap={{ scale: 0.85 }}
+                            whileTap={{ scale: 0.92 }}
                             onClick={(e) => {
                               e.stopPropagation();
                               close(w.id);

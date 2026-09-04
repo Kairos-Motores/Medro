@@ -25,14 +25,14 @@ const HANDLES: { dir: Dir; cls: string }[] = [
   { dir: "sw", cls: "bottom-0 left-0 size-2.5 cursor-nesw-resize" },
 ];
 
-/** abre com um "pop"; sai por fade+encolhe (fechar) ou suga pra baixo (minimizar). */
+/** abre com um leve "settle"; sai por fade discreto (fechar) ou desce um pouco (minimizar). */
 const frameVariants: Variants = {
-  initial: { opacity: 0, scale: 0.92, y: 10 },
+  initial: { opacity: 0, scale: 0.985, y: 6 },
   animate: { opacity: 1, scale: 1, y: 0, transition: SPRING },
   exit: (minimized: boolean) =>
     minimized
-      ? { opacity: 0, scale: 0.5, y: 140, transition: { duration: 0.24, ease: [0.4, 0, 1, 1] } }
-      : { opacity: 0, scale: 0.94, y: 8, transition: EASE_OUT },
+      ? { opacity: 0, scale: 0.9, y: 48, transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } }
+      : { opacity: 0, scale: 0.985, y: 6, transition: EASE_OUT },
 };
 
 export function WindowFrame({
@@ -161,9 +161,8 @@ export function WindowFrame({
         </span>
         <div className="flex items-stretch">
           <motion.button
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.88 }}
-            transition={{ duration: 0.12 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ duration: 0.1 }}
             onClick={() => minimize(win.id)}
             className="flex w-10 items-center justify-center text-foreground-secondary transition-colors hover:bg-black/10 dark:hover:bg-white/10"
             aria-label="Minimizar"
@@ -172,9 +171,8 @@ export function WindowFrame({
             <Minus className="size-3.5" strokeWidth={2.5} />
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.88 }}
-            transition={{ duration: 0.12 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ duration: 0.1 }}
             onClick={() => toggleMax(win.id, bounds)}
             className="flex w-10 items-center justify-center text-foreground-secondary transition-colors hover:bg-black/10 dark:hover:bg-white/10"
             aria-label={win.maximized ? "Restaurar" : "Maximizar"}
@@ -183,9 +181,8 @@ export function WindowFrame({
             {win.maximized ? <Copy className="size-3" strokeWidth={2.5} /> : <Square className="size-3" strokeWidth={2.5} />}
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.88 }}
-            transition={{ duration: 0.12 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ duration: 0.1 }}
             onClick={() => close(win.id)}
             className="flex w-10 items-center justify-center text-foreground-secondary transition-colors hover:bg-danger hover:text-white"
             aria-label="Fechar"

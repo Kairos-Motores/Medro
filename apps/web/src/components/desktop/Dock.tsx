@@ -24,10 +24,12 @@ import {
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
 
-/** distância (px) de influência da lupa do dock e escala máxima no centro. */
-const MAG_RANGE = 110;
-const MAG_SCALE = 1.42;
-const MAG_LIFT = -12;
+/** distância (px) de influência da lupa do dock e escala máxima no centro.
+ *  Deliberadamente discreto — realce, não circo. */
+const MAG_RANGE = 92;
+const MAG_SCALE = 1.16;
+const MAG_LIFT = -4;
+const MAG_SPRING = { stiffness: 260, damping: 28 } as const;
 
 /**
  * Ícone do dock com "lupa" estilo macOS: cresce e sobe conforme o cursor se
@@ -51,14 +53,14 @@ const DockMagnet = React.forwardRef<
     if (!b) return MAG_RANGE * 4;
     return x - (b.left + b.width / 2);
   });
-  const scale = useSpring(useTransform(dist, [-MAG_RANGE, 0, MAG_RANGE], [1, MAG_SCALE, 1]), {
-    stiffness: 380,
-    damping: 24,
-  });
-  const y = useSpring(useTransform(dist, [-MAG_RANGE, 0, MAG_RANGE], [0, MAG_LIFT, 0]), {
-    stiffness: 380,
-    damping: 24,
-  });
+  const scale = useSpring(
+    useTransform(dist, [-MAG_RANGE, 0, MAG_RANGE], [1, MAG_SCALE, 1]),
+    MAG_SPRING,
+  );
+  const y = useSpring(
+    useTransform(dist, [-MAG_RANGE, 0, MAG_RANGE], [0, MAG_LIFT, 0]),
+    MAG_SPRING,
+  );
 
   return (
     <motion.button
@@ -233,9 +235,9 @@ export function Dock({ hidden = false }: { hidden?: boolean }) {
                 <motion.div
                   key={m.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.4, y: 10 }}
+                  initial={{ opacity: 0, scale: 0.86, y: 6 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.4, y: 10 }}
+                  exit={{ opacity: 0, scale: 0.86, y: 6 }}
                   transition={SPRING_SNAPPY}
                 >
                   <ContextMenu>

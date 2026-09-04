@@ -255,8 +255,8 @@ function ModuleTile({
       variants={gridItem}
       disabled={!allowed}
       onClick={onClick}
-      whileHover={allowed ? { scale: 1.07 } : undefined}
-      whileTap={allowed ? { scale: 0.9 } : undefined}
+      whileHover={allowed ? { scale: 1.035 } : undefined}
+      whileTap={allowed ? { scale: 0.965 } : undefined}
       className="group flex w-24 flex-col items-center gap-2 disabled:opacity-40"
     >
       <span
@@ -302,8 +302,8 @@ function FolderTile({
         <motion.button
           variants={gridItem}
           onClick={onOpen}
-          whileHover={{ scale: 1.07 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.035 }}
+          whileTap={{ scale: 0.965 }}
           className="group flex w-24 flex-col items-center gap-2"
         >
           <span className="grid size-16 grid-cols-3 grid-rows-3 gap-[3px] rounded-2xl border border-white/20 bg-white/10 p-2 shadow-mac-2 backdrop-blur">

@@ -54,16 +54,16 @@ export function DesktopIcons() {
           <motion.div
             key={sc.id}
             layout
-            initial={{ opacity: 0, scale: 0.5, x: -12 }}
+            initial={{ opacity: 0, scale: 0.92, x: -6 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.14 } }}
-            transition={{ ...SPRING_SNAPPY, delay: i * 0.04 }}
+            exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
+            transition={{ ...SPRING_SNAPPY, delay: i * 0.03 }}
           >
             <ContextMenu>
               <ContextMenuTrigger asChild>
                 <motion.button
-                  whileHover={{ scale: 1.06 }}
-                  whileTap={{ scale: 0.94 }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   onDoubleClick={() => abrir(sc)}
                   className="pointer-events-auto flex w-[86px] flex-col items-center gap-1 rounded-lg px-1.5 py-2 text-center outline-none transition-colors hover:bg-white/40 focus-visible:bg-white/40 dark:hover:bg-white/10 dark:focus-visible:bg-white/10"
                   title={`${sc.label} — dois cliques para abrir`}

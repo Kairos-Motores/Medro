@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth";
 import { FILIAIS } from "@medro/shared";
 import { cn } from "@/lib/cn";
@@ -87,19 +88,23 @@ export function TerceirizadosApp() {
             </p>
           </div>
 
-          <label className="flex items-center gap-2 rounded-md border border-border bg-surface-2 px-2.5 py-1.5 text-[12px]">
+          <div className="flex items-center gap-1.5">
             <Building2 className="size-3.5 text-accent-indigo" />
-            <select
+            <Select
               value={filial}
-              onChange={(e) => setFilial(e.target.value)}
-              className="bg-transparent text-foreground focus:outline-none"
+              onValueChange={setFilial}
+              size="sm"
+              className="w-40"
+              aria-label="Filial"
             >
-              <option value="Todas" className="bg-surface">Todas as filiais</option>
+              <SelectItem value="Todas">Todas as filiais</SelectItem>
               {FILIAIS.map((f) => (
-                <option key={f} value={f} className="bg-surface">{f}</option>
+                <SelectItem key={f} value={f}>
+                  {f}
+                </SelectItem>
               ))}
-            </select>
-          </label>
+            </Select>
+          </div>
 
           <Button
             variant="neutral"
@@ -206,11 +211,11 @@ export function TerceirizadosApp() {
                 <motion.button
                   key={it.id}
                   layout
-                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.14 } }}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, transition: { duration: 0.12 } }}
                   transition={SPRING_SNAPPY}
-                  whileHover={{ y: -2 }}
+                  whileHover={{ y: -1 }}
                   onClick={() => setSelecionado(it)}
                   className="group flex items-start gap-3 rounded-xl border border-border bg-surface p-3.5 text-left transition-colors hover:border-accent-indigo/50"
                 >

@@ -165,9 +165,9 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
         return (
           <motion.div
             key={it.instanceId}
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: busy ? 1.03 : 1 }}
-            exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.14 } }}
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: busy ? 1.015 : 1 }}
+            exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.12 } }}
             transition={busy ? { duration: 0.12 } : SPRING_SNAPPY}
             className={cn(
               "group/wl absolute",
@@ -236,7 +236,7 @@ export function MobileWidgetStack() {
           <motion.div
             key={it.instanceId}
             layout
-            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.14 } }}
             transition={{ ...SPRING_SNAPPY, delay: i * 0.03 }}

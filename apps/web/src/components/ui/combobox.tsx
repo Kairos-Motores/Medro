@@ -62,8 +62,9 @@ export function Combobox({
           disabled={disabled}
           className={cn(
             "inline-flex w-full items-center justify-between gap-2 rounded-md border border-border bg-surface px-2.5 text-left text-[13px] text-foreground",
-            "transition-shadow duration-150 ease-mac",
-            "focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/35 disabled:opacity-50",
+            "transition-[color,background-color,border-color,box-shadow] duration-150 ease-mac hover:border-border-strong",
+            "focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25",
+            "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border",
             size === "sm" ? "h-[26px] text-[12px]" : "h-8",
             className,
           )}
