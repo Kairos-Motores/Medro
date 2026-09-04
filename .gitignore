@@ -46,3 +46,4 @@ Peritagem/
 # Runtime data
 apps/api/data/
 .runners_state.json
+controle_carga_margens/

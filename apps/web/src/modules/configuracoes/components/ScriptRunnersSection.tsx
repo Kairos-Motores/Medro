@@ -305,7 +305,7 @@ export function ScriptRunnersSection() {
           <RefreshCw className="mr-2 size-4 animate-spin text-primary" /> Carregando disparadores...
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="flex flex-col gap-4">
           {runners.map((runner) => {
             const isRunning = runner.status === "running";
             const isBusy = activeActionId === runner.id;
@@ -314,14 +314,14 @@ export function ScriptRunnersSection() {
             return (
               <div
                 key={runner.id}
-                className="flex flex-col justify-between rounded-2xl border border-border bg-surface p-4 shadow-xs transition-all hover:border-border/90"
+                className="flex flex-col rounded-2xl border border-border bg-surface p-4.5 shadow-xs transition-all hover:border-border/90"
               >
                 <div>
-                  {/* Header do Card (Nome, Ícone, Status e Botão de Colapsar) */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5 min-w-0">
+                  {/* Header do Card (Nome, Ícone, Badges, Status e Botão de Colapsar) */}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div
-                        className={`flex size-9 shrink-0 items-center justify-center rounded-xl shadow-xs ${
+                        className={`flex size-10 shrink-0 items-center justify-center rounded-xl shadow-xs ${
                           runner.id === "dataverse_margens"
                             ? "bg-amber-500/15 text-amber-500"
                             : runner.id === "atualizarsb2"
@@ -330,48 +330,43 @@ export function ScriptRunnersSection() {
                         }`}
                       >
                         {runner.id === "dataverse_margens" ? (
-                          <Database className="size-4.5" />
+                          <Database className="size-5" />
                         ) : runner.id === "atualizarsb2" ? (
-                          <Package className="size-4.5" />
+                          <Package className="size-5" />
                         ) : (
-                          <Layers className="size-4.5" />
+                          <Layers className="size-5" />
                         )}
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 truncate">
-                          <h4 className="text-[13.5px] font-bold text-foreground truncate">{runner.name}</h4>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                          <span className="rounded bg-surface-2 px-1.5 py-0.2 font-mono text-[10.5px] text-foreground/80">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="text-[14.5px] font-bold text-foreground">{runner.name}</h4>
+                          <span className="rounded-md border border-border/80 bg-surface-2 px-2 py-0.5 font-mono text-[11px] text-foreground/90">
                             {runner.scriptFile}
                           </span>
-                          {!isCollapsed && (
-                            <>
-                              <span>•</span>
-                              <span>{runner.category}</span>
-                            </>
-                          )}
+                          <span className="rounded-md bg-surface-2/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                            {runner.category}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Status Pill + Botão de Colapsar */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2.5 shrink-0">
                       <div>
                         {isRunning ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-amber-500">
-                            <RefreshCw className="size-3 animate-spin" /> Executando
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-[11.5px] font-semibold text-amber-500">
+                            <RefreshCw className="size-3.5 animate-spin" /> Executando
                           </span>
                         ) : runner.status === "success" ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-500">
-                            <CheckCircle2 className="size-3" /> Sucesso
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[11.5px] font-semibold text-emerald-500">
+                            <CheckCircle2 className="size-3.5" /> Sucesso
                           </span>
                         ) : runner.status === "error" ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2 py-0.5 text-[11px] font-semibold text-rose-500">
-                            <AlertCircle className="size-3" /> Falha
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/15 px-2.5 py-0.5 text-[11.5px] font-semibold text-rose-500">
+                            <AlertCircle className="size-3.5" /> Falha
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-zinc-500/10 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-500/10 px-2.5 py-0.5 text-[11.5px] font-medium text-muted-foreground">
                             Pronto
                           </span>
                         )}
@@ -381,13 +376,13 @@ export function ScriptRunnersSection() {
                       <button
                         type="button"
                         onClick={() => toggleCollapse(runner.id)}
-                        className="rounded-lg p-1 text-muted-foreground hover:bg-surface-2 hover:text-foreground transition-colors"
+                        className="rounded-lg p-1.5 text-muted-foreground hover:bg-surface-2 hover:text-foreground transition-colors"
                         title={isCollapsed ? "Expandir detalhes e terminal" : "Colapsar para deixar só o nome"}
                       >
                         {isCollapsed ? (
-                          <ChevronDown className="size-4" />
+                          <ChevronDown className="size-4.5" />
                         ) : (
-                          <ChevronUp className="size-4" />
+                          <ChevronUp className="size-4.5" />
                         )}
                       </button>
                     </div>
@@ -397,19 +392,19 @@ export function ScriptRunnersSection() {
                   {!isCollapsed ? (
                     <>
                       {/* Descrição */}
-                      <p className="mt-2 text-[11.5px] text-muted-foreground leading-relaxed">
+                      <p className="mt-2.5 text-[12.5px] text-muted-foreground leading-relaxed">
                         {runner.description}
                       </p>
 
                       {/* Metadados da Última Execução */}
-                      <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg bg-surface-2/60 px-2.5 py-1.5 text-[11px] text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Clock className="size-3 text-cyan-400" />
+                      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg bg-surface-2/60 px-3 py-2 text-[11.5px] text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="size-3.5 text-cyan-400" />
                           <span className="font-medium text-foreground">Última vez:</span>
                           <span>{formatDateTime(runner.lastRunAt)}</span>
                         </div>
                         {runner.lastDurationMs !== null && (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1.5">
                             <span className="font-medium text-foreground">Duração:</span>
                             <span className="font-mono text-cyan-400">{formatDuration(runner.lastDurationMs)}</span>
                           </div>
@@ -425,13 +420,13 @@ export function ScriptRunnersSection() {
                       />
 
                       {/* Ações / Botões Expandidos */}
-                      <div className="mt-3.5 flex items-center justify-end gap-2 border-t border-border/60 pt-3">
+                      <div className="mt-4 flex items-center justify-end gap-2 border-t border-border/60 pt-3">
                         {isRunning ? (
                           <button
                             type="button"
                             onClick={() => handleStop(runner)}
                             disabled={isBusy}
-                            className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-[12px] font-semibold text-white shadow-xs hover:bg-rose-700 active:scale-95 disabled:opacity-50"
+                            className="flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-[12.5px] font-semibold text-white shadow-xs hover:bg-rose-700 active:scale-95 disabled:opacity-50 transition-all"
                           >
                             <Square className="size-3.5 fill-current" /> Interromper
                           </button>
@@ -440,7 +435,7 @@ export function ScriptRunnersSection() {
                             type="button"
                             onClick={() => handleRun(runner)}
                             disabled={isBusy}
-                            className="flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-[12px] font-semibold text-primary-foreground shadow-xs hover:opacity-90 active:scale-95 disabled:opacity-50"
+                            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-[12.5px] font-semibold text-primary-foreground shadow-xs hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all"
                           >
                             <Play className="size-3.5 fill-current" /> Disparar Agora
                           </button>
