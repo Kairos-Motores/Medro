@@ -12,6 +12,8 @@ import {
   getModelo,
   atualizarModelo,
   excluirModelo,
+  salvarCapa,
+  lerCapa,
   getModeloIa,
   getModeloIaConfig,
   setModeloIaConfig,
@@ -43,7 +45,13 @@ export async function laudosGenRoutes(app: FastifyInstance) {
       req.headers.authorization = `Bearer ${t}`;
     }
   });
-  app.addHook("preHandler", app.requireAccess("DPT"));
+  const requireDpt = app.requireAccess("DPT");
+  app.addHook("preHandler", async (req, reply) => {
+    // GET da capa customizada é usado como `<img src>` (sem header Authorization)
+    // pela prévia e pelo worker de PDF — leitura pública.
+    if (req.method === "GET" && req.routeOptions.url?.endsWith("/laudos-gen/capas/:id")) return;
+    return requireDpt(req, reply);
+  });
 
   // ── foto da OS: redireciona para uma URL de download fresca do SharePoint ──
   app.get("/laudos-gen/foto/:itemId", async (req, reply) => {
@@ -52,6 +60,39 @@ export async function laudosGenRoutes(app: FastifyInstance) {
     if (!url) return reply.code(404).send({ error: "foto_nao_encontrada" });
     reply.header("Cache-Control", "private, max-age=1500");
     return reply.redirect(url);
+  });
+
+  // ── capa customizada (arquivo no Dataverse cr4a1_caparelatorios) ───────────
+  const CapaBody = z.object({
+    nome: z.string().min(1).max(200),
+    /** data URL ou base64 puro do arquivo */
+    dataBase64: z.string().min(1),
+  });
+  app.post("/laudos-gen/capas", { bodyLimit: 14 * 1024 * 1024 }, async (req, reply) => {
+    const parsed = CapaBody.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: "bad_request" });
+    const raw = parsed.data.dataBase64.replace(/^data:[^;]*;base64,/, "");
+    const buffer = Buffer.from(raw, "base64");
+    if (buffer.length === 0) return reply.code(400).send({ error: "arquivo_vazio" });
+    if (buffer.length > 8 * 1024 * 1024)
+      return reply.code(413).send({ error: "arquivo_grande", message: "A capa deve ter até 8 MB." });
+    const ext = (parsed.data.nome.match(/\.[a-z0-9]+$/i)?.[0] ?? ".png").toLowerCase();
+    const { id } = await salvarCapa(buffer, `capa-${Date.now()}${ext}`);
+    // URL absoluta (o `<img>` da capa é carregado pela prévia/worker, não só pelo front)
+    const base =
+      config.PUBLIC_API_URL ||
+      process.env.RENDER_EXTERNAL_URL ||
+      `${req.protocol}://${req.headers.host}`;
+    return { success: true, id, url: `${base}/api/laudos-gen/capas/${id}` };
+  });
+
+  app.get("/laudos-gen/capas/:id", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const capa = await lerCapa(id);
+    if (!capa) return reply.code(404).send({ error: "capa_nao_encontrada" });
+    reply.header("Content-Type", capa.contentType);
+    reply.header("Cache-Control", "public, max-age=31536000, immutable");
+    return reply.send(Buffer.from(capa.body));
   });
 
   // ── OS ────────────────────────────────────────────────────────────────────

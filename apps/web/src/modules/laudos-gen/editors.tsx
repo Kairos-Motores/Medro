@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, Trash2, Eye, EyeOff, Sparkles, Loader2, ImagePlus, X } from "lucide-react";
+import { Plus, Trash2, Eye, EyeOff, Sparkles, Loader2, ImagePlus, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import type { LaudoPage } from "./layout";
 import type { LaudoState, DiagKey, MechKey } from "./state";
 import { DIAG_ITEMS } from "./state";
 import type { PatchFn } from "./useLaudoDoc";
-import { useFotosOs, useIaGerar, useIaGerarLote, fotoSrc } from "./api";
+import { useFotosOs, useIaGerar, useIaGerarLote, useUploadCapa, fotoSrc } from "./api";
 import {
   EditorSection,
   FieldGrid,
@@ -135,6 +135,71 @@ function PhotoField({
 
 /* ────────────────────────── Capa ────────────────────────── */
 
+function CoverUpload({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (url: string | null) => void;
+}) {
+  const upload = useUploadCapa();
+  const [erro, setErro] = useState<string | null>(null);
+
+  async function pick(file?: File | null) {
+    if (!file) return;
+    setErro(null);
+    try {
+      const r = await upload.mutateAsync(file);
+      onChange(r.url);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Falha ao enviar a capa.");
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3">
+        {value ? (
+          <img
+            src={value}
+            alt="Capa customizada"
+            className="h-20 w-14 rounded-md border border-border object-cover"
+          />
+        ) : (
+          <div className="flex h-20 w-14 items-center justify-center rounded-md border border-dashed border-border text-muted-foreground">
+            <ImagePlus className="size-4" />
+          </div>
+        )}
+        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-[12px] font-medium text-foreground hover:bg-surface-2">
+          {upload.isPending ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <UploadCloud className="size-3.5" />
+          )}
+          {upload.isPending ? "Enviando…" : "Enviar imagem"}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={upload.isPending}
+            onChange={(e) => pick(e.target.files?.[0])}
+          />
+        </label>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange(null)}
+            className="text-[12px] text-muted-foreground underline underline-offset-2 hover:text-danger"
+          >
+            remover
+          </button>
+        )}
+      </div>
+      {erro && <p className="text-[12px] text-danger">{erro}</p>}
+    </div>
+  );
+}
+
 function CoverEditor({ doc, patch }: EditorProps) {
   const mc = doc.modelConfig;
   return (
@@ -153,16 +218,16 @@ function CoverEditor({ doc, patch }: EditorProps) {
       </FieldGrid>
       {mc.capaAtiva === "custom" && (
         <>
+          <CoverUpload
+            value={mc.customCoverUrl}
+            onChange={(url) => patch((d) => void (d.modelConfig.customCoverUrl = url))}
+          />
           <TextField
-            label="URL da capa customizada"
+            label="ou cole a URL de uma imagem já hospedada"
             value={mc.customCoverUrl ?? ""}
             onChange={(v) => patch((d) => void (d.modelConfig.customCoverUrl = v || null))}
             placeholder="https://…"
           />
-          <DeferredNote>
-            O upload de capa (<code>/api/upload-capa</code>) entra numa fase posterior. Por ora,
-            cole a URL de uma imagem já hospedada.
-          </DeferredNote>
         </>
       )}
     </EditorSection>
@@ -1014,25 +1079,120 @@ function ImageBlockEditor({ page, doc, patch }: EditorProps) {
   );
 }
 
+function addFreeBlock(patch: PatchFn, pageId: string, type: string, data: Record<string, unknown>) {
+  patch((d) => {
+    d.freePageBlocks[pageId] ??= [];
+    d.freePageBlocks[pageId]!.push({
+      id: `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+      type,
+      data,
+    });
+  });
+}
+
+type AiText = { titulo?: string; prompt?: string; texto?: string };
+
+/** Bloco de "texto por IA" numa página livre: instrução → IA gera → técnico revisa. */
+function AiTextBlock({
+  doc,
+  value,
+  onChange,
+}: {
+  doc: LaudoState;
+  value: AiText;
+  onChange: (data: { titulo: string; prompt: string; texto: string }) => void;
+}) {
+  const modeloId = doc.activeTemplateId;
+  const gerar = useIaGerar();
+  const [erro, setErro] = useState<string | null>(null);
+  const set = (p: Partial<AiText>) =>
+    onChange({
+      titulo: value.titulo ?? "",
+      prompt: value.prompt ?? "",
+      texto: value.texto ?? "",
+      ...p,
+    });
+
+  async function gerarIA() {
+    if (!modeloId || !value.prompt?.trim()) return;
+    setErro(null);
+    try {
+      const r = await gerar.mutateAsync({
+        modeloId,
+        resumo: value.prompt,
+        campoLabel: value.titulo?.trim() || "Texto da página livre",
+      });
+      set({ texto: r.texto });
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Falha ao gerar com IA.");
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <TextField label="Título" value={value.titulo ?? ""} onChange={(v) => set({ titulo: v })} />
+      <AreaField
+        label="Instrução para a IA"
+        rows={3}
+        value={value.prompt ?? ""}
+        onChange={(v) => set({ prompt: v })}
+        placeholder="Ex.: escreva um parágrafo técnico sobre os cuidados de armazenamento do motor após a manutenção."
+      />
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          size="sm"
+          onClick={gerarIA}
+          disabled={!modeloId || !value.prompt?.trim() || gerar.isPending}
+        >
+          {gerar.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Sparkles className="size-4" />
+          )}
+          Gerar texto
+        </Button>
+        {!modeloId && (
+          <span className="text-[11.5px] text-muted-foreground">
+            Requer um modelo com IA configurada (salve o modelo / selecione um na barra).
+          </span>
+        )}
+      </div>
+      {erro && <p className="text-[12px] text-danger">{erro}</p>}
+      <AreaField
+        label="Texto gerado (revise antes de emitir o PDF)"
+        rows={6}
+        value={value.texto ?? ""}
+        onChange={(v) => set({ texto: v })}
+      />
+    </div>
+  );
+}
+
 function FreePageEditor({ page, doc, patch }: EditorProps) {
   const blocks = doc.freePageBlocks[page.id] ?? [];
   return (
     <EditorSection
       title="Página livre"
-      subtitle="Blocos de texto editáveis aqui; blocos de imagem/tabela no app antigo."
+      subtitle="Blocos de texto (e texto por IA) editáveis aqui; imagem/tabela no app antigo."
       right={
-        <Button
-          variant="neutral"
-          size="sm"
-          onClick={() =>
-            patch((d) => {
-              d.freePageBlocks[page.id] ??= [];
-              d.freePageBlocks[page.id]!.push({ id: Date.now(), type: "text", data: { title: "", content: "" } });
-            })
-          }
-        >
-          <Plus className="size-3.5" /> Texto
-        </Button>
+        <div className="flex gap-1.5">
+          <Button
+            variant="neutral"
+            size="sm"
+            onClick={() => addFreeBlock(patch, page.id, "text", { title: "", content: "" })}
+          >
+            <Plus className="size-3.5" /> Texto
+          </Button>
+          <Button
+            variant="neutral"
+            size="sm"
+            onClick={() =>
+              addFreeBlock(patch, page.id, "ai-text", { titulo: "", prompt: "", texto: "" })
+            }
+          >
+            <Sparkles className="size-3.5" /> Texto IA
+          </Button>
+        </div>
       }
     >
       {blocks.length === 0 && (
@@ -1069,6 +1229,14 @@ function FreePageEditor({ page, doc, patch }: EditorProps) {
                   />
                 </div>
               </>
+            ) : blk.type === "ai-text" ? (
+              <AiTextBlock
+                doc={doc}
+                value={blk.data as { titulo?: string; prompt?: string; texto?: string }}
+                onChange={(nd) =>
+                  patch((d) => void (d.freePageBlocks[page.id]![i]!.data = nd))
+                }
+              />
             ) : (
               <DeferredNote>Bloco “{blk.type}” — edite no app antigo por enquanto.</DeferredNote>
             )}

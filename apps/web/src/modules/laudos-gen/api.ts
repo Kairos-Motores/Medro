@@ -163,6 +163,30 @@ export function useSetIaConfig() {
   });
 }
 
+/** lê um File como base64 (data URL) para enviar no corpo JSON. */
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = () => reject(r.error ?? new Error("Falha ao ler o arquivo."));
+    r.readAsDataURL(file);
+  });
+}
+
+/** Envia uma imagem de capa customizada; devolve a URL absoluta para o `<img>`. */
+export function useUploadCapa() {
+  return useMutation({
+    mutationFn: async (file: File): Promise<{ id: string; url: string }> => {
+      if (file.size > 8 * 1024 * 1024) throw new Error("A capa deve ter até 8 MB.");
+      const dataBase64 = await fileToDataUrl(file);
+      return api<{ success: true; id: string; url: string }>("/laudos-gen/capas", {
+        method: "POST",
+        body: { nome: file.name || "capa.png", dataBase64 },
+      });
+    },
+  });
+}
+
 /** Gera o texto de UM campo do diagnóstico por IA (não persiste). */
 export function useIaGerar() {
   return useMutation({

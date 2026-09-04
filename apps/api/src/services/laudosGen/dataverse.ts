@@ -193,6 +193,61 @@ export async function excluirModelo(id: string): Promise<void> {
   await dataverse.remove(MODELOS_SET, id);
 }
 
+// ── capas customizadas (arquivo no Dataverse: cr4a1_caparelatorios) ──────────
+const CAPAS_SET = "cr4a1_caparelatorios";
+
+/** Cria a linha da capa e grava o binário na coluna de arquivo. Devolve o id. */
+export async function salvarCapa(buffer: Buffer, nomeArquivo: string): Promise<{ id: string }> {
+  const row = await dataverse.create<{ cr4a1_caparelatorioid: string }>(CAPAS_SET, {
+    cr4a1_chave: nomeArquivo,
+  });
+  const id = row.cr4a1_caparelatorioid;
+  const token = await getToken();
+  const res = await fetch(`${API_BASE}/${CAPAS_SET}(${id})/cr4a1_arquivo`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/octet-stream",
+      "x-ms-file-name": nomeArquivo,
+    },
+    body: buffer,
+  });
+  if (!res.ok) {
+    // limpa a linha órfã se o upload do binário falhar
+    await dataverse.remove(CAPAS_SET, id).catch(() => {});
+    throw new Error(`Dataverse upload capa → ${res.status}: ${await res.text()}`);
+  }
+  return { id };
+}
+
+/** Lê o binário de uma capa customizada (proxy — o front não tem credenciais). */
+export async function lerCapa(
+  id: string,
+): Promise<{ body: ArrayBuffer; contentType: string } | null> {
+  const token = await getToken();
+  const res = await fetch(`${API_BASE}/${CAPAS_SET}(${id})/cr4a1_arquivo/$value`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "*/*" },
+  });
+  // id inexistente/malformado → 400/404 no Dataverse; para um `<img>` vale só 404
+  if (!res.ok) return null;
+  // o $value do Dataverse costuma vir como application/octet-stream — o browser
+  // faz sniff no `<img>`, mas mandamos image/* quando dá pra inferir do nome.
+  const ct = res.headers.get("content-type") || "";
+  const disp = res.headers.get("content-disposition") || "";
+  const ext = disp.match(/\.([a-z0-9]+)"?\s*$/i)?.[1]?.toLowerCase();
+  const byExt: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
+    gif: "image/gif",
+  };
+  return {
+    body: await res.arrayBuffer(),
+    contentType: ct.startsWith("image/") ? ct : byExt[ext ?? ""] ?? "image/png",
+  };
+}
+
 /** prompt + provider do modelo (sem máscara) — a chave vem do .env do Medro. */
 export async function getModeloIa(id: string): Promise<{ prompt: string; provider: string }> {
   const row = await dataverse.get<Record<string, string | null>>(MODELOS_SET, id, {

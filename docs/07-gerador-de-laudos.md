@@ -2,11 +2,12 @@
 
 > **Handoff para o próximo chat.** Documento vivo. Última atualização: 2026-09-03
 > (17 editores + prévia tempo real + IA FUNCIONANDO + fotos SharePoint corrigidas §7.1
-> + primitivos de UI Medro + shell: menu de contexto, status do dispositivo,
-> atalhos/pastas — §5 **+ Fases A e B do §11: gerenciador `ModelosManager` e
-> construtor `ModeloBuilder` PRONTOS** — ver §11.7).
-> **➡️ PRÓXIMO PASSO: §11.4 — FASE C (bloco `ai-text` em página livre, upload de
-> capa própria, designer de tabela avançado).**
+> + primitivos de UI Medro + shell — §5 **+ §11 Fases A, B e C do construtor de
+> modelos PRONTAS**: gerenciador `ModelosManager` (§11.7), construtor `ModeloBuilder`
+> (§11.7), bloco `ai-text` por IA + upload de capa própria (§11.8)).
+> **➡️ PRÓXIMO PASSO: validar tudo num deploy Render (upload SharePoint §7.1 +
+> `PUBLIC_API_URL` para a capa §11.8) e, se pedirem, o designer de tabela avançado
+> (§11.4 item 3).**
 > Contexto: incorporar o app **standalone `Gerador_relatorios`** (gerador de laudo técnico
 > de OS, saída PDF A4 padrão Kairós) ao Medro como **módulo próprio `laudos-gen`,
 > acessível SOMENTE ao Departamento Técnico** (`access: ["DPT"]`).
@@ -390,11 +391,10 @@ pnpm --filter @medro/web dev
    (commit `2f0c2b5`). Falta: **upload local** (`/api/upload-temp/:categoria`) e **auto-import
    da peritagem** (`/api/os/:id/peritagem-fotos` + `aplicarFotosAutomaticas`).
 4. **Confirmar upload SharePoint no Render** (§7.1).
-5. ✅/➡️ **Construtor + gerenciador de modelos de laudo — ver §11.** Fases **A e B
-   PRONTAS** (§11.7): `GET/PUT/DELETE/duplicar` + hooks + `modeloConfigFromDoc` +
-   `ModelosManager` (listar/duplicar/renomear/excluir/config-IA) + `ModeloBuilder`
-   (+ adicionar página agrupada, reordenar ↑/↓, remover, prévia com OS fake).
-   Falta a **FASE C** (§11.4) e o **upload de capa própria**.
+5. ✅ **Construtor + gerenciador de modelos de laudo — ver §11.** Fases **A, B e C
+   PRONTAS**: `ModelosManager` + `ModeloBuilder` (§11.7); bloco `ai-text` por IA em
+   página livre + upload de capa própria (§11.8). Falta só o designer de tabela
+   avançado (§11.4 item 3 — "se pedirem") e validar a capa/upload num deploy real.
 
 ### Depois
 6. **Apagar `Gerador_relatorios/`** quando o módulo estiver completo (plano do usuário).
@@ -650,11 +650,9 @@ Pseudo-módulo `"modelo-builder"` (`ModuleHost` branch + id no union). Component
 - `services/laudosGen/dataverse.ts` — `getModelo(id)` (inclui `cr4a1_ia_prompt`),
   `atualizarModelo(id,{nome?,configuracaoJson?})`, `excluirModelo(id)`. `criarModelo`
   agora **devolve `{ id }`** (lê o id do `return=representation`). `listarModelos` passou a
-  pedir `cr4a1_ia_provider` + `modifiedon` e `orderby: modifiedon desc`.
-  ⚠️ **Esta tenant ignora `$select`/`$orderby` de `modifiedon` e `cr4a1_ia_provider` neste
-  entity set** — só voltam `cr4a1_configuracao_json/nome_modelo/…id`. Efeito: no card do
-  gerenciador o selo "IA: {provider}" e a data não aparecem (cai no `sem IA` / sem data).
-  Não quebra nada; se for importante, achar o nome lógico certo da coluna de provider.
+  pedir `cr4a1_ia_provider` + `modifiedon` e `orderby: modifiedon desc` — **funcionam**
+  (o card mostra a data e o selo "IA: {provider}"). *(A rodada anterior achou que a tenant
+  ignorava esses campos; era só a API de dev rodando código velho — resolvido ao reiniciar.)*
 - `routes/laudosGen.ts` — `GET /laudos-gen/modelos/:id`, `PUT /laudos-gen/modelos/:id`
   (zod `{nome?,configuracaoJson?}`), `DELETE /laudos-gen/modelos/:id`,
   `POST /laudos-gen/modelos/:id/duplicar` (copia estrutura + prompt/provider de IA, sufixo
@@ -701,13 +699,55 @@ contagem de páginas; construtor abre "Novo modelo" com o layout padrão (17), "
 insere (ex.: Relatório Fotográfico → vira 18, com `keys`), prévia renderiza a folha A4 com a
 OS fictícia; **Salvar cria o modelo no Dataverse com 18 páginas** (`modeloConfigFromDoc` ok).
 
-⚠️ **Pendências desta rodada (para o próximo chat):**
-1. **A API de dev precisava reiniciar** para pegar as rotas novas (`GET/PUT/DELETE/duplicar`
-   deram 404 no `tsx watch` que estava rodando). Buildaram limpo (`pnpm --filter @medro/api
-   build` e `@medro/web build`). Reiniciar a API e revalidar: editar modelo existente (GET+PUT),
-   Renomear, Duplicar, Excluir, Config IA.
-2. **Nada foi commitado ainda.**
-3. Ficou um modelo de teste **"Teste Fase B (Claude)"** no Dataverse (18 páginas) — apagar
-   pelo gerenciador depois que a API reiniciar.
-4. Selo de IA / data no card do gerenciador dependem de campos que a tenant não devolve (ver
-   acima).
+Depois de reiniciar a API, revalidado no browser: gerenciador lista os modelos **com data
+e selo "IA: {provider}"**; abrir modelo no construtor, `↑/↓`, remover, "+ Adicionar" ok.
+
+### 11.8 Fase C — bloco de texto por IA + upload de capa (rodada 2026-09-03)
+
+**C1 — bloco `ai-text` em página livre** (`PageBuilder` / `freePageBlocks`):
+- shape: `{ id, type: "ai-text", data: { titulo, prompt, texto } }`.
+- `editors.tsx` `FreePageEditor` — botão **"+ Texto IA"** (além do "+ Texto"); componente
+  `AiTextBlock`: campo Título, "Instrução para a IA" (`AreaField`), botão **"Gerar texto"**
+  (`useIaGerar` → `resumo = data.prompt`, `campoLabel = data.titulo`; habilita só com
+  `doc.activeTemplateId` — o modelo em edição —, senão mostra o aviso), textarea do `texto`
+  para o técnico revisar. Helper `addFreeBlock(patch, pageId, type, data)`.
+- `apps/report-print` — **único toque em página desta fase**: `PageBuilder.jsx` **e**
+  `BuilderContent.jsx` renderizam `block.type === 'ai-text'` como `<h3>` (título) + `<p>`
+  justificado (`whiteSpace: pre-wrap`). `pagination.js` conta blocos por `.length` (3/página)
+  — `ai-text` entra na paginação sem mudança.
+
+**C2 — upload de capa própria** (arquivo no Dataverse `cr4a1_caparelatorios`, como no app antigo):
+- `services/laudosGen/dataverse.ts` — `salvarCapa(buffer, nome)` (cria a linha `cr4a1_chave`
+  + PATCH binário em `cr4a1_arquivo`; apaga a linha órfã se o PATCH falhar) e `lerCapa(id)`
+  (proxy do `$value`; MIME inferido do `Content-Disposition`, default `image/png`).
+- `routes/laudosGen.ts` — `POST /laudos-gen/capas` (corpo **JSON** `{ nome, dataBase64 }` —
+  **sem multipart/nova dep**; `bodyLimit` 14 MiB, imagem até 8 MiB; devolve
+  `{ id, url }` **absoluta**) e `GET /laudos-gen/capas/:id` (**pública** — o `preHandler`
+  do router agora libera esse GET, porque é `<img src>` sem header; `Cache-Control:
+  immutable`). URL absoluta = `config.PUBLIC_API_URL || \`${req.protocol}://${req.headers.host}\``.
+- `config.ts` — nova env **`PUBLIC_API_URL`** (opcional; em dev cai no host da requisição;
+  **em produção no Render defina** — o `req.protocol` atrás do proxy não é https).
+- `api.ts` — `useUploadCapa()` (lê o `File` como data URL → `POST /capas`).
+- `editors.tsx` `CoverEditor` — componente `CoverUpload` (`<input type=file accept=image/*>`
+  escondido num `<label>`, thumbnail, "remover") grava a URL devolvida em
+  `modelConfig.customCoverUrl`; o `TextField` de URL manual virou "ou cole a URL…".
+- **report-print não muda para a capa**: `resolveCoverImage` já usa `customCoverUrl` cru no
+  `<img>`; como a URL é absoluta e o GET é público, funciona na prévia e no worker de PDF.
+
+**Verificado no browser** (api reiniciada + web + report-print :5180):
+- `POST /laudos-gen/capas` (base64 de um PNG) → 200 `{id,url}`; `GET url` público → 200,
+  `Cache-Control: immutable`. Colando essa URL no `CoverEditor`, a **prévia do report-print
+  renderiza a capa** (folha A4 vira a imagem).
+- Página Livre → "+ Texto IA" → instrução → **"Gerar texto" retornou parágrafo do Gemini**
+  (modelo "Modelo de capa alternativa", provider gemini) no textarea.
+
+⚠️ **Pendências / notas:**
+1. **Nada commitado ainda** ao escrever isto *(ver commits reais no §5)*.
+2. Ficaram no Dataverse: modelo de teste **"Teste Fase B (Claude)"** (18 pág.) e **1 linha
+   de capa** de teste (`cr4a1_caparelatorios`, PNG 1×1). Sem endpoint de delete de capa —
+   apagar manualmente se incomodar; o modelo dá pra apagar pelo gerenciador.
+3. **Capa em produção**: a URL absoluta usa `PUBLIC_API_URL` → `RENDER_EXTERNAL_URL`
+   (auto no Render) → host da requisição. Já tem linha no `.env.example` da raiz; setar
+   `PUBLIC_API_URL` explícito no Render só se o `RENDER_EXTERNAL_URL` não bastar.
+4. Upload SharePoint do PDF (§7.1) continua pendente de validação no Render.
+5. Designer de tabela avançado (§11.4 item 3) não feito — era "se pedirem".

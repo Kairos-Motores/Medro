@@ -26,6 +26,17 @@ export const BuilderContent = ({ blocks, onBlockChange, isPrintMode, isViewerMod
               isViewerMode={isViewerMode}
             />
           )}
+
+          {block.type === 'ai-text' && (
+            <div className="ai-text-block">
+              {block.data?.titulo && (
+                <h3 style={{ fontSize: '12pt', fontWeight: 'bold', margin: '0 0 6px' }}>{block.data.titulo}</h3>
+              )}
+              <p style={{ fontSize: '10pt', lineHeight: 1.5, textAlign: 'justify', whiteSpace: 'pre-wrap', margin: 0 }}>
+                {block.data?.texto || ''}
+              </p>
+            </div>
+          )}
           {block.type === 'table' && (
             <PageCustomTable
               isInsideBuilder={true}

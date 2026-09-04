@@ -41,6 +41,13 @@ const Schema = z.object({
   REPORT_PRINT_URL: z.string().url().default("http://localhost:5180"),
   PDF_WORKER_URL: z.string().url().default("http://localhost:8100"),
   PDF_WORKER_TOKEN: z.string().default(""),
+  /**
+   * URL pública desta API (ex.: https://medro-api.onrender.com). Usada para
+   * montar o link absoluto da capa customizada (`<img src>` lido pelo
+   * report-print). Em dev cai no host da requisição; em produção (atrás do
+   * proxy do Render) defina explicitamente.
+   */
+  PUBLIC_API_URL: z.string().url().optional(),
   // provedores de IA do diagnóstico (opcionais nesta fase)
   GEMINI_API_KEY: z.string().optional(),
   GROQ_API_KEY: z.string().optional(),

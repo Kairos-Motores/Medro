@@ -35,6 +35,20 @@ export const PageBuilder = ({ id, pageNumber, blocks, onBlockChange, osData, isP
                      />
                   )}
 
+                  {/* Bloco de Texto por IA (gerado no editor Medro; aqui só renderiza) */}
+                  {block.type === 'ai-text' && (
+                     <div className="ai-text-block">
+                        {block.data?.titulo && (
+                           <h3 style={{ fontSize: '12pt', fontWeight: 'bold', margin: '0 0 6px' }}>
+                              {block.data.titulo}
+                           </h3>
+                        )}
+                        <p style={{ fontSize: '10pt', lineHeight: 1.5, textAlign: 'justify', whiteSpace: 'pre-wrap', margin: 0 }}>
+                           {block.data?.texto || ''}
+                        </p>
+                     </div>
+                  )}
+
                   {/* Bloco de Tabela (com colunas e subcolunas) */}
                   {block.type === 'table' && (
                      <PageCustomTable
