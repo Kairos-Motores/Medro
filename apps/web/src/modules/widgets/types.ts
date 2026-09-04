@@ -5,6 +5,7 @@ import type { ModuleId } from "@/modules/registry";
 export type WidgetId =
   | "relogio"
   | "notas"
+  | "clima"
   | "farol-os"
   | "laudos-andamento"
   | "ultimos-pdfs";
@@ -29,7 +30,13 @@ export const SIZE_LABEL: Record<WidgetSize, string> = {
 export interface WidgetProps {
   /** tamanho atual da instância — o componente adapta o conteúdo */
   size: WidgetSize;
-  /** config por instância (ex.: filial escolhida) — Fase 2 usa mais */
+  /** config por instância (ex.: filial escolhida) */
+  config: Record<string, unknown>;
+  setConfig: (patch: Record<string, unknown>) => void;
+}
+
+/** formulário de configuração por instância (abre no menu "Configurar…"). */
+export interface WidgetConfigProps {
   config: Record<string, unknown>;
   setConfig: (patch: Record<string, unknown>) => void;
 }
@@ -48,6 +55,8 @@ export interface WidgetDef {
   /** exigências extras de acesso, além das do módulo */
   access?: AccessToken[];
   Component: React.FC<WidgetProps>;
+  /** se definido, o menu do widget ganha "Configurar…" abrindo este formulário */
+  ConfigForm?: React.FC<WidgetConfigProps>;
 }
 
 /** instância posicionada na tela inicial. */

@@ -1,8 +1,9 @@
-import { Clock, StickyNote, Activity, FileClock, History } from "lucide-react";
+import { Clock, StickyNote, Activity, FileClock, History, CloudSun } from "lucide-react";
 import type { WidgetDef, WidgetId } from "./types";
 import { RelogioWidget } from "./widgets/RelogioWidget";
 import { NotasWidget } from "./widgets/NotasWidget";
-import { FarolOsWidget } from "./widgets/FarolOsWidget";
+import { ClimaWidget } from "./widgets/ClimaWidget";
+import { FarolOsWidget, FarolOsConfig } from "./widgets/FarolOsWidget";
 import { LaudosAndamentoWidget } from "./widgets/LaudosAndamentoWidget";
 import { UltimosPdfsWidget } from "./widgets/UltimosPdfsWidget";
 
@@ -30,6 +31,17 @@ export const WIDGETS: WidgetDef[] = [
     Component: NotasWidget,
   },
   {
+    id: "clima",
+    title: "Clima da unidade",
+    desc: "Temperatura e condição do tempo na sua localização.",
+    icon: CloudSun,
+    module: null,
+    accent: "cyan",
+    sizes: ["sm", "md"],
+    defaultSize: "sm",
+    Component: ClimaWidget,
+  },
+  {
     id: "farol-os",
     title: "Farol de OS",
     desc: "Ordens de serviço no prazo, aguardando e fora do prazo.",
@@ -38,6 +50,7 @@ export const WIDGETS: WidgetDef[] = [
     sizes: ["sm", "md", "wide"],
     defaultSize: "md",
     Component: FarolOsWidget,
+    ConfigForm: FarolOsConfig,
   },
   {
     id: "laudos-andamento",

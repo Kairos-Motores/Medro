@@ -5,13 +5,24 @@ import type { WinRect } from "@/lib/wm";
 import { useWidgets, cellsToPx, gridToPx, pxToGrid, PITCH, ORIGIN_X, ORIGIN_Y } from "@/lib/useWidgets";
 import { moduleById } from "@/modules/registry";
 import { widgetById } from "./registry";
-import { SIZE_CELLS, type PlacedWidget, type WidgetDef } from "./types";
+import { SIZE_CELLS, type PlacedWidget, type WidgetDef, type WidgetSize } from "./types";
 import { WidgetShell } from "./WidgetShell";
 
-const sizePx = (def: WidgetDef, size: PlacedWidget["size"]) => {
+const sizePx = (size: WidgetSize) => {
   const c = SIZE_CELLS[size];
   return { w: cellsToPx(c.w), h: cellsToPx(c.h) };
 };
+
+/** dentre os tamanhos permitidos, o mais próximo das dimensões arrastadas. */
+function pickSize(def: WidgetDef, targetW: number, targetH: number): WidgetSize {
+  return def.sizes.reduce((best, s) => {
+    const b = sizePx(best);
+    const c = sizePx(s);
+    const db = Math.abs(b.w - targetW) + Math.abs(b.h - targetH);
+    const dc = Math.abs(c.w - targetW) + Math.abs(c.h - targetH);
+    return dc < db ? s : best;
+  }, def.sizes[0]!);
+}
 
 function useCanShow() {
   const can = useAuth((s) => s.can);
@@ -25,19 +36,22 @@ function useCanShow() {
 
 /** Tela inicial de widgets sobre a área útil do desktop. */
 export function WidgetLayer({ bounds }: { bounds: WinRect }) {
-  const { mode, items, moveGrid, moveFree } = useWidgets();
+  const { mode, items, moveGrid, moveFree, resize } = useWidgets();
   const canShow = useCanShow();
 
   const drag = useRef<null | {
     id: string;
+    kind: "move" | "resize";
     px: number;
     py: number;
     ox: number;
     oy: number;
     w: number;
     h: number;
+    def: WidgetDef;
   }>(null);
-  const [preview, setPreview] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [movePv, setMovePv] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [sizePv, setSizePv] = useState<{ id: string; size: WidgetSize } | null>(null);
 
   function baseXY(it: PlacedWidget) {
     return mode === "grid"
@@ -45,39 +59,46 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
       : { x: it.fx, y: it.fy };
   }
 
-  function onDown(e: React.PointerEvent, it: PlacedWidget, def: WidgetDef) {
-    // ignora clique com botão direito (menu de contexto)
+  function start(e: React.PointerEvent, it: PlacedWidget, def: WidgetDef, kind: "move" | "resize") {
     if (e.button !== 0) return;
-    const { w, h } = sizePx(def, it.size);
+    e.stopPropagation();
+    const cur = sizePv?.id === it.instanceId ? sizePv.size : it.size;
+    const { w, h } = sizePx(cur);
     const { x, y } = baseXY(it);
     (e.target as Element).setPointerCapture(e.pointerId);
-    drag.current = { id: it.instanceId, px: e.clientX, py: e.clientY, ox: x, oy: y, w, h };
-    setPreview({ id: it.instanceId, x, y });
+    drag.current = { id: it.instanceId, kind, px: e.clientX, py: e.clientY, ox: x, oy: y, w, h, def };
+    if (kind === "move") setMovePv({ id: it.instanceId, x, y });
+    else setSizePv({ id: it.instanceId, size: cur });
   }
 
   function onMove(e: React.PointerEvent) {
     const d = drag.current;
     if (!d) return;
-    const nx = Math.max(0, Math.min(d.ox + (e.clientX - d.px), bounds.w - d.w));
-    const ny = Math.max(0, Math.min(d.oy + (e.clientY - d.py), bounds.h - d.h));
-    setPreview({ id: d.id, x: nx, y: ny });
+    if (d.kind === "move") {
+      const nx = Math.max(0, Math.min(d.ox + (e.clientX - d.px), bounds.w - d.w));
+      const ny = Math.max(0, Math.min(d.oy + (e.clientY - d.py), bounds.h - d.h));
+      setMovePv({ id: d.id, x: nx, y: ny });
+    } else {
+      const tw = d.w + (e.clientX - d.px);
+      const th = d.h + (e.clientY - d.py);
+      setSizePv({ id: d.id, size: pickSize(d.def, tw, th) });
+    }
   }
 
   function onUp(e: React.PointerEvent) {
     const d = drag.current;
     if (d) {
       (e.target as Element).releasePointerCapture?.(e.pointerId);
-      const p = preview;
-      if (p && p.id === d.id) {
-        if (mode === "grid") {
-          moveGrid(d.id, pxToGrid(p.x, "x"), pxToGrid(p.y, "y"));
-        } else {
-          moveFree(d.id, p.x, p.y);
-        }
+      if (d.kind === "move" && movePv?.id === d.id) {
+        if (mode === "grid") moveGrid(d.id, pxToGrid(movePv.x, "x"), pxToGrid(movePv.y, "y"));
+        else moveFree(d.id, movePv.x, movePv.y);
+      } else if (d.kind === "resize" && sizePv?.id === d.id) {
+        resize(d.id, sizePv.size);
       }
     }
     drag.current = null;
-    setPreview(null);
+    setMovePv(null);
+    setSizePv(null);
   }
 
   return (
@@ -86,8 +107,7 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
         <div
           className="absolute inset-0 opacity-60"
           style={{
-            backgroundImage:
-              "radial-gradient(rgb(var(--border)) 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(rgb(var(--border)) 1px, transparent 1px)",
             backgroundSize: `${PITCH}px ${PITCH}px`,
             backgroundPosition: `${ORIGIN_X}px ${ORIGIN_Y}px`,
           }}
@@ -98,29 +118,44 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
       {items.map((it) => {
         const def = widgetById(it.widgetId);
         if (!def || !canShow(def)) return null;
-        const { w, h } = sizePx(def, it.size);
-        const pos = preview?.id === it.instanceId ? preview : baseXY(it);
-        const dragging = drag.current?.id === it.instanceId;
+        const size = sizePv?.id === it.instanceId ? sizePv.size : it.size;
+        const { w, h } = sizePx(size);
+        const pos = movePv?.id === it.instanceId ? movePv : baseXY(it);
+        const busy = drag.current?.id === it.instanceId;
         return (
           <div
             key={it.instanceId}
             className={cn(
-              "pointer-events-auto absolute",
-              dragging ? "z-50 scale-[1.02] shadow-ios-2 transition-none" : "transition-[left,top] duration-150 ease-ios",
+              "group/wl pointer-events-auto absolute",
+              busy
+                ? "z-50 shadow-ios-2 transition-none"
+                : "transition-[left,top,width,height] duration-150 ease-ios",
             )}
             style={{ left: pos.x, top: pos.y, width: w, height: h }}
           >
             <WidgetShell
               def={def}
-              placed={it}
+              placed={{ ...it, size }}
               dragHandleProps={{
-                onPointerDown: (e) => onDown(e, it, def),
+                onPointerDown: (e) => start(e, it, def, "move"),
                 onPointerMove: onMove,
                 onPointerUp: onUp,
               }}
             >
-              <WidgetBody def={def} it={it} />
+              <WidgetBody def={def} it={it} size={size} />
             </WidgetShell>
+
+            {def.sizes.length > 1 && (
+              <div
+                onPointerDown={(e) => start(e, it, def, "resize")}
+                onPointerMove={onMove}
+                onPointerUp={onUp}
+                title="Redimensionar"
+                className="absolute bottom-0 right-0 z-10 flex size-6 cursor-se-resize touch-none select-none items-end justify-end p-1 opacity-0 transition-opacity group-hover/wl:opacity-100"
+              >
+                <span className="size-2.5 rounded-[3px] border-b-2 border-r-2 border-muted-foreground/70" />
+              </div>
+            )}
           </div>
         );
       })}
@@ -128,19 +163,15 @@ export function WidgetLayer({ bounds }: { bounds: WinRect }) {
   );
 }
 
-function WidgetBody({ def, it }: { def: WidgetDef; it: PlacedWidget }) {
+function WidgetBody({ def, it, size }: { def: WidgetDef; it: PlacedWidget; size: WidgetSize }) {
   const setConfig = useWidgets((s) => s.setConfig);
   const Comp = def.Component;
   return (
-    <Comp
-      size={it.size}
-      config={it.config}
-      setConfig={(patch) => setConfig(it.instanceId, patch)}
-    />
+    <Comp size={size} config={it.config} setConfig={(patch) => setConfig(it.instanceId, patch)} />
   );
 }
 
-/** Pilha vertical simples para o mobile (Fase 1 — o remodel do mobile virá depois). */
+/** Pilha vertical simples para o mobile (o remodel do mobile virá depois). */
 export function MobileWidgetStack() {
   const items = useWidgets((s) => s.items);
   const canShow = useCanShow();

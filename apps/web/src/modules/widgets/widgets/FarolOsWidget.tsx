@@ -4,8 +4,11 @@ import type { FiliaisKPIsMap } from "@medro/shared";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/cn";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useWidgetRefetch, WidgetLoading, WidgetError } from "../WidgetShell";
-import type { WidgetProps } from "../types";
+import type { WidgetConfigProps, WidgetProps } from "../types";
+
+const FILIAIS = ["São Luís", "Barcarena", "Parauapebas", "São José dos Campos"];
 
 function useFarol() {
   return useQuery({
@@ -16,8 +19,9 @@ function useFarol() {
   });
 }
 
-export function FarolOsWidget({ size }: WidgetProps) {
-  const filial = useAuth((s) => s.user?.filial);
+export function FarolOsWidget({ size, config }: WidgetProps) {
+  const sessionFilial = useAuth((s) => s.user?.filial);
+  const pick = typeof config.filial === "string" ? config.filial : "";
   const q = useFarol();
   useWidgetRefetch(useCallback(() => q.refetch(), [q]));
 
@@ -25,22 +29,27 @@ export function FarolOsWidget({ size }: WidgetProps) {
   if (q.isError || !q.data?.data) return <WidgetError onRetry={() => q.refetch()} />;
 
   const map = q.data.data;
-  // filial da sessão quando existir no mapa, senão soma tudo
-  const base =
-    filial && map[filial]
-      ? [map[filial]]
-      : Object.values(map);
+  // resolve o escopo: filial escolhida > todas (explícito) > filial da sessão > todas
+  let base = Object.values(map);
+  let escopo = "Todas as filiais";
+  if (pick && pick !== "__todas" && map[pick]) {
+    base = [map[pick]];
+    escopo = pick;
+  } else if (!pick && sessionFilial && map[sessionFilial]) {
+    base = [map[sessionFilial]];
+    escopo = sessionFilial;
+  }
+
   const agg = base.reduce(
-    (acc, k) => ({
-      total: acc.total + (k?.os_na_filial ?? 0),
-      aprovadas: acc.aprovadas + (k?.os_aprovadas ?? 0),
-      dentro: acc.dentro + (k?.os_dentro_prazo ?? 0),
-      fora: acc.fora + (k?.os_fora_prazo ?? 0),
+    (a, k) => ({
+      total: a.total + (k?.os_na_filial ?? 0),
+      aprovadas: a.aprovadas + (k?.os_aprovadas ?? 0),
+      dentro: a.dentro + (k?.os_dentro_prazo ?? 0),
+      fora: a.fora + (k?.os_fora_prazo ?? 0),
     }),
     { total: 0, aprovadas: 0, dentro: 0, fora: 0 },
   );
   const aguardando = Math.max(0, agg.total - agg.aprovadas);
-  const escopo = filial && map[filial] ? filial : "Todas as filiais";
   const denom = Math.max(1, agg.dentro + agg.fora + aguardando);
 
   const seg = [
@@ -51,7 +60,7 @@ export function FarolOsWidget({ size }: WidgetProps) {
 
   return (
     <div className="flex h-full flex-col">
-      <p className="text-[10.5px] text-muted-foreground">{escopo}</p>
+      <p className="truncate text-[10.5px] text-muted-foreground">{escopo}</p>
       <p className="mt-0.5 text-[22px] font-semibold leading-none text-foreground tabular-nums">
         {agg.total}
         <span className="ml-1 text-[11px] font-normal text-muted-foreground">OS na filial</span>
@@ -74,5 +83,26 @@ export function FarolOsWidget({ size }: WidgetProps) {
         ))}
       </div>
     </div>
+  );
+}
+
+export function FarolOsConfig({ config, setConfig }: WidgetConfigProps) {
+  const value = typeof config.filial === "string" && config.filial ? config.filial : "__auto";
+  return (
+    <label className="block space-y-1">
+      <span className="text-[12px] font-medium text-foreground-secondary">Filial exibida</span>
+      <Select
+        value={value}
+        onValueChange={(v) => setConfig({ filial: v === "__auto" ? "" : v })}
+      >
+        <SelectItem value="__auto">Automática (minha filial)</SelectItem>
+        <SelectItem value="__todas">Todas as filiais</SelectItem>
+        {FILIAIS.map((f) => (
+          <SelectItem key={f} value={f}>
+            {f}
+          </SelectItem>
+        ))}
+      </Select>
+    </label>
   );
 }

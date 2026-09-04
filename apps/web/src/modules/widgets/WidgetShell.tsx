@@ -1,5 +1,13 @@
-import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
-import { RefreshCw, Trash2, Maximize2, ArrowUpRight, AlertTriangle, Loader2 } from "lucide-react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  RefreshCw,
+  Trash2,
+  Maximize2,
+  ArrowUpRight,
+  AlertTriangle,
+  Loader2,
+  Settings2,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useWM } from "@/lib/wm";
 import { useWidgets } from "@/lib/useWidgets";
@@ -16,6 +24,7 @@ import {
   ContextMenuRadioGroup,
   ContextMenuRadioItem,
 } from "@/components/ui/context-menu";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { SIZE_LABEL, type PlacedWidget, type WidgetDef, type WidgetSize } from "./types";
 
 /** canal p/ o item "Atualizar" chamar o refetch do widget montado. */
@@ -44,8 +53,10 @@ export function WidgetShell({
 }) {
   const remove = useWidgets((s) => s.remove);
   const resize = useWidgets((s) => s.resize);
+  const setConfig = useWidgets((s) => s.setConfig);
   const open = useWM((s) => s.open);
   const refetchRef = useRef<null | (() => void)>(null);
+  const [cfgOpen, setCfgOpen] = useState(false);
 
   const accent = def.module ? moduleById(def.module).accent : (def.accent ?? "slate");
   const a = ACCENT[accent];
@@ -100,6 +111,11 @@ export function WidgetShell({
           <ContextMenuItem onSelect={() => refetchRef.current?.()}>
             <RefreshCw className="size-3.5" /> Atualizar
           </ContextMenuItem>
+          {def.ConfigForm && (
+            <ContextMenuItem onSelect={() => setCfgOpen(true)}>
+              <Settings2 className="size-3.5" /> Configurar…
+            </ContextMenuItem>
+          )}
           {def.module && modLabel && (
             <ContextMenuItem onSelect={() => open(def.module!, modLabel)}>
               <ArrowUpRight className="size-3.5" /> Abrir {modLabel}
@@ -111,6 +127,18 @@ export function WidgetShell({
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
+
+      {def.ConfigForm && (
+        <Sheet open={cfgOpen} onOpenChange={setCfgOpen}>
+          <SheetContent side="center" className="max-w-sm gap-3">
+            <SheetTitle>{def.title} — configurar</SheetTitle>
+            <def.ConfigForm
+              config={placed.config}
+              setConfig={(patch) => setConfig(placed.instanceId, patch)}
+            />
+          </SheetContent>
+        </Sheet>
+      )}
     </RefetchCtx.Provider>
   );
 }
