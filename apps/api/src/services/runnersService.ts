@@ -200,11 +200,12 @@ class RunnersService {
     state.recentLines = state.logs.slice(-3);
 
     try {
-      const proc = spawn("python", [state.scriptFile], {
+      const proc = spawn("python", ["-u", state.scriptFile], {
         cwd: this.referenciaDir,
         env: {
           ...process.env,
           PYTHONUNBUFFERED: "1",
+          PYTHONIOENCODING: "utf-8",
         },
         shell: process.platform === "win32",
       });
