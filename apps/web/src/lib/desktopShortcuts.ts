@@ -11,6 +11,8 @@ export interface DesktopShortcut {
   moduleId: ModuleId;
   /** só para kind "laudo" */
   osId?: string;
+  x?: number;
+  y?: number;
 }
 
 interface State {
@@ -19,6 +21,9 @@ interface State {
   seeded: boolean;
   add: (sc: Omit<DesktopShortcut, "id">) => void;
   remove: (id: string) => void;
+  updatePosition: (id: string, x: number, y: number) => void;
+  resetPosition: (id: string) => void;
+  resetAllPositions: () => void;
   seedRascunhos: () => void;
 }
 
@@ -41,6 +46,22 @@ export const useDesktopShortcuts = create<State>()(
           };
         }),
       remove: (id) => set((s) => ({ shortcuts: s.shortcuts.filter((x) => x.id !== id) })),
+      updatePosition: (id, x, y) =>
+        set((s) => ({
+          shortcuts: s.shortcuts.map((it) =>
+            it.id === id ? { ...it, x: Math.round(x), y: Math.round(y) } : it,
+          ),
+        })),
+      resetPosition: (id) =>
+        set((s) => ({
+          shortcuts: s.shortcuts.map((it) =>
+            it.id === id ? { ...it, x: undefined, y: undefined } : it,
+          ),
+        })),
+      resetAllPositions: () =>
+        set((s) => ({
+          shortcuts: s.shortcuts.map((it) => ({ ...it, x: undefined, y: undefined })),
+        })),
       seedRascunhos: () => {
         if (get().seeded) return;
         get().add({ kind: "rascunhos", moduleId: "laudos-gen", label: "Rascunhos DPT" });

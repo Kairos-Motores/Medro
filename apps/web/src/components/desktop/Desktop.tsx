@@ -9,6 +9,7 @@ import {
   LayoutPanelLeft,
   Move,
   Plus,
+  RotateCcw,
 } from "lucide-react";
 import { useWM, type WinRect } from "@/lib/wm";
 import { useAuth } from "@/lib/auth";
@@ -31,6 +32,7 @@ import {
 import { ModuleHost } from "@/modules/ModuleHost";
 import { MenuBar } from "./MenuBar";
 import { DesktopIcons } from "./DesktopIcons";
+import { useDesktopShortcuts } from "@/lib/desktopShortcuts";
 import { Dock } from "./Dock";
 import { Launchpad } from "./Launchpad";
 import { TaskView } from "./TaskView";
@@ -57,6 +59,10 @@ export function Desktop() {
   const setWidgetMode = useWidgets((s) => s.setMode);
   const setWidgetStore = useWidgets((s) => s.setStoreOpen);
   const seedWidgets = useWidgets((s) => s.seedDefaults);
+  const resetAllShortcutPositions = useDesktopShortcuts((s) => s.resetAllPositions);
+  const hasMovedShortcuts = useDesktopShortcuts((s) =>
+    s.shortcuts.some((it) => it.x !== undefined || it.y !== undefined),
+  );
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState<WinRect>({ x: 0, y: 0, w: 1200, h: 700 });
   const [dockManualShow, setDockManualShow] = useState(false);
@@ -236,6 +242,11 @@ export function Desktop() {
                 </ContextMenuRadioGroup>
               </ContextMenuSubContent>
             </ContextMenuSub>
+            {hasMovedShortcuts && (
+              <ContextMenuItem onSelect={resetAllShortcutPositions}>
+                <RotateCcw className="size-3.5" /> Reorganizar ícones da mesa
+              </ContextMenuItem>
+            )}
             <ContextMenuSeparator />
             <ContextMenuItem
               disabled={openWindows.length < 2}

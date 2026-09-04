@@ -57,6 +57,7 @@ export function WidgetShell({
   const remove = useWidgets((s) => s.remove);
   const resize = useWidgets((s) => s.resize);
   const setConfig = useWidgets((s) => s.setConfig);
+  const opacity = useWidgets((s) => s.opacity ?? 45);
   const open = useWM((s) => s.open);
   const refetchRef = useRef<null | (() => void)>(null);
   const [cfgOpen, setCfgOpen] = useState(false);
@@ -77,12 +78,20 @@ export function WidgetShell({
           <div
             onContextMenu={(e) => e.stopPropagation()}
             className={cn(
-              // padrão: fundo translúcido (mesmo material dos menus), não opaco
-              "material-menu flex h-full w-full flex-col overflow-hidden rounded-xl border transition-[border-color,box-shadow,background-color] duration-150",
+              "flex h-full w-full flex-col overflow-hidden rounded-xl border transition-[border-color,box-shadow,background-color] duration-150",
               selected
                 ? "border-border bg-surface shadow-ios-2"
-                : "border-transparent shadow-none hover:border-border/50",
+                : "border-black/[0.08] dark:border-white/[0.12] shadow-sm hover:border-border/70",
             )}
+            style={
+              selected
+                ? undefined
+                : {
+                    backgroundColor: `rgb(var(--surface) / ${opacity / 100})`,
+                    backdropFilter: `blur(${Math.max(2, Math.round((opacity / 100) * 20 + 4))}px)`,
+                    WebkitBackdropFilter: `blur(${Math.max(2, Math.round((opacity / 100) * 20 + 4))}px)`,
+                  }
+            }
           >
             <div
               {...dragHandleProps}

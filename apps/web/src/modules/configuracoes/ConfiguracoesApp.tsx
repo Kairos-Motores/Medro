@@ -26,6 +26,9 @@ import {
   Sliders,
   Layers,
   Users,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTheme, type WallpaperOption, type ThemeMode } from "@/lib/theme";
@@ -34,6 +37,9 @@ import { useProfilePhoto } from "@/lib/useProfilePhoto";
 import type { SettingsSectionId } from "./types";
 import { GestaoUsuariosSection } from "./GestaoUsuariosSection";
 import { ScriptRunnersSection } from "./components/ScriptRunnersSection";
+import { useWidgets } from "@/lib/useWidgets";
+import { useDockPrefs } from "@/lib/useDockPrefs";
+import { cn } from "@/lib/cn";
 
 interface IosSwitchProps {
   checked: boolean;
@@ -86,6 +92,12 @@ export function ConfiguracoesApp() {
   const [efeitoVidro, setEfeitoVidro] = useState(true);
   const [filialSelecionada, setFilialSelecionada] = useState(user?.filial || "São Luís");
   const [testingConexoes, setTestingConexoes] = useState(false);
+
+  const widgetOpacity = useWidgets((s) => s.opacity ?? 45);
+  const setWidgetOpacity = useWidgets((s) => s.setOpacity);
+
+  const dockAlignment = useDockPrefs((s) => s.alignment);
+  const setDockAlignment = useDockPrefs((s) => s.setAlignment);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -458,19 +470,159 @@ export function ConfiguracoesApp() {
                 </div>
               </div>
 
-              {/* Card 3: Efeitos Visuais */}
-              <div className="rounded-2xl border border-border bg-surface p-4 shadow-xs">
-                <h3 className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Efeitos de Vidro (Vibrancy)
-                </h3>
-                <div className="mt-3 flex items-center justify-between">
+              {/* Card 3: Efeitos Visuais & Widgets */}
+              <div className="rounded-2xl border border-border bg-surface p-4 shadow-xs space-y-4">
+                <div>
+                  <h3 className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Efeitos de Vidro (Vibrancy)
+                  </h3>
+                  <div className="mt-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-[13px] font-medium">Transluscência e Vidro Fosco</p>
+                      <p className="text-[12px] text-muted-foreground">
+                        Aplica desfoque de fundo no Dock, janelas e menus
+                      </p>
+                    </div>
+                    <IosSwitch checked={efeitoVidro} onChange={setEfeitoVidro} />
+                  </div>
+                </div>
+
+                <div className="border-t border-border/70 pt-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="text-[13px] font-medium text-foreground">
+                        Opacidade dos Widgets
+                      </h4>
+                      <p className="text-[12px] text-muted-foreground">
+                        Ajuste o nível de transparência e vidro fosco exclusivamente nos cartões de widgets da tela inicial.
+                      </p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-0.5 font-mono text-[12px] font-semibold text-primary">
+                      {widgetOpacity}%
+                    </span>
+                  </div>
+
+                  {/* Slider */}
+                  <div className="mt-3 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[11px] font-medium text-muted-foreground">Translúcido (10%)</span>
+                      <input
+                        type="range"
+                        min={10}
+                        max={100}
+                        step={5}
+                        value={widgetOpacity}
+                        onChange={(e) => setWidgetOpacity(Number(e.target.value))}
+                        className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-surface-2 accent-primary transition-all"
+                      />
+                      <span className="text-[11px] font-medium text-muted-foreground">Sólido (100%)</span>
+                    </div>
+
+                    {/* Predefinições Rápidas */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] font-medium text-muted-foreground">Predefinições:</span>
+                      {[
+                        { label: "Vidro Claro (25%)", val: 25 },
+                        { label: "Translúcido (45%)", val: 45 },
+                        { label: "Fosco (70%)", val: 70 },
+                        { label: "Quase Sólido (90%)", val: 90 },
+                      ].map((preset) => (
+                        <button
+                          key={preset.val}
+                          type="button"
+                          onClick={() => setWidgetOpacity(preset.val)}
+                          className={cn(
+                            "rounded-lg border px-2.5 py-1 text-[11.5px] font-medium transition-all active:scale-95",
+                            widgetOpacity === preset.val
+                              ? "border-primary bg-primary text-primary-foreground shadow-2xs font-semibold"
+                              : "border-border bg-surface-2/60 text-foreground hover:bg-surface-2",
+                          )}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 4: Alinhamento da Barra de Tarefas Inferior (Dock) */}
+              <div className="rounded-2xl border border-border bg-surface p-4 shadow-xs space-y-4">
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[13px] font-medium">Transluscência e Vidro Fosco</p>
-                    <p className="text-[12px] text-muted-foreground">
-                      Aplica desfoque de fundo no Dock, janelas e menus
+                    <h3 className="text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Barra de Tarefas Inferior (Dock)
+                    </h3>
+                    <p className="mt-0.5 text-[12.5px] text-muted-foreground">
+                      Defina a posição e o alinhamento da barra de tarefas inferior na tela.
                     </p>
                   </div>
-                  <IosSwitch checked={efeitoVidro} onChange={setEfeitoVidro} />
+                  <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11.5px] font-semibold text-primary">
+                    {dockAlignment === "center"
+                      ? "Centralizada"
+                      : dockAlignment === "left"
+                        ? "À Esquerda"
+                        : "À Direita"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {[
+                    {
+                      id: "left" as const,
+                      label: "À Esquerda",
+                      desc: "Alinhado no início da tela",
+                      icon: AlignLeft,
+                    },
+                    {
+                      id: "center" as const,
+                      label: "Centralizada",
+                      desc: "Padrão moderno macOS",
+                      icon: AlignCenter,
+                    },
+                    {
+                      id: "right" as const,
+                      label: "À Direita",
+                      desc: "Alinhado no canto direito",
+                      icon: AlignRight,
+                    },
+                  ].map((pos) => {
+                    const Icon = pos.icon;
+                    const isSelected = dockAlignment === pos.id;
+                    return (
+                      <button
+                        key={pos.id}
+                        type="button"
+                        onClick={() => setDockAlignment(pos.id)}
+                        className={cn(
+                          "flex flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all active:scale-[0.98]",
+                          isSelected
+                            ? "border-primary bg-primary/10 text-foreground ring-2 ring-primary/25 shadow-xs"
+                            : "border-border bg-surface-2/40 text-muted-foreground hover:bg-surface-2 hover:text-foreground",
+                        )}
+                      >
+                        <div className="flex w-full items-center justify-between">
+                          <div
+                            className={cn(
+                              "flex size-8 items-center justify-center rounded-lg transition-colors",
+                              isSelected
+                                ? "bg-primary text-primary-foreground shadow-2xs"
+                                : "bg-surface text-foreground",
+                            )}
+                          >
+                            <Icon className="size-4" />
+                          </div>
+                          {isSelected && <Check className="size-4 text-primary" />}
+                        </div>
+                        <div>
+                          <p className={cn("text-[13px] font-semibold", isSelected && "text-primary")}>
+                            {pos.label}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">{pos.desc}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

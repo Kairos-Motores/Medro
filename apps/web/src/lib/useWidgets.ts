@@ -32,9 +32,12 @@ interface WidgetsState {
   storeOpen: boolean;
   /** já semeou os widgets padrão neste navegador? */
   seeded: boolean;
+  /** opacidade do fundo dos widgets (10 a 100%, padrão 45% translúcido) */
+  opacity: number;
 
   setMode: (m: WidgetLayoutMode) => void;
   setStoreOpen: (v: boolean) => void;
+  setOpacity: (v: number) => void;
 
   add: (widgetId: WidgetId, size: WidgetSize) => void;
   remove: (instanceId: string) => void;
@@ -71,6 +74,10 @@ export const useWidgets = create<WidgetsState>()(
       items: [],
       storeOpen: false,
       seeded: false,
+      opacity: 45,
+
+      setOpacity: (opacity) =>
+        set({ opacity: Math.max(10, Math.min(100, Math.round(opacity))) }),
 
       // ao trocar de modo, converte as posições para não empilhar os widgets
       setMode: (mode) =>
@@ -162,6 +169,9 @@ export const useWidgets = create<WidgetsState>()(
             fx: gridToPx(it.gx ?? 0, "x"),
             fy: gridToPx(it.gy ?? 0, "y"),
           }));
+        }
+        if (s && typeof s.opacity !== "number") {
+          s.opacity = 45;
         }
         return s;
       },

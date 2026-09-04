@@ -15,6 +15,7 @@ import { cn } from "@/lib/cn";
 import { SPRING, SPRING_SNAPPY } from "@/lib/motion";
 import { MODULES, ACCENT, type ModuleDef } from "@/modules/registry";
 import { useRecentApps } from "@/lib/useRecentApps";
+import { useDockPrefs } from "@/lib/useDockPrefs";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -190,17 +191,28 @@ export function Dock({ hidden = false }: { hidden?: boolean }) {
     }
   };
 
+  const alignment = useDockPrefs((s) => s.alignment);
+  const justifyClass =
+    alignment === "left"
+      ? "justify-start px-4 lg:px-6"
+      : alignment === "right"
+        ? "justify-end px-4 lg:px-6"
+        : "justify-center px-4 lg:px-6";
+
   return (
     <motion.div
       initial={false}
       animate={{ y: hidden ? 130 : 0, opacity: hidden ? 0 : 1 }}
       transition={SPRING}
       className={cn(
-        "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-2.5 lg:pb-3",
+        "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex pb-2.5 lg:pb-3",
+        justifyClass,
         hidden && "pointer-events-none",
       )}
     >
       <motion.div
+        layout
+        transition={SPRING_SNAPPY}
         onMouseMove={(e) => mouseX.set(e.clientX)}
         onMouseLeave={() => mouseX.set(Number.POSITIVE_INFINITY)}
         className="material-menu pointer-events-auto flex items-end gap-1.5 rounded-2xl border border-white/25 dark:border-white/10 px-2 py-1.5 shadow-mac-2"
