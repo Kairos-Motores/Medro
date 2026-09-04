@@ -40,3 +40,9 @@ Gerador_relatorios/
 
 # PDFs de teste locais
 *.pdf
+
+Peritagem/
+
+# Runtime data
+apps/api/data/
+.runners_state.json

@@ -33,6 +33,7 @@ import { initials } from "@/lib/useClock";
 import { useProfilePhoto } from "@/lib/useProfilePhoto";
 import type { SettingsSectionId } from "./types";
 import { GestaoUsuariosSection } from "./GestaoUsuariosSection";
+import { ScriptRunnersSection } from "./components/ScriptRunnersSection";
 
 interface IosSwitchProps {
   checked: boolean;
@@ -737,6 +738,11 @@ export function ConfiguracoesApp() {
                     <span className="size-1.5 rounded-full bg-emerald-500" /> Conectado
                   </span>
                 </div>
+              </div>
+
+              {/* DISPARADORES DE SCRIPTS (SQL → DATAVERSE) */}
+              <div className="pt-1">
+                <ScriptRunnersSection />
               </div>
             </div>
           )}

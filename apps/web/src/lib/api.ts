@@ -17,7 +17,9 @@ type Options = Omit<RequestInit, "body"> & { body?: unknown };
 export async function api<T>(path: string, opts: Options = {}): Promise<T> {
   const token = useAuth.getState().token;
   const headers = new Headers(opts.headers);
-  headers.set("Content-Type", "application/json");
+  if (opts.body !== undefined) {
+    headers.set("Content-Type", "application/json");
+  }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
   const res = await fetch(`${BASE}${path}`, {
