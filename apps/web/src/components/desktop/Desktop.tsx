@@ -1,9 +1,19 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { X, LayoutGrid, AppWindow, LayoutDashboard, FilePlus2 } from "lucide-react";
+import {
+  X,
+  LayoutGrid,
+  AppWindow,
+  LayoutDashboard,
+  FilePlus2,
+  LayoutPanelLeft,
+  Move,
+  Plus,
+} from "lucide-react";
 import { useWM, type WinRect } from "@/lib/wm";
 import { useAuth } from "@/lib/auth";
 import { useIsDesktop } from "@/lib/useMedia";
 import { useMenuBarPrefs } from "@/lib/useMenuBarPrefs";
+import { useWidgets } from "@/lib/useWidgets";
 import { cn } from "@/lib/cn";
 import {
   ContextMenu,
@@ -11,6 +21,11 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
 } from "@/components/ui/context-menu";
 import { ModuleHost } from "@/modules/ModuleHost";
 import { MenuBar } from "./MenuBar";
@@ -21,6 +36,8 @@ import { TaskView } from "./TaskView";
 import { WindowFrame } from "./WindowFrame";
 import { WallpaperBackground } from "./WallpaperBackground";
 import { FloatingDockTrigger } from "./FloatingDockTrigger";
+import { WidgetLayer, MobileWidgetStack } from "@/modules/widgets/WidgetLayer";
+import { WidgetStore } from "@/modules/widgets/WidgetStore";
 import { api } from "@/lib/api";
 import type { UserSession } from "@medro/shared";
 
@@ -32,6 +49,9 @@ export function Desktop() {
   const canDpt = useAuth((s) => s.can("DPT"));
   const barPosition = useMenuBarPrefs((s) => s.position);
   const barAutohide = useMenuBarPrefs((s) => s.autohide);
+  const widgetMode = useWidgets((s) => s.mode);
+  const setWidgetMode = useWidgets((s) => s.setMode);
+  const setWidgetStore = useWidgets((s) => s.setStoreOpen);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState<WinRect>({ x: 0, y: 0, w: 1200, h: 700 });
   const [dockManualShow, setDockManualShow] = useState(false);
@@ -90,7 +110,7 @@ export function Desktop() {
         <WallpaperBackground />
         <MenuBar />
         <div className="relative z-10 min-h-0 flex-1 overflow-auto pb-16 pt-7">
-          {active && (
+          {active ? (
             <div className="flex min-h-full flex-col">
               <div className="material-toolbar sticky top-0 z-10 flex h-10 items-center gap-2 border-b border-border pl-3 pr-1">
                 <span className="flex-1 truncate text-[13px] font-semibold text-foreground">
@@ -111,6 +131,21 @@ export function Desktop() {
                 paramsNonce={active.paramsNonce}
               />
             </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between px-4 pt-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Tela inicial
+                </span>
+                <button
+                  onClick={() => setWidgetStore(true)}
+                  className="flex items-center gap-1 rounded-md border border-border bg-surface px-2 py-1 text-[11.5px] font-medium text-foreground"
+                >
+                  <Plus className="size-3" /> Widgets
+                </button>
+              </div>
+              <MobileWidgetStack />
+            </>
           )}
         </div>
 
@@ -125,6 +160,7 @@ export function Desktop() {
 
         <Launchpad />
         <TaskView />
+        <WidgetStore />
       </div>
     );
   }
@@ -153,6 +189,28 @@ export function Desktop() {
             <ContextMenuItem onSelect={() => setLaunchpad(true)}>
               <LayoutDashboard className="size-3.5" /> Central de apps
             </ContextMenuItem>
+            <ContextMenuItem onSelect={() => setWidgetStore(true)}>
+              <LayoutPanelLeft className="size-3.5" /> Adicionar widget…
+            </ContextMenuItem>
+            <ContextMenuSub>
+              <ContextMenuSubTrigger>
+                <Move className="size-3.5" /> Organização dos widgets
+              </ContextMenuSubTrigger>
+              <ContextMenuSubContent>
+                <ContextMenuRadioGroup
+                  value={widgetMode}
+                  onValueChange={(v) => setWidgetMode(v as "grid" | "free")}
+                >
+                  <ContextMenuRadioItem value="grid">
+                    <LayoutGrid className="size-3.5" /> Grade (alinha ao soltar)
+                  </ContextMenuRadioItem>
+                  <ContextMenuRadioItem value="free">
+                    <Move className="size-3.5" /> Livre (posição solta)
+                  </ContextMenuRadioItem>
+                </ContextMenuRadioGroup>
+              </ContextMenuSubContent>
+            </ContextMenuSub>
+            <ContextMenuSeparator />
             <ContextMenuItem
               disabled={openWindows.length < 2}
               onSelect={() => tile()}
@@ -175,6 +233,7 @@ export function Desktop() {
             )}
           </ContextMenuContent>
         </ContextMenu>
+        <WidgetLayer bounds={bounds} />
         {openWindows.map((w) => (
           <WindowFrame key={w.id} win={w} bounds={bounds} focused={w.id === topId}>
             <ModuleHost moduleId={w.moduleId} params={w.params} paramsNonce={w.paramsNonce} />
@@ -193,6 +252,7 @@ export function Desktop() {
 
       <Launchpad />
       <TaskView />
+      <WidgetStore />
     </div>
   );
 }
