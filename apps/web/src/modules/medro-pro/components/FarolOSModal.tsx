@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
+import { cn } from "@/lib/cn";
 import type { CarcacaEquiv, GrupoPorte, FarolConfig } from "../types";
 
 interface FarolOSModalProps {
@@ -79,6 +80,7 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
   const [error, setError] = useState("");
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [comercialFilter, setComercialFilter] = useState<"TODAS" | "AGUARDANDO" | "EM_ANDAMENTO">("TODAS");
   const [filialFilter, setFilialFilter] = useState("TODAS");
   const [statusFilter, setStatusFilter] = useState("TODOS");
   const [dateFilter, setDateFilter] = useState("");
@@ -224,6 +226,17 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
         String(row["Equipamento"] || "").toLowerCase().includes(term) ||
         String(row["TAG Kairos"] || "").toLowerCase().includes(term);
 
+      // Filtro comercial (todas as OS, aguardando aprovação, em andamento)
+      const isNaFilial = !String(row["Dt Entreg Eq"] || "").trim();
+      const hasAutoriza = !!String(row["DT Autoriza"] || "").trim();
+
+      let matchComercial = true;
+      if (comercialFilter === "EM_ANDAMENTO") {
+        matchComercial = isNaFilial && hasAutoriza;
+      } else if (comercialFilter === "AGUARDANDO") {
+        matchComercial = isNaFilial && !hasAutoriza;
+      }
+
       // Filtro filial
       const matchFilial =
         filialFilter === "TODAS" ||
@@ -241,9 +254,9 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
         matchDate = dtRec.includes(dateFilter) || dtLim.includes(dateFilter);
       }
 
-      return matchSearch && matchFilial && matchStatus && matchDate;
+      return matchSearch && matchComercial && matchFilial && matchStatus && matchDate;
     });
-  }, [data, searchTerm, filialFilter, statusFilter, dateFilter]);
+  }, [data, searchTerm, comercialFilter, filialFilter, statusFilter, dateFilter]);
 
   // Ordenação precisa e robusta sobre toda a base de dados
   const sortedData = useMemo(() => {
@@ -317,18 +330,45 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filialFilter, statusFilter, dateFilter]);
+  }, [searchTerm, comercialFilter, filialFilter, statusFilter, dateFilter]);
 
-  // Contagens dos Faróis
-  const stats = useMemo(() => {
+  // Contagens globais das categorias do filtro comercial
+  const countsComercial = useMemo(() => {
+    let aguardando = 0;
+    let emAndamento = 0;
+    for (const row of data) {
+      const isNaFilial = !String(row["Dt Entreg Eq"] || "").trim();
+      const hasAutoriza = !!String(row["DT Autoriza"] || "").trim();
+      if (isNaFilial) {
+        if (hasAutoriza) emAndamento++;
+        else aguardando++;
+      }
+    }
     return {
       total: data.length,
-      noPrazo: data.filter((d) => d.statusFarol === "No Prazo").length,
-      atencao: data.filter((d) => d.statusFarol === "Atenção").length,
-      critico: data.filter((d) => d.statusFarol === "Crítico").length,
-      semAprovacao: data.filter((d) => d.statusFarol === "Sem Aprovação").length,
+      aguardando,
+      emAndamento,
     };
   }, [data]);
+
+  // Contagens dos Faróis (contextualizadas pelo filtro comercial)
+  const stats = useMemo(() => {
+    const scoped = data.filter((row) => {
+      const isNaFilial = !String(row["Dt Entreg Eq"] || "").trim();
+      const hasAutoriza = !!String(row["DT Autoriza"] || "").trim();
+      if (comercialFilter === "EM_ANDAMENTO") return isNaFilial && hasAutoriza;
+      if (comercialFilter === "AGUARDANDO") return isNaFilial && !hasAutoriza;
+      return true;
+    });
+
+    return {
+      total: scoped.length,
+      noPrazo: scoped.filter((d) => d.statusFarol === "No Prazo").length,
+      atencao: scoped.filter((d) => d.statusFarol === "Atenção").length,
+      critico: scoped.filter((d) => d.statusFarol === "Crítico").length,
+      semAprovacao: scoped.filter((d) => d.statusFarol === "Sem Aprovação").length,
+    };
+  }, [data, comercialFilter]);
 
   if (!isOpen) return null;
 
@@ -377,57 +417,112 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
         </div>
       </header>
 
-      {/* Farol Counter Summary Cards (Slim Bar) */}
+      {/* Farol Counter Summary Cards (Slim Bar - Interativos) */}
       <div className="grid grid-cols-2 gap-2 border-b border-border bg-surface/40 px-4 py-2 sm:grid-cols-5 shrink-0">
-        <div className="flex items-center gap-2.5 rounded-lg border border-border/70 bg-surface/80 px-2.5 py-1.5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => {
+            setComercialFilter("TODAS");
+            setStatusFilter("TODOS");
+          }}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg border px-2.5 py-1.5 shadow-sm text-left transition-all",
+            comercialFilter === "TODAS" && statusFilter === "TODOS"
+              ? "border-primary/60 bg-surface ring-1 ring-primary/30"
+              : "border-border/70 bg-surface/80 hover:border-primary/40",
+          )}
+          title="Ver todas as OS"
+        >
           <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
             <Building2 className="size-3.5" />
           </div>
           <div className="min-w-0">
             <span className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">Total OS</span>
-            <p className="text-xs font-bold text-foreground leading-tight">{stats.total}</p>
+            <p className="text-xs font-bold text-foreground leading-tight">{stats.total.toLocaleString("pt-BR")}</p>
           </div>
-        </div>
+        </button>
 
-        <div className="flex items-center gap-2.5 rounded-lg border border-accent-green/30 bg-accent-green/10 px-2.5 py-1.5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setStatusFilter((prev) => (prev === "No Prazo" ? "TODOS" : "No Prazo"))}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg border px-2.5 py-1.5 shadow-sm text-left transition-all",
+            statusFilter === "No Prazo"
+              ? "border-accent-green bg-accent-green/20 ring-1 ring-accent-green/40"
+              : "border-accent-green/30 bg-accent-green/10 hover:border-accent-green/60",
+          )}
+          title="Filtrar por No Prazo"
+        >
           <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-accent-green/20 text-accent-green">
             <CheckCircle2 className="size-3.5" />
           </div>
           <div className="min-w-0">
             <span className="block text-[9px] font-medium uppercase tracking-wider text-accent-green">No Prazo</span>
-            <p className="text-xs font-bold text-accent-green leading-tight">{stats.noPrazo}</p>
+            <p className="text-xs font-bold text-accent-green leading-tight">{stats.noPrazo.toLocaleString("pt-BR")}</p>
           </div>
-        </div>
+        </button>
 
-        <div className="flex items-center gap-2.5 rounded-lg border border-accent-amber/30 bg-accent-amber/10 px-2.5 py-1.5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setStatusFilter((prev) => (prev === "Atenção" ? "TODOS" : "Atenção"))}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg border px-2.5 py-1.5 shadow-sm text-left transition-all",
+            statusFilter === "Atenção"
+              ? "border-accent-amber bg-accent-amber/20 ring-1 ring-accent-amber/40"
+              : "border-accent-amber/30 bg-accent-amber/10 hover:border-accent-amber/60",
+          )}
+          title="Filtrar por Atenção"
+        >
           <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-accent-amber/20 text-accent-amber">
             <AlertTriangle className="size-3.5" />
           </div>
           <div className="min-w-0">
             <span className="block text-[9px] font-medium uppercase tracking-wider text-accent-amber">Atenção</span>
-            <p className="text-xs font-bold text-accent-amber leading-tight">{stats.atencao}</p>
+            <p className="text-xs font-bold text-accent-amber leading-tight">{stats.atencao.toLocaleString("pt-BR")}</p>
           </div>
-        </div>
+        </button>
 
-        <div className="flex items-center gap-2.5 rounded-lg border border-accent-rose/30 bg-accent-rose/10 px-2.5 py-1.5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setStatusFilter((prev) => (prev === "Crítico" ? "TODOS" : "Crítico"))}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg border px-2.5 py-1.5 shadow-sm text-left transition-all",
+            statusFilter === "Crítico"
+              ? "border-accent-rose bg-accent-rose/20 ring-1 ring-accent-rose/40"
+              : "border-accent-rose/30 bg-accent-rose/10 hover:border-accent-rose/60",
+          )}
+          title="Filtrar por Crítico"
+        >
           <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-accent-rose/20 text-accent-rose">
             <AlertTriangle className="size-3.5" />
           </div>
           <div className="min-w-0">
             <span className="block text-[9px] font-medium uppercase tracking-wider text-accent-rose">Crítico</span>
-            <p className="text-xs font-bold text-accent-rose leading-tight">{stats.critico}</p>
+            <p className="text-xs font-bold text-accent-rose leading-tight">{stats.critico.toLocaleString("pt-BR")}</p>
           </div>
-        </div>
+        </button>
 
-        <div className="flex items-center gap-2.5 rounded-lg border border-border/70 bg-surface-2/60 px-2.5 py-1.5 shadow-sm">
+        <button
+          type="button"
+          onClick={() => {
+            setComercialFilter((prev) => (prev === "AGUARDANDO" ? "TODAS" : "AGUARDANDO"));
+          }}
+          className={cn(
+            "flex items-center gap-2.5 rounded-lg border px-2.5 py-1.5 shadow-sm text-left transition-all",
+            comercialFilter === "AGUARDANDO"
+              ? "border-primary bg-primary/20 ring-1 ring-primary/40"
+              : "border-border/70 bg-surface-2/60 hover:border-border-strong",
+          )}
+          title="Filtrar por Aguardando aprovação"
+        >
           <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-border text-muted-foreground">
             <HelpCircle className="size-3.5" />
           </div>
           <div className="min-w-0">
             <span className="block text-[9px] font-medium uppercase tracking-wider text-muted-foreground">S/ Aprovação</span>
-            <p className="text-xs font-bold text-muted-foreground leading-tight">{stats.semAprovacao}</p>
+            <p className="text-xs font-bold text-muted-foreground leading-tight">{stats.semAprovacao.toLocaleString("pt-BR")}</p>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Toolbar / Filters */}
@@ -442,6 +537,20 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="h-7 pl-7 text-xs"
           />
+        </div>
+
+        {/* Filtro Comercial / Fase da OS: Todas as OS, Aguardando aprovação, Em andamento */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-semibold text-foreground">Filtro:</span>
+          <select
+            value={comercialFilter}
+            onChange={(e) => setComercialFilter(e.target.value as "TODAS" | "AGUARDANDO" | "EM_ANDAMENTO")}
+            className="h-7 rounded-md border border-border bg-surface px-2 text-xs font-medium text-foreground focus:border-primary focus:outline-none"
+          >
+            <option value="TODAS">Todas as OS ({countsComercial.total.toLocaleString("pt-BR")})</option>
+            <option value="AGUARDANDO">Aguardando aprovação ({countsComercial.aguardando.toLocaleString("pt-BR")})</option>
+            <option value="EM_ANDAMENTO">Em andamento ({countsComercial.emAndamento.toLocaleString("pt-BR")})</option>
+          </select>
         </div>
 
         {/* Filial */}
@@ -468,7 +577,7 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="h-7 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus:border-primary focus:outline-none"
           >
-            <option value="TODOS">Todos os Status</option>
+            <option value="TODOS">Todos os Faróis</option>
             <option value="No Prazo">No Prazo</option>
             <option value="Atenção">Atenção</option>
             <option value="Crítico">Crítico</option>
@@ -489,7 +598,7 @@ export function FarolOSModal({ isOpen, onClose }: FarolOSModalProps) {
         </div>
 
         <div className="ml-auto text-[11px] text-muted-foreground">
-          Mostrando <span className="font-semibold text-foreground">{sortedData.length}</span> ordens filtradas
+          Mostrando <span className="font-semibold text-foreground">{sortedData.length.toLocaleString("pt-BR")}</span> ordens filtradas
         </div>
       </div>
 
