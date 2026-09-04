@@ -16,6 +16,7 @@ import { RascunhosFolder } from "./laudos-gen/RascunhosFolder";
 import { ModelosManager } from "./laudos-gen/ModelosManager";
 import { ModeloBuilder } from "./laudos-gen/ModeloBuilder";
 import { UsinagemCaldeirariaApp } from "./caldeiraria/UsinagemCaldeirariaApp";
+import { MigracaoApp } from "./migracao/MigracaoApp";
 
 /** Roteia o conteúdo de uma janela para o app do módulo. */
 export function ModuleHost({
@@ -55,6 +56,7 @@ export function ModuleHost({
   // do Dock/Launchpad; isto barra aberturas por atalho/janela persistida).
   if (m.access?.length && !(authed && can(...m.access))) return <AccessDenied label={m.label} />;
 
+  if (moduleId === "migracao") return <MigracaoApp />;
   if (moduleId === "configuracoes" || moduleId === "pcp") return <ConfiguracoesApp />;
   if (moduleId === "dpt-laudos") return <DptApp />;
   if (moduleId === "laudos-gen")

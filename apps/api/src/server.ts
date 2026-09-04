@@ -11,6 +11,7 @@ import { laudosGenRoutes } from "./routes/laudosGen.js";
 import { medroProRoutes } from "./routes/medroPro.js";
 import { caldeirariaRoutes } from "./routes/caldeiraria.js";
 import { usuariosRoutes } from "./routes/usuarios.js";
+import { migracaoRoutes } from "./routes/migracao.js";
 
 export function buildServer() {
   const app = Fastify({
@@ -34,6 +35,7 @@ export function buildServer() {
   app.register(medroProRoutes, { prefix: "/api" });
   app.register(caldeirariaRoutes, { prefix: "/api" });
   app.register(usuariosRoutes, { prefix: "/api" });
+  app.register(migracaoRoutes, { prefix: "/api" });
 
   app.get("/", async () => ({ name: "medro-api", env: config.NODE_ENV }));
 

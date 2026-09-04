@@ -19,6 +19,7 @@ import {
   Boxes,
   FilePlus2,
   LayoutTemplate,
+  ArrowLeftRight,
   type LucideIcon,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ import {
  */
 
 export type ModuleId =
+  | "migracao"
   | "configuracoes"
   | "medro-pro"
   | "central-bobinagem"
@@ -68,6 +70,16 @@ export interface ModuleDef {
 }
 
 export const MODULES: ModuleDef[] = [
+  {
+    id: "migracao",
+    label: "Migração",
+    short: "Migração",
+    desc: "Painel de controle e monitoramento da transcrição da base legada para o novo modelo",
+    icon: ArrowLeftRight,
+    path: "/migracao",
+    accent: "cyan",
+    ready: true,
+  },
   {
     id: "medro-pro",
     label: "Medro Pro",
