@@ -4,10 +4,13 @@
 > (17 editores + prévia tempo real + IA FUNCIONANDO + fotos SharePoint corrigidas §7.1
 > + primitivos de UI Medro + shell — §5 **+ §11 Fases A, B e C do construtor de
 > modelos PRONTAS**: gerenciador `ModelosManager` (§11.7), construtor `ModeloBuilder`
-> (§11.7), bloco `ai-text` por IA + upload de capa própria (§11.8)).
-> **➡️ PRÓXIMO PASSO: validar tudo num deploy Render (upload SharePoint §7.1 +
-> `PUBLIC_API_URL` para a capa §11.8) e, se pedirem, o designer de tabela avançado
-> (§11.4 item 3).**
+> (§11.7), bloco `ai-text` por IA + upload de capa própria (§11.8)
+> **+ §12: shell do sistema — MenuBar customizável, transição de boas-vindas + som,
+> e o sistema de Widgets (Fases 1 e 2 + widgets de mais módulos)**).
+> **➡️ Existe agora um `README.md` técnico na raiz descrevendo o app inteiro — ler primeiro.**
+> **➡️ PRÓXIMOS PASSOS abertos:** (laudos) validar num deploy Render — upload SharePoint §7.1
+> + `PUBLIC_API_URL` da capa §11.8; designer de tabela avançado §11.4-3 (se pedirem).
+> (widgets/shell) ver "Próximos passos" no fim do §12.
 > Contexto: incorporar o app **standalone `Gerador_relatorios`** (gerador de laudo técnico
 > de OS, saída PDF A4 padrão Kairós) ao Medro como **módulo próprio `laudos-gen`,
 > acessível SOMENTE ao Departamento Técnico** (`access: ["DPT"]`).
@@ -751,3 +754,135 @@ e selo "IA: {provider}"**; abrir modelo no construtor, `↑/↓`, remover, "+ Ad
    `PUBLIC_API_URL` explícito no Render só se o `RENDER_EXTERNAL_URL` não bastar.
 4. Upload SharePoint do PDF (§7.1) continua pendente de validação no Render.
 5. Designer de tabela avançado (§11.4 item 3) não feito — era "se pedirem".
+
+---
+
+## 12. Shell do sistema + Widgets (fora do Gerador de Laudos)
+
+Rodada 2026-09-03/04. Tudo em `apps/web` (front). Commits: `a737dbf` (welcome só "Medro"),
+`9f25242` (gestão de janelas), `a981816` (widgets Fase 1), `a9b800f` (widgets Fase 2),
+`404554c` (widgets de mais módulos + `/laudos-gen/resumo`), `00f8fee` (widgets roláveis +
+transparentes), `f1d942b` (fundo translúcido + loja rolável + seed), `8322b72` (README).
+Builds `pnpm --filter @medro/web build` (e `@medro/api` quando tocou back) passando.
+
+### 12.1 MenuBar customizável + cartões no hover
+
+- **`lib/useMenuBarPrefs.ts`** (zustand+persist `medro.menubar`): `surface`
+  (`solid`/`glass`/`transparent`), `position` (`top`/`left`/`right`), `autohide`,
+  `hidden` (visibilidade por item). `BAR_ITEM_LABELS`, `isVerticalBar(p)`.
+- **`components/desktop/MenuBar.tsx`** — reescrita: menu de contexto (botão direito na barra)
+  com Aparência / Posição / Ocultar automaticamente / Mostrar itens / Restaurar padrão.
+  Layout horizontal (topo) ou **trilho vertical** (`w-10`) nas bordas; modo transparente = só
+  as informações com `text-shadow`; auto-ocultar com zona de revelação na borda. Mobile força
+  topo+glass.
+- **`components/desktop/Desktop.tsx`** — a área útil (`surfaceInset`) recua conforme a posição
+  da barra (`left-10`/`right-10`/`top-7`) ou ocupa tudo no auto-ocultar; re-sincroniza os
+  bounds das janelas.
+- **`components/desktop/DeviceStatus.tsx`** + **`MenuBarCards.tsx`** (novo) — cada item
+  (filial/rede/bateria/localização/relógio) abre um **cartão detalhado e interativo** no hover
+  via **`components/ui/hover-card.tsx`** (novo — Popover + intenção de hover + "fixa no
+  clique"). O de **Data e hora** tem relógio ao vivo + `react-day-picker` navegável.
+- **`lib/useDeviceInfo.ts`** — passou a expor `battery.chargingTime/dischargingTime`, Network
+  Information API (`connection`) e `coords`.
+- **`components/ui/context-menu.tsx`** — novo `ContextMenuRadioItem`.
+
+### 12.2 Transição de boas-vindas + som
+
+- **`components/desktop/WelcomeOverlay.tsx`** — máquina de estados em 2 fases:
+  1. assinatura **"Medro"** (~3 s: wordmark + régua que cresce + "Kairós Motores", dissolve);
+  2. **saudação por horário + primeiro nome** (a linha extra mostra só "Medro", sem a filial).
+  `prefers-reduced-motion` colapsa p/ ~1,5 s. Clique/tecla pula. Montada no `App` só quando
+  `token && welcome`.
+- **`lib/auth.ts`** — flag `welcome` (**não persistida**, `partialize` só `token`+`user`);
+  `setSession` liga; `refreshUser` (usado pelo sync do `/auth/me`) **não** reanima;
+  `dismissWelcome`.
+- **`lib/startupChime.ts`** (novo) — som sintetizado via **Web Audio** (acorde de Lá maior
+  arpejado + brilho agudo + filtro que abre). Toca no mount do overlay (após o gesto de
+  login → autoplay liberado); falha em silêncio. Desligável:
+  `localStorage['medro.mute-startup'] = '1'`.
+- **`styles/index.css`** — keyframes `brand-in/out/rule`, `welcome-*`.
+
+### 12.3 Gestão de janelas (`lib/wm.ts`) — commit `9f25242`
+
+`tile()`/layout: 1 janela = semi-fullsize; 2 = split; 3+ = grade flutuante. Contexto — não foi
+tocado nas rodadas de widget, mas o próximo chat deve saber que existe.
+
+### 12.4 Widgets — visão geral
+
+Tela inicial de widgets sobre a área de trabalho, com **dados reais** dos módulos.
+Persistência **por navegador** (`localStorage`, decisão do usuário — vira PWA). Dois modos de
+arranjo à escolha: **grade** (snap) e **livre** (px).
+
+**Arquivos** (`apps/web/src/modules/widgets/` salvo indicado):
+
+| Arquivo | Papel |
+|---|---|
+| `types.ts` | `WidgetId` (union), `WidgetSize` `sm/md/lg/wide` + `SIZE_CELLS`/`SIZE_LABEL`, `WidgetDef` (`id,title,desc,icon,module,accent?,sizes,defaultSize,access?,Component,ConfigForm?`), `WidgetProps` (`size,config,setConfig`), `WidgetConfigProps`, `PlacedWidget` (`instanceId,widgetId,size,gx,gy,fx,fy,config`). |
+| `registry.tsx` | `WIDGETS: WidgetDef[]` + `widgetById(id)`. |
+| `WidgetShell.tsx` | casca do widget: **fundo sempre translúcido** (`material-menu`); **sem seleção** → sem borda; **selecionado** → `bg-surface` sólido + `border-border` + `shadow-ios-2`. Menu de contexto: Tamanho (radio) · Atualizar · Configurar… (`Sheet` com `def.ConfigForm`) · Abrir {módulo} · Remover. `onContextMenu` faz `stopPropagation` (não abre o menu do desktop junto). `useWidgetRefetch(fn)` registra o refetch p/ o "Atualizar" (`fn` estável — `useCallback`). Exporta `WidgetLoading/WidgetError/WidgetEmpty`. |
+| `WidgetLayer.tsx` | canvas. Renderiza **dentro** do `ContextMenuTrigger` de fundo do `Desktop` (que virou `overflow-y-auto` → rola). `contentH = max(bounds.h, widget mais baixo + 32)`. Drag (header) e resize (alça no canto inf-dir, aparece no hover) à mão, padrão do `WindowFrame` (`setPointerCapture`+deltas). `pickSize()` encaixa no tamanho permitido mais próximo. **Seleção**: clicar seleciona (um só); clicar a mesa vazia / `Esc` deseleciona; arrastar também seleciona. Clamp horizontal no render. `MobileWidgetStack` = pilha vertical (mobile, sempre `selected`). |
+| `WidgetStore.tsx` | a "loja" (pane `z-[55]` estilo Launchpad). Agrupada por módulo, filtrada por acesso (`can(...)`), busca, toggle **Grade/Livre**. Estrutura de rolagem: overlay com `px-6 py-10 items-center`, painel `flex min-h-0 flex-1 flex-col`, lista `min-h-0 flex-1 overflow-y-auto`. |
+| `lib/useWidgets.ts` | store zustand+persist `medro.widgets` (**version 1**, com `migrate`). `mode`, `items`, `storeOpen`, `seeded`. `add(id,size)` (acha célula livre via `freeGridSpot`), `remove`, `resize`, `moveGrid`/`moveFree` (**mantêm gx/gy E fx/fy em sync**), `setMode` (converte as posições), `setConfig`, `seedDefaults(picks)` (semeia 1×/navegador só se vazio), `reset`. Constantes `CELL=84 GAP=10 PITCH ORIGIN_X=16 ORIGIN_Y=12` + `gridToPx/pxToGrid/cellsToPx`. |
+| `widgets/*.tsx` | um componente por widget. Chamam os hooks React Query **do próprio módulo** (cache compartilhado com a janela). |
+
+**Entradas:** `Desktop.tsx` — menu de contexto da área de trabalho: "Adicionar widget…"
+(`setStoreOpen(true)`) + "Organização dos widgets → Grade/Livre". `<WidgetStore/>` montado no
+desktop e no mobile. Seed chamado num `useEffect` (gated por `hasUser` + `canDpt`/`canCal`).
+
+### 12.5 Widgets existentes
+
+| id | módulo (accent) | dados | config |
+|---|---|---|---|
+| `relogio` | Sistema (blue) | relógio ao vivo + `Calendar` (`components/ui/calendar.tsx`, novo) | — |
+| `notas` | Sistema (amber) | texto no `config` da instância | — |
+| `clima` | Sistema (cyan) | **open-meteo** keyless via `useDeviceInfo.coords`; temp/condição(WMO)/máx-mín/vento; fallback "Permitir localização" | — |
+| `farol-os` | Medro Pro | `GET /medro-pro/kpis/torre-macro` → no prazo / aguardando / fora do prazo | **filial** (auto/todas/específica) |
+| `laudos-andamento` | Gerador de Laudos (DPT) | `useRascunhos` — nº + lista; clique abre a OS | — |
+| `ultimos-pdfs` | Gerador de Laudos (DPT) | `useHistoricoPdf` | — |
+| `laudos-resumo` | Gerador de Laudos (DPT) | **`GET /laudos-gen/resumo`** (novo — `resumoLaudos()` em `services/laudosGen/dataverse.ts`): `{rascunhos, pdfsHoje, pdfs7d}` | — |
+| `laudos-dpt` | Dep. Técnico (DPT) | `useLaudos({tipo:"todos"})` (`modules/dpt/api`) — laudos técnicos recentes | — |
+| `caldeiraria-kpis` | Usinagem e Caldeiraria (CAL) | `useCaldeirariaKpis(filial)` (`modules/caldeiraria/api`) — pendentes/prioridade/suspensos/% no prazo | **filial** |
+
+**Seed padrão** (1ª vez, se a tela estiver vazia): `relogio` + `farol-os` (+ `laudos-andamento`
+se DPT, + `caldeiraria-kpis` se CAL), todos `md`.
+
+### 12.6 Adicionar um widget novo
+
+1. `widgets/MeuWidget.tsx` — `export function MeuWidget({ size, config, setConfig }: WidgetProps)`.
+   Dados: reusar/inline `useQuery` com a chave do módulo;
+   `useWidgetRefetch(useCallback(() => q.refetch(), [q]))`.
+   Estados: `WidgetLoading` / `WidgetError` / `WidgetEmpty`.
+2. (opcional) `export function MeuWidgetConfig({ config, setConfig }: WidgetConfigProps)` — form
+   num `<label>` + `Select` do `components/ui/select`.
+3. Registrar em `registry.tsx`: `{ id, title, desc, icon, module, access?, sizes, defaultSize,
+   Component: MeuWidget, ConfigForm?: MeuWidgetConfig }` + o `id` no union `WidgetId` (`types.ts`).
+4. Se depender de endpoint novo: rota em `apps/api` + hook no `api.ts` do módulo.
+
+### 12.7 Verificado no browser (rodadas de widget)
+
+Loja lista/filtra/agrupa por acesso; adicionar coloca com dados reais (Farol `/kpis`,
+Caldeiraria `/kpis`, `/laudos-gen/resumo` = `12 rascunhos · 2 PDFs hoje`, 50 laudos DPT);
+drag+snap na grade; modo livre; resize pelo menu; `Configurar…` troca a filial do Farol
+(São Luís 340 → Todas 941) e persiste; layout persiste após reload; **seed** monta 4 widgets
+ao limpar o `localStorage`; widgets translúcidos, clique enquadra, `Esc`/clique-fora
+deseleciona; loja rola até o último grupo; menu de contexto do desktop e dos widgets ok.
+
+### 12.8 Pendências / próximos passos (shell + widgets)
+
+- **Endpoints `/resumo` leves** para os widgets que ainda baixam listas (opcional — já
+  funcionam). Padrão: `GET /api/<modulo>/resumo` com contadores agregados, cache curto no BFF.
+- **Widgets de Ensaios / Qualidade / Ferramentaria** — hoje esses módulos são **stub sem
+  backend real**; fazer os widgets junto com os dados desses módulos.
+- **Widget de Migração** — existe `GET /migracao/status`, mas os dados são **mock em memória**
+  (`routes/migracao.ts`); não fazer até virar real.
+- **Resize por arrasto**: a alça funciona mas é pequena (16→24 px); avaliar um handle mais
+  visível / snap com preview de contorno.
+- **Config por instância**: só Farol e Caldeiraria têm `ConfigForm` (filial). Estender a
+  widgets que dependem de TAG/OS (ex.: um "Histórico de serviços" com TAG no config, reusando
+  `useHistoricoServicos`).
+- **Sync do layout de widgets entre dispositivos** — hoje `localStorage`. Se pedirem:
+  `GET/PUT /api/me/widgets` (JSON num campo de preferências do usuário no Dataverse).
+- **Mobile** — `MobileWidgetStack` é só uma pilha vertical básica; o remodel do mobile foi
+  adiado pelo usuário ("futuramente remodelaremos").
+- **MenuBar vertical + janelas** — testado, mas revisar `tile()` / bounds quando a barra está
+  numa borda lateral com janelas abertas.
