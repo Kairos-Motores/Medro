@@ -8,7 +8,10 @@ export type WidgetId =
   | "clima"
   | "farol-os"
   | "laudos-andamento"
-  | "ultimos-pdfs";
+  | "ultimos-pdfs"
+  | "laudos-resumo"
+  | "laudos-dpt"
+  | "caldeiraria-kpis";
 
 /** tamanhos em CÉLULAS da grade (ver GRID em WidgetLayer). */
 export type WidgetSize = "sm" | "md" | "lg" | "wide";

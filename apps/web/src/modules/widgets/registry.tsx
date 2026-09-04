@@ -1,4 +1,14 @@
-import { Clock, StickyNote, Activity, FileClock, History, CloudSun } from "lucide-react";
+import {
+  Clock,
+  StickyNote,
+  Activity,
+  FileClock,
+  History,
+  CloudSun,
+  Gauge,
+  FileText,
+  Flame,
+} from "lucide-react";
 import type { WidgetDef, WidgetId } from "./types";
 import { RelogioWidget } from "./widgets/RelogioWidget";
 import { NotasWidget } from "./widgets/NotasWidget";
@@ -6,6 +16,9 @@ import { ClimaWidget } from "./widgets/ClimaWidget";
 import { FarolOsWidget, FarolOsConfig } from "./widgets/FarolOsWidget";
 import { LaudosAndamentoWidget } from "./widgets/LaudosAndamentoWidget";
 import { UltimosPdfsWidget } from "./widgets/UltimosPdfsWidget";
+import { LaudosResumoWidget } from "./widgets/LaudosResumoWidget";
+import { LaudosDptWidget } from "./widgets/LaudosDptWidget";
+import { CaldeirariaWidget, CaldeirariaConfig } from "./widgets/CaldeirariaWidget";
 
 export const WIDGETS: WidgetDef[] = [
   {
@@ -73,6 +86,40 @@ export const WIDGETS: WidgetDef[] = [
     sizes: ["md", "lg"],
     defaultSize: "md",
     Component: UltimosPdfsWidget,
+  },
+  {
+    id: "laudos-resumo",
+    title: "Laudos · resumo",
+    desc: "Contadores: rascunhos e PDFs emitidos (hoje e na semana).",
+    icon: Gauge,
+    module: "laudos-gen",
+    access: ["DPT"],
+    sizes: ["sm", "md"],
+    defaultSize: "sm",
+    Component: LaudosResumoWidget,
+  },
+  {
+    id: "laudos-dpt",
+    title: "Laudos técnicos (DPT)",
+    desc: "Laudos técnicos mais recentes do Departamento Técnico.",
+    icon: FileText,
+    module: "dpt-laudos",
+    access: ["DPT"],
+    sizes: ["sm", "md", "lg"],
+    defaultSize: "md",
+    Component: LaudosDptWidget,
+  },
+  {
+    id: "caldeiraria-kpis",
+    title: "Usinagem e Caldeiraria",
+    desc: "Peças pendentes, prioridade, suspensas e % no prazo.",
+    icon: Flame,
+    module: "caldeiraria",
+    access: ["CAL"],
+    sizes: ["sm", "md", "wide"],
+    defaultSize: "md",
+    Component: CaldeirariaWidget,
+    ConfigForm: CaldeirariaConfig,
   },
 ];
 

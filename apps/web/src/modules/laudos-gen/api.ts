@@ -242,6 +242,18 @@ export function useHistoricoPdf() {
   });
 }
 
+export type LaudosResumo = { rascunhos: number; pdfsHoje: number; pdfs7d: number };
+
+/** contadores enxutos para o widget (sem baixar as listas). */
+export function useLaudosResumo() {
+  return useQuery({
+    queryKey: ["laudos-gen", "resumo"],
+    queryFn: () => api<LaudosResumo>("/laudos-gen/resumo"),
+    refetchInterval: 120_000,
+    refetchIntervalInBackground: false,
+  });
+}
+
 export interface PdfResult {
   url: string;
   arquivado: "pending" | "true" | "false" | null;

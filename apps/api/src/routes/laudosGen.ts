@@ -19,6 +19,7 @@ import {
   setModeloIaConfig,
   registrarHistoricoPdf,
   listarHistoricoPdf,
+  resumoLaudos,
   getBalanceamento,
   getPeritagemPorOs,
   getHistoricoServicos,
@@ -108,6 +109,7 @@ export async function laudosGenRoutes(app: FastifyInstance) {
 
   // ── rascunho ──────────────────────────────────────────────────────────────
   app.get("/laudos-gen/rascunhos", async () => listarRascunhos());
+  app.get("/laudos-gen/resumo", async () => resumoLaudos());
 
   app.get("/laudos-gen/rascunho/:osId", async (req) => {
     const { osId } = req.params as { osId: string };

@@ -309,6 +309,32 @@ export async function listarHistoricoPdf(): Promise<Record<string, unknown>[]> {
   return value;
 }
 
+/** Resumo enxuto para o widget: contadores em vez de listas. */
+export async function resumoLaudos(): Promise<{
+  rascunhos: number;
+  pdfsHoje: number;
+  pdfs7d: number;
+}> {
+  const rasc = await dataverse.list(RASCUNHO_SET, {
+    select: ["cr4a1_osid"],
+    top: 1,
+    count: true,
+  });
+  const hist = await listarHistoricoPdf();
+  const inicioHoje = new Date();
+  inicioHoje.setHours(0, 0, 0, 0);
+  const t7 = Date.now() - 7 * 86_400_000;
+  let pdfsHoje = 0;
+  let pdfs7d = 0;
+  for (const h of hist) {
+    const t = new Date(String(h.cr4a1_adicionado_em ?? "")).getTime();
+    if (Number.isNaN(t)) continue;
+    if (t >= inicioHoje.getTime()) pdfsHoje++;
+    if (t >= t7) pdfs7d++;
+  }
+  return { rascunhos: rasc.count ?? rasc.value.length, pdfsHoje, pdfs7d };
+}
+
 // ── balanceamento (texto INI) ───────────────────────────────────────────────
 export async function getBalanceamento(osId: string): Promise<
   { encontrado: false } | { encontrado: true; dados: Record<string, Record<string, string>> }
