@@ -168,10 +168,12 @@ export function ScriptRunnersSection() {
   const [runners, setRunners] = useState<RunnerItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [modalRunner, setModalRunner] = useState<RunnerItem | null>(null);
+  const [modalRunnerId, setModalRunnerId] = useState<string | null>(null);
   const [activeActionId, setActiveActionId] = useState<string | null>(null);
   // Estado para colapsar cada card individualmente (ou todos)
   const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
+
+  const modalRunner = modalRunnerId ? runners.find((r) => r.id === modalRunnerId) ?? null : null;
 
   const fetchRunners = async (silent = false) => {
     if (!silent) setRefreshing(true);
@@ -179,10 +181,6 @@ export function ScriptRunnersSection() {
       const res = await api<RunnersApiResponse>("/runners");
       if (res && res.data) {
         setRunners(res.data);
-        if (modalRunner) {
-          const updated = res.data.find((r) => r.id === modalRunner.id);
-          if (updated) setModalRunner(updated);
-        }
       }
     } catch (err) {
       console.error("Erro ao carregar runners:", err);
@@ -415,7 +413,7 @@ export function ScriptRunnersSection() {
                       <MiniTerminal
                         lines={runner.recentLines}
                         status={runner.status}
-                        onExpand={() => setModalRunner(runner)}
+                        onExpand={() => setModalRunnerId(runner.id)}
                         onClear={() => handleClear(runner)}
                       />
 
@@ -478,8 +476,14 @@ export function ScriptRunnersSection() {
 
       {/* MODAL EXPANDIDO DE LOG COMPLETO */}
       {modalRunner && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="relative flex max-h-[85vh] w-full max-w-3xl flex-col rounded-2xl border border-border bg-surface shadow-2xl overflow-hidden">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setModalRunnerId(null)}
+        >
+          <div
+            className="relative flex max-h-[85vh] w-full max-w-3xl flex-col rounded-2xl border border-border bg-surface shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-border/80 px-4 py-3 bg-surface-2/70">
               <div className="flex items-center gap-2 font-mono">
@@ -500,7 +504,7 @@ export function ScriptRunnersSection() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setModalRunner(null)}
+                  onClick={() => setModalRunnerId(null)}
                   className="rounded-lg p-1 text-muted-foreground hover:bg-surface hover:text-foreground"
                 >
                   <X className="size-4" />
@@ -528,7 +532,7 @@ export function ScriptRunnersSection() {
               </div>
               <button
                 type="button"
-                onClick={() => setModalRunner(null)}
+                onClick={() => setModalRunnerId(null)}
                 className="rounded-lg bg-surface-2 px-3 py-1 text-foreground font-medium hover:bg-surface-2/80"
               >
                 Fechar
