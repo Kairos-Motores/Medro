@@ -3,6 +3,8 @@ import { X, LayoutGrid, AppWindow, LayoutDashboard, FilePlus2 } from "lucide-rea
 import { useWM, type WinRect } from "@/lib/wm";
 import { useAuth } from "@/lib/auth";
 import { useIsDesktop } from "@/lib/useMedia";
+import { useMenuBarPrefs } from "@/lib/useMenuBarPrefs";
+import { cn } from "@/lib/cn";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -28,6 +30,8 @@ export function Desktop() {
   const { windows, activeId, close, setBounds: setStoreBounds, open, tile, setTaskView, setLaunchpad } =
     useWM();
   const canDpt = useAuth((s) => s.can("DPT"));
+  const barPosition = useMenuBarPrefs((s) => s.position);
+  const barAutohide = useMenuBarPrefs((s) => s.autohide);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [bounds, setBounds] = useState<WinRect>({ x: 0, y: 0, w: 1200, h: 700 });
   const [dockManualShow, setDockManualShow] = useState(false);
@@ -36,11 +40,8 @@ export function Desktop() {
   useEffect(() => {
     api<{ user: UserSession }>("/auth/me")
       .then((res) => {
-        if (res.user) {
-          const currentToken = useAuth.getState().token;
-          if (currentToken) {
-            useAuth.getState().setSession(currentToken, res.user);
-          }
+        if (res.user && useAuth.getState().token) {
+          useAuth.getState().refreshUser(res.user);
         }
       })
       .catch(() => {});
@@ -58,7 +59,7 @@ export function Desktop() {
     const ro = new ResizeObserver(sync);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [isDesktop, setStoreBounds]);
+  }, [isDesktop, setStoreBounds, barPosition, barAutohide]);
 
   const openWindows = windows.filter((w) => !w.minimized);
   const topId =
@@ -128,11 +129,21 @@ export function Desktop() {
     );
   }
 
+  // a área útil recua conforme a barra do sistema; com auto-ocultar ela some e a
+  // área ocupa tudo (a barra passa a flutuar por cima).
+  const surfaceInset = barAutohide
+    ? "inset-0"
+    : barPosition === "left"
+      ? "inset-y-0 right-0 left-10"
+      : barPosition === "right"
+        ? "inset-y-0 left-0 right-10"
+        : "inset-x-0 bottom-0 top-7";
+
   return (
     <div className="relative h-dvh overflow-hidden bg-bg">
       <WallpaperBackground />
       <MenuBar />
-      <div ref={surfaceRef} className="absolute inset-x-0 bottom-0 top-7 z-10">
+      <div ref={surfaceRef} className={cn("absolute z-10", surfaceInset)}>
         <DesktopIcons />
         <ContextMenu>
           <ContextMenuTrigger asChild>

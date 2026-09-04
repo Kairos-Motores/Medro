@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as CM from "@radix-ui/react-context-menu";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, Circle } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 /**
@@ -81,6 +81,29 @@ export const ContextMenuCheckboxItem = React.forwardRef<
   </CM.CheckboxItem>
 ));
 ContextMenuCheckboxItem.displayName = "ContextMenuCheckboxItem";
+
+export const ContextMenuRadioItem = React.forwardRef<
+  React.ElementRef<typeof CM.RadioItem>,
+  React.ComponentPropsWithoutRef<typeof CM.RadioItem>
+>(({ className, children, ...props }, ref) => (
+  <CM.RadioItem
+    ref={ref}
+    className={cn(
+      "relative flex cursor-pointer select-none items-center gap-2.5 rounded-md py-1.5 pl-8 pr-2.5 text-[13px] outline-none",
+      "focus:bg-primary/10 focus:text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className,
+    )}
+    {...props}
+  >
+    <span className="absolute left-2.5 inline-flex items-center">
+      <CM.ItemIndicator>
+        <Circle className="size-2 fill-current" />
+      </CM.ItemIndicator>
+    </span>
+    {children}
+  </CM.RadioItem>
+));
+ContextMenuRadioItem.displayName = "ContextMenuRadioItem";
 
 export const ContextMenuLabel = React.forwardRef<
   React.ElementRef<typeof CM.Label>,

@@ -15,24 +15,56 @@ import { useCallback, useEffect, useState } from "react";
 export interface BatteryInfo {
   level: number; // 0..1
   charging: boolean;
+  /** segundos até carregar de vez / descarregar (Infinity = desconhecido) */
+  chargingTime: number;
+  dischargingTime: number;
+}
+
+export interface ConnectionInfo {
+  /** "slow-2g" | "2g" | "3g" | "4g" */
+  effectiveType: string | null;
+  /** Mbps estimados */
+  downlink: number | null;
+  /** RTT estimado (ms) */
+  rtt: number | null;
+  saveData: boolean;
+}
+
+export interface GeoCoords {
+  lat: number;
+  lon: number;
 }
 
 export interface DeviceInfo {
   online: boolean;
   battery: BatteryInfo | null;
+  connection: ConnectionInfo | null;
   city: string | null;
+  coords: GeoCoords | null;
   /** "granted" | "prompt" | "denied" | "unsupported" */
   geoState: PermissionState | "unsupported";
   requestLocation: () => void;
 }
 
+type BatteryManager = {
+  level: number;
+  charging: boolean;
+  chargingTime: number;
+  dischargingTime: number;
+  addEventListener: (t: string, fn: () => void) => void;
+  removeEventListener: (t: string, fn: () => void) => void;
+};
+
 type NavigatorWithBattery = Navigator & {
-  getBattery?: () => Promise<{
-    level: number;
-    charging: boolean;
-    addEventListener: (t: string, fn: () => void) => void;
-    removeEventListener: (t: string, fn: () => void) => void;
-  }>;
+  getBattery?: () => Promise<BatteryManager>;
+  connection?: {
+    effectiveType?: string;
+    downlink?: number;
+    rtt?: number;
+    saveData?: boolean;
+    addEventListener?: (t: string, fn: () => void) => void;
+    removeEventListener?: (t: string, fn: () => void) => void;
+  };
 };
 
 async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
@@ -55,10 +87,25 @@ async function reverseGeocode(lat: number, lon: number): Promise<string | null> 
   }
 }
 
+function readConnection(): ConnectionInfo | null {
+  const c = (navigator as NavigatorWithBattery).connection;
+  if (!c) return null;
+  return {
+    effectiveType: c.effectiveType ?? null,
+    downlink: typeof c.downlink === "number" ? c.downlink : null,
+    rtt: typeof c.rtt === "number" ? c.rtt : null,
+    saveData: !!c.saveData,
+  };
+}
+
 export function useDeviceInfo(): DeviceInfo {
   const [online, setOnline] = useState(() => (typeof navigator !== "undefined" ? navigator.onLine : true));
   const [battery, setBattery] = useState<BatteryInfo | null>(null);
+  const [connection, setConnection] = useState<ConnectionInfo | null>(() =>
+    typeof navigator !== "undefined" ? readConnection() : null,
+  );
   const [city, setCity] = useState<string | null>(null);
+  const [coords, setCoords] = useState<GeoCoords | null>(null);
   const [geoState, setGeoState] = useState<PermissionState | "unsupported">(
     typeof navigator !== "undefined" && "geolocation" in navigator ? "prompt" : "unsupported",
   );
@@ -79,9 +126,16 @@ export function useDeviceInfo(): DeviceInfo {
   useEffect(() => {
     const nav = navigator as NavigatorWithBattery;
     if (!nav.getBattery) return;
-    let bat: Awaited<ReturnType<NonNullable<NavigatorWithBattery["getBattery"]>>> | null = null;
+    let bat: BatteryManager | null = null;
     let alive = true;
-    const sync = () => bat && setBattery({ level: bat.level, charging: bat.charging });
+    const sync = () =>
+      bat &&
+      setBattery({
+        level: bat.level,
+        charging: bat.charging,
+        chargingTime: bat.chargingTime,
+        dischargingTime: bat.dischargingTime,
+      });
     nav
       .getBattery()
       .then((b) => {
@@ -90,6 +144,8 @@ export function useDeviceInfo(): DeviceInfo {
         sync();
         b.addEventListener("levelchange", sync);
         b.addEventListener("chargingchange", sync);
+        b.addEventListener("chargingtimechange", sync);
+        b.addEventListener("dischargingtimechange", sync);
       })
       .catch(() => {});
     return () => {
@@ -97,8 +153,19 @@ export function useDeviceInfo(): DeviceInfo {
       if (bat) {
         bat.removeEventListener("levelchange", sync);
         bat.removeEventListener("chargingchange", sync);
+        bat.removeEventListener("chargingtimechange", sync);
+        bat.removeEventListener("dischargingtimechange", sync);
       }
     };
+  }, []);
+
+  // rede (Network Information API — Chrome/Android)
+  useEffect(() => {
+    const c = (navigator as NavigatorWithBattery).connection;
+    if (!c?.addEventListener) return;
+    const sync = () => setConnection(readConnection());
+    c.addEventListener("change", sync);
+    return () => c.removeEventListener?.("change", sync);
   }, []);
 
   const fetchLocation = useCallback(() => {
@@ -106,6 +173,7 @@ export function useDeviceInfo(): DeviceInfo {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         setGeoState("granted");
+        setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude });
         const cached = sessionStorage.getItem("medro.city");
         if (cached) {
           setCity(cached);
@@ -147,5 +215,5 @@ export function useDeviceInfo(): DeviceInfo {
       .catch(() => {});
   }, [fetchLocation]);
 
-  return { online, battery, city, geoState, requestLocation: fetchLocation };
+  return { online, battery, connection, city, coords, geoState, requestLocation: fetchLocation };
 }
