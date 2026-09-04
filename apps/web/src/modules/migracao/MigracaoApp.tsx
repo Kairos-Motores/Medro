@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectItem } from "@/components/ui/select";
 import {
   useMigracaoStatus,
   useMigracaoAmostras,
@@ -341,33 +342,37 @@ export function MigracaoApp() {
                 />
               </div>
 
-              <select
+              <Select
                 value={filtroUnidade}
-                onChange={(e) => setFiltroUnidade(e.target.value)}
-                className="h-8 rounded-md border border-border bg-surface-1 px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                onValueChange={setFiltroUnidade}
+                size="sm"
+                className="w-36 bg-surface-1 focus:border-cyan-500 focus:ring-cyan-500/25"
+                aria-label="Filial"
               >
-                <option value="Todas">Todas Filiais</option>
-                <option value="São Luís">São Luís</option>
-                <option value="Parauapebas">Parauapebas</option>
-                <option value="Barcarena">Barcarena</option>
-                <option value="São José dos Campos">São José dos Campos</option>
-                <option value="Aveiro">Aveiro</option>
-              </select>
+                <SelectItem value="Todas">Todas Filiais</SelectItem>
+                <SelectItem value="São Luís">São Luís</SelectItem>
+                <SelectItem value="Parauapebas">Parauapebas</SelectItem>
+                <SelectItem value="Barcarena">Barcarena</SelectItem>
+                <SelectItem value="São José dos Campos">São José dos Campos</SelectItem>
+                <SelectItem value="Aveiro">Aveiro</SelectItem>
+              </Select>
 
-              <select
+              <Select
                 value={filtroSetor}
-                onChange={(e) => setFiltroSetor(e.target.value)}
-                className="h-8 rounded-md border border-border bg-surface-1 px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                onValueChange={setFiltroSetor}
+                size="sm"
+                className="w-40 bg-surface-1 focus:border-cyan-500 focus:ring-cyan-500/25"
+                aria-label="Setor"
               >
-                <option value="Todos">Todos Setores</option>
-                <option value="Peritagem">Peritagem</option>
-                <option value="Montagem">Montagem</option>
-                <option value="Rebobinamento">Rebobinamento</option>
-                <option value="Usinagem / Retífica">Usinagem / Retífica</option>
-                <option value="Caldeiraria">Caldeiraria</option>
-                <option value="Balanceamento">Balanceamento</option>
-                <option value="Testes Finais">Testes Finais</option>
-              </select>
+                <SelectItem value="Todos">Todos Setores</SelectItem>
+                <SelectItem value="Peritagem">Peritagem</SelectItem>
+                <SelectItem value="Montagem">Montagem</SelectItem>
+                <SelectItem value="Rebobinamento">Rebobinamento</SelectItem>
+                <SelectItem value="Usinagem / Retífica">Usinagem / Retífica</SelectItem>
+                <SelectItem value="Caldeiraria">Caldeiraria</SelectItem>
+                <SelectItem value="Balanceamento">Balanceamento</SelectItem>
+                <SelectItem value="Testes Finais">Testes Finais</SelectItem>
+              </Select>
             </div>
           )}
         </div>
