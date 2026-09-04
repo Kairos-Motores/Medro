@@ -185,7 +185,7 @@ cp apps/web/.env.example apps/web/.env # em dev pode deixar como está
 pnpm dev            # shared (build) + TODOS os apps em paralelo
 # ou, o essencial (sem laudo em PDF):
 pnpm dev:api        # API   :3333   (tsx watch)
-pnpm dev:web        # Front :5173   (proxy /api → :3333)
+pnpm dev:web        # Front :5174   (proxy /api → :3333)
 ```
 
 Para mexer no **Gerador de Laudos** ponta a ponta, suba também:
@@ -195,7 +195,7 @@ pnpm --filter @medro/pdf-worker dev                                  # :8100
 pnpm --filter @medro/report-print build && pnpm --filter @medro/report-print preview   # :5180 (use o preview, não o dev)
 ```
 
-- Front: <http://localhost:5173> · Login dev: botão "entrar sem senha" (usuário `douglasnou`, tem DPT/CAL/…).
+- Front: <http://localhost:5174> · Login dev: botão "entrar sem senha" (usuário `douglasnou`, tem DPT/CAL/…).
 - API: `/health` · readiness (testa Dataverse) `/health/ready`.
 - OS de teste que funciona ponta a ponta no laudo: **`11539-AL`**.
 

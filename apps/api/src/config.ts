@@ -11,7 +11,7 @@ const bool = z
 const Schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(3333),
-  WEB_ORIGIN: z.string().default("http://localhost:5173"),
+  WEB_ORIGIN: z.string().default("http://localhost:5173,http://localhost:5174"),
   JWT_SECRET: z.string().min(16, "defina JWT_SECRET (>=16 chars) no .env"),
   JWT_EXPIRES_IN: z.string().default("8h"),
 

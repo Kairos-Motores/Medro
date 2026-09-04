@@ -884,7 +884,7 @@ function App() {
           };
           localStorage.setItem('kairos_print_state_' + osData.cr4a1_novacoluna, JSON.stringify(printState));
 
-          const currentUrl = new URL('http://localhost:5173' + window.location.pathname);
+          const currentUrl = new URL(window.location.origin + window.location.pathname);
           currentUrl.searchParams.set('os', osData.cr4a1_novacoluna);
           currentUrl.searchParams.set('print', 'true');
           const fullReportUrl = currentUrl.toString();
@@ -914,7 +914,7 @@ function App() {
         mensagem: 'Gerando PDF...',
         progresso: 40,
         acao: async () => {
-          const currentUrl = new URL('http://localhost:5173' + window.location.pathname);
+          const currentUrl = new URL(window.location.origin + window.location.pathname);
           currentUrl.searchParams.set('os', osData.cr4a1_novacoluna);
           currentUrl.searchParams.set('print', 'true');
           const fullReportUrl = currentUrl.toString();
@@ -939,7 +939,7 @@ function App() {
         mensagem: 'Salvando no SharePoint...',
         progresso: 70,
         acao: async () => {
-          const currentUrl = new URL('http://localhost:5173' + window.location.pathname);
+          const currentUrl = new URL(window.location.origin + window.location.pathname);
           currentUrl.searchParams.set('os', osData.cr4a1_novacoluna);
           currentUrl.searchParams.set('print', 'true');
 
