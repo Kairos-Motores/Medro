@@ -126,9 +126,7 @@ export function WelcomeOverlay() {
             <h1 className="welcome-name text-4xl font-semibold tracking-tight sm:text-5xl">
               {firstName(user?.nome)}
             </h1>
-            <p className="welcome-title mt-1 text-[12.5px] text-white/45">
-              {user?.filial ? `Medro · ${user.filial}` : "Medro"}
-            </p>
+            <p className="welcome-title mt-1 text-[12.5px] text-white/45">Medro</p>
           </div>
         </>
       )}
